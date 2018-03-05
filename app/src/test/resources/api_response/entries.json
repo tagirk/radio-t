@@ -1,0 +1,885 @@
+[
+  {
+    "url": "https://radio-t.com/p/2018/01/13/podcast-580/",
+    "title": "Радио-Т 580",
+    "date": "2018-01-13T17:48:47-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt580.jpg",
+    "file_name": "rt_podcast580",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt580.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"http://mashable.com/2018/01/09/best-tech-ces-2018/\">Лучшее на CES 2018 по версии mashable</a> - <em>00:02:18</em>.</li>\n<li><a href=\"https://www.wired.com/gallery/best-of-ces-2018/\">Лучшее на CES 2018 по версии WIRED</a> - <em>00:49:55</em>.</li>\n<li><a href=\"https://thenextweb.com/gadgets/2018/01/10/huaweis-new-wi-fi-routers-solve-a-serious-first-world-problem/\">Новый Wi-Fi для больших домов</a> - <em>00:55:30</em>.</li>\n<li><a href=\"https://www.wired.com/story/facebooks-virtual-assistant-m-is-dead-so-are-chatbots/\">Virtual Assistant M закончился</a> - <em>01:00:35</em>.</li>\n<li><a href=\"https://thenextweb.com/apps/2018/01/11/seeking-consent-before-sex-theres-a-blockchain-based-app-for-that/\">Blockchain для согласия</a> - <em>01:05:52</em>.</li>\n<li><a href=\"https://hackernoon.com/the-stress-of-remote-working-38be5bdcf4da?gi=10a84f22dba3\">Ужас удаленной работы</a> - <em>01:12:00</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast580.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-580.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast580.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Лучшее на CES 2018 по версии mashable - 00:02:18.\nЛучшее на CES 2018 по версии WIRED - 00:49:55.\nНовый Wi-Fi для больших домов - 00:55:30.\nVirtual Assistant M закончился - 01:00:35.\nBlockchain для согласия - 01:05:52.\nУжас удаленной работы - 01:12:00.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast580.mp3",
+    "time_labels": [
+      {
+        "topic": "Лучшее на CES 2018 по версии mashable",
+        "time": "2018-01-12T15:02:18-06:00",
+        "duration": 2857
+      },
+      {
+        "topic": "Лучшее на CES 2018 по версии WIRED",
+        "time": "2018-01-12T15:49:55-06:00",
+        "duration": 335
+      },
+      {
+        "topic": "Новый Wi-Fi для больших домов",
+        "time": "2018-01-12T15:55:30-06:00",
+        "duration": 305
+      },
+      {
+        "topic": "Virtual Assistant M закончился",
+        "time": "2018-01-12T16:00:35-06:00",
+        "duration": 317
+      },
+      {
+        "topic": "Blockchain для согласия",
+        "time": "2018-01-12T16:05:52-06:00",
+        "duration": 368
+      },
+      {
+        "topic": "Ужас удаленной работы",
+        "time": "2018-01-12T16:12:00-06:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2018/01/06/podcast-579/",
+    "title": "Радио-Т 579",
+    "date": "2018-01-06T18:23:14-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt579.jpg",
+    "file_name": "rt_podcast579",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt579.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://techcrunch.com/2018/01/03/kernel-panic-what-are-meltdown-and-spectre-the-bugs-affecting-nearly-every-computer-and-device/\">Ужас Meltdown и Spectre</a> - <em>00:02:56</em>.</li>\n<li><a href=\"https://habrahabr.ru/company/itsumma/blog/345976/?utm_source=habrahabr\">Докер мертв</a> - <em>00:53:19</em>.</li>\n<li><a href=\"https://github.com/paragonie/past\">PAST: Platform-Agnostic Security Tokens</a> - <em>01:09:26</em>.</li>\n<li><a href=\"https://dev.to/mporam/good-code-reviews-43kk\">Как правильно делать Code Reviews</a> - <em>01:29:41</em>.</li>\n<li><a href=\"https://bartongeorge.io/2018/01/04/xps-13-developer-edition-the-7th-gen-is-here/\">XPS 13 Developer Edition</a> - <em>02:02:50</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast579.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-579.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast579.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Ужас Meltdown и Spectre - 00:02:56.\nДокер мертв - 00:53:19.\nPAST: Platform-Agnostic Security Tokens - 01:09:26.\nКак правильно делать Code Reviews - 01:29:41.\nXPS 13 Developer Edition - 02:02:50.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast579.mp3",
+    "time_labels": [
+      {
+        "topic": "Ужас Meltdown и Spectre",
+        "time": "2018-01-05T15:02:56-06:00",
+        "duration": 3023
+      },
+      {
+        "topic": "Докер мертв",
+        "time": "2018-01-05T15:53:19-06:00",
+        "duration": 967
+      },
+      {
+        "topic": "PAST: Platform-Agnostic Security Tokens",
+        "time": "2018-01-05T16:09:26-06:00",
+        "duration": 1215
+      },
+      {
+        "topic": "Как правильно делать Code Reviews",
+        "time": "2018-01-05T16:29:41-06:00",
+        "duration": 1989
+      },
+      {
+        "topic": "XPS 13 Developer Edition",
+        "time": "2018-01-05T17:02:50-06:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/12/30/podcast-578/",
+    "title": "Радио-Т 578",
+    "date": "2017-12-30T17:33:00-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt578.jpg",
+    "file_name": "rt_podcast578",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt578.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://thenextweb.com/evergreen/2017/12/29/2017-review-techs-biggest-scandals-fuck-ups/\">Скандалы и технические провалы 2017</a> - <em>00:05:09</em>.</li>\n<li><a href=\"http://bgr.com/2017/12/20/amazon-youtube-service-amazontube/\">Amazon готовит свой собственный YouTube</a> - <em>00:35:33</em>.</li>\n<li><a href=\"https://techcrunch.com/2017/12/28/amazon-updates-fire-tvs-youtube-app-to-redirect-users-to-a-web-browser-instead/\">Fire TV редиректит YouTube на web</a> - <em>00:45:02</em>.</li>\n<li><a href=\"https://www.engadget.com/2017/12/29/kodi-media-player-arrives-to-xbox-one/\">Kodi возвращается на Xbox</a> - <em>00:46:21</em>.</li>\n<li><a href=\"https://www.pcmag.com/news/358180/web-trackers-lift-email-addresses-via-browsers-autofill-fea\">Воровство Email посредством Autofill</a> - <em>00:55:37</em>.</li>\n<li><a href=\"https://spa.mnesty.com/\">Spamnesty - наш ответ гадам</a> - <em>01:09:42</em>.</li>\n<li><a href=\"https://www.techspot.com/news/72499-microsoft-time-kill-off-password.html\">Microsoft убьет пароли</a> - <em>01:12:31</em>.</li>\n<li><a href=\"https://qz.com/1152683/indian-it-layoffs-in-2017-top-56000-led-by-tcs-infosys-cognizant/\">56,000 уволены</a> - <em>01:23:16</em>.</li>\n<li><a href=\"http://highscalability.com/blog/2017/12/11/netflix-what-happens-when-you-press-play.html\">Как работает Netflix, для самых маленьких</a> - <em>01:33:45</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast578.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-578.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast578.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Скандалы и технические провалы 2017 - 00:05:09.\nAmazon готовит свой собственный YouTube - 00:35:33.\nFire TV редиректит YouTube на web - 00:45:02.\nKodi возвращается на Xbox - 00:46:21.\nВоровство Email посредством Autofill - 00:55:37.\nSpamnesty - наш ответ гадам - 01:09:42.\nMicrosoft убьет пароли - 01:12:31.\n56,000 уволены - 01:23:16.\nКак работает Netflix, для самых маленьких - 01:33:45.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast578.mp3",
+    "time_labels": [
+      {
+        "topic": "Скандалы и технические провалы 2017",
+        "time": "2017-12-29T15:05:09-06:00",
+        "duration": 1824
+      },
+      {
+        "topic": "Amazon готовит свой собственный YouTube",
+        "time": "2017-12-29T15:35:33-06:00",
+        "duration": 569
+      },
+      {
+        "topic": "Fire TV редиректит YouTube на web",
+        "time": "2017-12-29T15:45:02-06:00",
+        "duration": 79
+      },
+      {
+        "topic": "Kodi возвращается на Xbox",
+        "time": "2017-12-29T15:46:21-06:00",
+        "duration": 556
+      },
+      {
+        "topic": "Воровство Email посредством Autofill",
+        "time": "2017-12-29T15:55:37-06:00",
+        "duration": 845
+      },
+      {
+        "topic": "Spamnesty - наш ответ гадам",
+        "time": "2017-12-29T16:09:42-06:00",
+        "duration": 169
+      },
+      {
+        "topic": "Microsoft убьет пароли",
+        "time": "2017-12-29T16:12:31-06:00",
+        "duration": 645
+      },
+      {
+        "topic": "56,000 уволены",
+        "time": "2017-12-29T16:23:16-06:00",
+        "duration": 629
+      },
+      {
+        "topic": "Как работает Netflix, для самых маленьких",
+        "time": "2017-12-29T16:33:45-06:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/12/23/podcast-577/",
+    "title": "Радио-Т 577",
+    "date": "2017-12-23T18:11:26-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt577.jpg",
+    "file_name": "rt_podcast577",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt577.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://www.cnet.com/news/ces-2018-computer-preview-what-to-expect-from-laptops-desktops-and-tablets/\">Что ждем от CES 2018</a> - <em>00:04:32</em>.</li>\n<li><a href=\"https://www.bloomberg.com/news/articles/2017-12-20/apple-is-said-to-have-plan-to-combine-iphone-ipad-and-mac-apps\">Apple соединит софт для iPhone, iPad и Mac</a> - <em>00:14:34</em>.</li>\n<li><a href=\"https://hackernoon.com/username-or-password-is-incorrect-is-bullshit-89985ca2be48?gi=c7697c053f2\">Против “username or password incorrect”</a> - <em>00:38:15</em>.</li>\n<li><a href=\"https://techcrunch.com/2017/12/19/ztes-dual-screen-phone-is-a-fascinating-mess/\">ZTE с 2мя экранами</a> - <em>00:48:50</em>.</li>\n<li><a href=\"https://www.cnet.com/news/amazon-acquires-security-camera-and-doorbell-maker-blink/\">Amazon купил себе Blink</a> - <em>00:52:35</em>.</li>\n<li><a href=\"https://www.fastcodesign.com/90155089/how-mit-students-fooled-a-google-algorithm\">MIT студенты обманули Google</a> - <em>00:58:50</em>.</li>\n<li><a href=\"https://blog.google/products/home/brains-beauty-and-beats-google-home-max-here/\">Google Home Max уже тут</a> - <em>01:06:30</em>.</li>\n<li><a href=\"https://www.slashgear.com/amazon-music-scraps-storage-subscriptions-for-mp3-imports-19512374/\">Amazon Music запретит хранение ваших MP3</a> - <em>01:20:18</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast577.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-577.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast577.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Что ждем от CES 2018 - 00:04:32.\nApple соединит софт для iPhone, iPad и Mac - 00:14:34.\nПротив “username or password incorrect” - 00:38:15.\nZTE с 2мя экранами - 00:48:50.\nAmazon купил себе Blink - 00:52:35.\nMIT студенты обманули Google - 00:58:50.\nGoogle Home Max уже тут - 01:06:30.\nAmazon Music запретит хранение ваших MP3 - 01:20:18.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast577.mp3",
+    "time_labels": [
+      {
+        "topic": "Что ждем от CES 2018",
+        "time": "2017-12-22T15:04:32-06:00",
+        "duration": 602
+      },
+      {
+        "topic": "Apple соединит софт для iPhone, iPad и Mac",
+        "time": "2017-12-22T15:14:34-06:00",
+        "duration": 1421
+      },
+      {
+        "topic": "Против “username or password incorrect”",
+        "time": "2017-12-22T15:38:15-06:00",
+        "duration": 635
+      },
+      {
+        "topic": "ZTE с 2мя экранами",
+        "time": "2017-12-22T15:48:50-06:00",
+        "duration": 225
+      },
+      {
+        "topic": "Amazon купил себе Blink",
+        "time": "2017-12-22T15:52:35-06:00",
+        "duration": 375
+      },
+      {
+        "topic": "MIT студенты обманули Google",
+        "time": "2017-12-22T15:58:50-06:00",
+        "duration": 460
+      },
+      {
+        "topic": "Google Home Max уже тут",
+        "time": "2017-12-22T16:06:30-06:00",
+        "duration": 828
+      },
+      {
+        "topic": "Amazon Music запретит хранение ваших MP3",
+        "time": "2017-12-22T16:20:18-06:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/12/16/podcast-576/",
+    "title": "Радио-Т 576",
+    "date": "2017-12-16T17:42:26-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt576.jpg",
+    "file_name": "rt_podcast576",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt576.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://www.servethehome.com/say-farewell-putty-microsoft-adds-openssh-client-windows-10/\">Putty больше не нужен в Windows 10</a> - <em>00:01:44</em>.</li>\n<li><a href=\"https://news.ycombinator.com/item?id=15927132\">Excel раздумывает над добавлением Python</a> - <em>00:24:53</em>.</li>\n<li><a href=\"https://www.idropnews.com/news/7-things-apple-screwed-up-this-year/58620/\">7 позоров Apple за этот год</a> - <em>00:36:11</em>.</li>\n<li><a href=\"https://drewdevault.com/2017/12/16/Firefox-is-on-a-slippery-slope.html\">Firefox позволил себе вольность</a> - <em>01:02:04</em>.</li>\n<li><a href=\"https://www.troyhunt.com/im-sorry-you-feel-this-way-natwest-but-https-on-your-landing-page-is-important/\">HTTPS важен везде</a> - <em>01:07:55</em>.</li>\n<li><a href=\"http://www.opennet.ru/opennews/art.shtml?num=47713\">Let&rsquo;s Encrypt опубликовал планы на 2018</a> - <em>01:10:37</em>.</li>\n<li><a href=\"https://www.theverge.com/2017/12/14/16775156/apple-imac-pro-photos-xeon-radeon-power-vr-final-cut-8k\">iMac Pro вышел</a> - <em>01:21:05</em>.</li>\n<li><a href=\"https://hellogiggles.com/lifestyle/technology/amazon-will-now-sell-apple-tvs-and-google-chromecasts/\">Amazon начинает продажу Apple T и Google Chromecasts</a> - <em>01:28:07</em>.</li>\n<li><a href=\"http://www.opennet.ru/opennews/art.shtml?num=47747\">Федеральное агентство по связи США отменяет правила сетевого нейтралитета</a> - <em>01:33:42</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast576.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-576.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast576.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Putty больше не нужен в Windows 10 - 00:01:44.\nExcel раздумывает над добавлением Python - 00:24:53.\n7 позоров Apple за этот год - 00:36:11.\nFirefox позволил себе вольность - 01:02:04.\nHTTPS важен везде - 01:07:55.\nLet’s Encrypt опубликовал планы на 2018 - 01:10:37.\niMac Pro вышел - 01:21:05.\nAmazon начинает продажу Apple T и Google Chromecasts - 01:28:07.\nФедеральное агентство по связи США отменяет правила сетевого нейтралитета - 01:33:42.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast576.mp3",
+    "time_labels": [
+      {
+        "topic": "Putty больше не нужен в Windows 10",
+        "time": "2017-12-15T15:01:44-06:00",
+        "duration": 1389
+      },
+      {
+        "topic": "Excel раздумывает над добавлением Python",
+        "time": "2017-12-15T15:24:53-06:00",
+        "duration": 678
+      },
+      {
+        "topic": "7 позоров Apple за этот год",
+        "time": "2017-12-15T15:36:11-06:00",
+        "duration": 1553
+      },
+      {
+        "topic": "Firefox позволил себе вольность",
+        "time": "2017-12-15T16:02:04-06:00",
+        "duration": 351
+      },
+      {
+        "topic": "HTTPS важен везде",
+        "time": "2017-12-15T16:07:55-06:00",
+        "duration": 162
+      },
+      {
+        "topic": "Let’s Encrypt опубликовал планы на 2018",
+        "time": "2017-12-15T16:10:37-06:00",
+        "duration": 628
+      },
+      {
+        "topic": "iMac Pro вышел",
+        "time": "2017-12-15T16:21:05-06:00",
+        "duration": 422
+      },
+      {
+        "topic": "Amazon начинает продажу Apple T и Google Chromecasts",
+        "time": "2017-12-15T16:28:07-06:00",
+        "duration": 335
+      },
+      {
+        "topic": "Федеральное агентство по связи США отменяет правила сетевого нейтралитета",
+        "time": "2017-12-15T16:33:42-06:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/12/09/podcast-575/",
+    "title": "Радио-Т 575",
+    "date": "2017-12-09T17:21:54-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt575.jpg",
+    "file_name": "rt_podcast575",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt575.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"http://mashable.com/2017/12/06/best-tech-2017/\">Лучшие технические новинки 2017</a> - <em>00:04:53</em>.</li>\n<li><a href=\"https://www.theverge.com/2017/12/8/16753794/apple-jony-ive-design-management-role-change\">Jony Ive возвращается</a> - <em>01:18:41</em>.</li>\n<li><a href=\"https://thenextweb.com/apple/2017/12/09/the-ios-jailbreaking-community-is-going-nuts-over-this-cryptic-tweet-by-a-google-employee/\">Вторая жизнь iOS jailbreaking</a> - <em>01:21:14</em>.</li>\n<li><a href=\"https://habrahabr.ru/company/JetBrains/blog/344166/\">TeamCity 2017.2</a> - <em>01:26:48</em>.</li>\n<li><a href=\"https://www.theverge.com/2017/12/5/16737288/microsoft-windows-10-qualcomm-arm-laptops-launch\">Microsoft запускает ARM Windows 10 PC</a> - <em>01:30:31</em>.</li>\n<li><a href=\"https://appadvice.com/post/apple-may-acquire-shazam/758465\">Apple покупает Shazam</a> - <em>01:36:40</em>.</li>\n<li><a href=\"https://techcrunch.com/2017/12/05/zeta-global-acquires-commenting-service-disqus/\">А Zeta Global купит Disqus</a> - <em>01:38:20</em>.</li>\n<li><a href=\"https://thenextweb.com/security/2017/12/07/protonmail-bridge-is-an-accessible-encryption-solution-for-apple-mail-outlook-and-thunderbird/\">ProtonMail доставит зашифрованную почту и на обычные клиенты</a> - <em>01:42:40</em>.</li>\n<li><a href=\"https://www.engadget.com/2017/12/05/google-blocking-youtube-on-amazon-echo-show-fire-tv/\">Google блокирует YouTube для Amazon</a> - <em>01:46:36</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast575.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-575.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast575.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Лучшие технические новинки 2017 - 00:04:53.\nJony Ive возвращается - 01:18:41.\nВторая жизнь iOS jailbreaking - 01:21:14.\nTeamCity 2017.2 - 01:26:48.\nMicrosoft запускает ARM Windows 10 PC - 01:30:31.\nApple покупает Shazam - 01:36:40.\nА Zeta Global купит Disqus - 01:38:20.\nProtonMail доставит зашифрованную почту и на обычные клиенты - 01:42:40.\nGoogle блокирует YouTube для Amazon - 01:46:36.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast575.mp3",
+    "time_labels": [
+      {
+        "topic": "Лучшие технические новинки 2017",
+        "time": "2017-12-08T15:04:53-06:00",
+        "duration": 4428
+      },
+      {
+        "topic": "Jony Ive возвращается",
+        "time": "2017-12-08T16:18:41-06:00",
+        "duration": 153
+      },
+      {
+        "topic": "Вторая жизнь iOS jailbreaking",
+        "time": "2017-12-08T16:21:14-06:00",
+        "duration": 334
+      },
+      {
+        "topic": "TeamCity 2017.2",
+        "time": "2017-12-08T16:26:48-06:00",
+        "duration": 223
+      },
+      {
+        "topic": "Microsoft запускает ARM Windows 10 PC",
+        "time": "2017-12-08T16:30:31-06:00",
+        "duration": 369
+      },
+      {
+        "topic": "Apple покупает Shazam",
+        "time": "2017-12-08T16:36:40-06:00",
+        "duration": 100
+      },
+      {
+        "topic": "А Zeta Global купит Disqus",
+        "time": "2017-12-08T16:38:20-06:00",
+        "duration": 260
+      },
+      {
+        "topic": "ProtonMail доставит зашифрованную почту и на обычные клиенты",
+        "time": "2017-12-08T16:42:40-06:00",
+        "duration": 236
+      },
+      {
+        "topic": "Google блокирует YouTube для Amazon",
+        "time": "2017-12-08T16:46:36-06:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/12/02/podcast-574/",
+    "title": "Радио-Т 574",
+    "date": "2017-12-02T18:02:12-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt574.jpg",
+    "file_name": "rt_podcast574",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt574.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://techcrunch.com/2017/11/28/astonishing-os-x-bug-lets-anyone-log-into-a-high-sierra-machine/\">Зияющая дыра в MacOS</a> - <em>00:09:34</em>.</li>\n<li><a href=\"https://objective-see.com/blog/blog_0x24.html\">Как и почему пустой пароль для root работал</a> - <em>00:13:23</em>.</li>\n<li><a href=\"https://habrahabr.ru/company/JetBrains/blog/343382/\">IntelliJ IDEA 2017.3. Что нового и интересного</a> - <em>00:15:53</em>.</li>\n<li><a href=\"https://radio-t.com/p/2017/11/27/site-api/\">API для сайта Радио-Т</a> - <em>00:34:47</em>.</li>\n<li><a href=\"https://aws.amazon.com/blogs/aws/aws-fargate/\">AWS Fargate – контейнеры для IAAS</a> - <em>00:44:06</em>.</li>\n<li><a href=\"https://aws.amazon.com/blogs/aws/amazon-elastic-container-service-for-kubernetes/\">Amazon Elastic Container Service и для Kubernetes</a> - <em>00:50:37</em>.</li>\n<li><a href=\"https://aws.amazon.com/blogs/aws/amazon-mq-managed-message-broker-service-for-activemq/\">Amazon MQ – управляемый ActiveMQ</a> - <em>00:52:15</em>.</li>\n<li><a href=\"https://aws.amazon.com/blogs/aws/new-t2-unlimited-going-beyond-the-burst-with-high-performance/\">T2 Unlimited для уменьшения головной боли</a> - <em>00:58:54</em>.</li>\n<li><a href=\"https://aws.amazon.com/blogs/aws/new-amazon-ec2-bare-metal-instances-with-direct-access-to-hardware/?utm_source=feedburner\">EC2 на настоящем железе</a> - <em>01:03:53</em>.</li>\n<li><a href=\"https://dzone.com/articles/why-we-moved-from-nosql-mongodb-to-postgresql\">Еще один переход с NoSQL MongoDB на PostgreSQL</a> - <em>01:14:29</em>.</li>\n<li><a href=\"https://www.techworm.net/2017/11/popular-programming-languages-2017-according-tiobe-pypl.html\">Рейтинг языков за 2017</a> - <em>01:35:32</em>.</li>\n<li><a href=\"https://developers.slashdot.org/story/17/11/27/039226/why-esr-hates-c-respects-java-and-thinks-go-but-not-rust-will-replace-c\">Почему ESR не любит C++</a> - <em>01:49:50</em>.</li>\n<li><a href=\"https://radio-t.com/p/2017/11/28/prep-574/\">Темы наших слушателей</a> - <em>01:53:53</em>.</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast574.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-574.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast574.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Зияющая дыра в MacOS - 00:09:34.\nКак и почему пустой пароль для root работал - 00:13:23.\nIntelliJ IDEA 2017.3. Что нового и интересного - 00:15:53.\nAPI для сайта Радио-Т - 00:34:47.\nAWS Fargate – контейнеры для IAAS - 00:44:06.\nAmazon Elastic Container Service и для Kubernetes - 00:50:37.\nAmazon MQ – управляемый ActiveMQ - 00:52:15.\nT2 Unlimited для уменьшения головной боли - 00:58:54.\nEC2 на настоящем железе - 01:03:53.\nЕще один переход с NoSQL MongoDB на PostgreSQL - 01:14:29.\nРейтинг языков за 2017 - 01:35:32.\nПочему ESR не любит C++ - 01:49:50.\nТемы наших слушателей - 01:53:53.\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast574.mp3",
+    "time_labels": [
+      {
+        "topic": "Зияющая дыра в MacOS",
+        "time": "2017-12-01T15:09:34-06:00",
+        "duration": 229
+      },
+      {
+        "topic": "Как и почему пустой пароль для root работал",
+        "time": "2017-12-01T15:13:23-06:00",
+        "duration": 150
+      },
+      {
+        "topic": "IntelliJ IDEA 2017.3. Что нового и интересного",
+        "time": "2017-12-01T15:15:53-06:00",
+        "duration": 1134
+      },
+      {
+        "topic": "API для сайта Радио-Т",
+        "time": "2017-12-01T15:34:47-06:00",
+        "duration": 559
+      },
+      {
+        "topic": "AWS Fargate – контейнеры для IAAS",
+        "time": "2017-12-01T15:44:06-06:00",
+        "duration": 391
+      },
+      {
+        "topic": "Amazon Elastic Container Service и для Kubernetes",
+        "time": "2017-12-01T15:50:37-06:00",
+        "duration": 98
+      },
+      {
+        "topic": "Amazon MQ – управляемый ActiveMQ",
+        "time": "2017-12-01T15:52:15-06:00",
+        "duration": 399
+      },
+      {
+        "topic": "T2 Unlimited для уменьшения головной боли",
+        "time": "2017-12-01T15:58:54-06:00",
+        "duration": 299
+      },
+      {
+        "topic": "EC2 на настоящем железе",
+        "time": "2017-12-01T16:03:53-06:00",
+        "duration": 636
+      },
+      {
+        "topic": "Еще один переход с NoSQL MongoDB на PostgreSQL",
+        "time": "2017-12-01T16:14:29-06:00",
+        "duration": 1263
+      },
+      {
+        "topic": "Рейтинг языков за 2017",
+        "time": "2017-12-01T16:35:32-06:00",
+        "duration": 858
+      },
+      {
+        "topic": "Почему ESR не любит C++",
+        "time": "2017-12-01T16:49:50-06:00",
+        "duration": 243
+      },
+      {
+        "topic": "Темы наших слушателей",
+        "time": "2017-12-01T16:53:53-06:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/11/25/podcast-573/",
+    "title": "Радио-Т 573",
+    "date": "2017-11-25T18:04:20-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt573.jpg",
+    "file_name": "rt_podcast573",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt573.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"http://www.businessinsider.com/iphone-x-negative-review-2017-11\">iPhone X – все плохо?</a></li>\n<li><a href=\"http://www.opennet.ru/opennews/art.shtml?num=47596\">Анализ степени дублирования кода на GitHub</a>.</li>\n<li><a href=\"http://www.opennet.ru/opennews/art.shtml?num=47586\">GitHub добавил средства информирования об уязвимостях</a>.</li>\n<li><a href=\"https://stationx.rocks/\">Station X убивает macboooks</a>.</li>\n<li><a href=\"https://medium.com/@melissamcewen/i-just-dont-want-to-be-a-software-developer-anymore-a371422069a1\">Она больше не хочет</a>.</li>\n<li><a href=\"https://techcrunch.com/2017/11/21/youtube-returns-to-the-amazon-echo-show/\">YouTube вернулся на Amazon Echo Show</a>.</li>\n<li><a href=\"https://github.com/maxpert/raspchat/releases/tag/v1.0.0-alpha\">Исход из Go в Node.js</a>.</li>\n<li><a href=\"https://qz.com/1131515/google-collects-android-users-locations-even-when-location-services-are-disabled/\">Google следит за пользователями Android</a>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast573.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-573.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast573.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "iPhone X – все плохо?\nАнализ степени дублирования кода на GitHub.\nGitHub добавил средства информирования об уязвимостях.\nStation X убивает macboooks.\nОна больше не хочет.\nYouTube вернулся на Amazon Echo Show.\nИсход из Go в Node.js.\nGoogle следит за пользователями Android.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast573.mp3"
+  },
+  {
+    "url": "https://radio-t.com/p/2017/11/18/podcast-572/",
+    "title": "Радио-Т 572",
+    "date": "2017-11-18T17:36:44-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt572.jpg",
+    "file_name": "rt_podcast572",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt572.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"http://mashable.com/2017/11/14/firefox-quantum-release/\">Firefox вернулся</a>!</li>\n<li><a href=\"https://techcrunch.com/2017/11/14/mozilla-terminates-its-deal-with-yahoo-and-makes-google-the-default-in-firefox-again/\">Mozilla и их странный договор с Yahoo</a>.</li>\n<li><a href=\"http://blog.atom.io/2017/11/15/code-together-in-real-time-with-teletype-for-atom.html\">Социальное программирование в Atom</a>.</li>\n<li><a href=\"https://code.visualstudio.com/blogs/2017/11/15/live-share\">Visual Studio Live Share о том же</a>.</li>\n<li><a href=\"https://techcrunch.com/2017/11/17/apple-pushes-homepod-release-to-early-2018/\">Apple отложила выпуск HomePod</a>.</li>\n<li><a href=\"https://blog.google/products/maps/google-maps-gets-new-look/\">Google Maps с новым видом</a>.</li>\n<li><a href=\"https://blog.agilebits.com/2017/11/13/1password-x-a-look-at-the-future-of-1password-in-the-browser/\">1Password X для браузера</a>.</li>\n<li><a href=\"https://www.theverge.com/2017/11/17/16655800/tesla-electric-semi-truck-roadster-recap-elon-musk\">Tesla показала новинки</a>.</li>\n<li><a href=\"http://mashable.com/2017/11/14/wireless-mouse-with-touchpad-gestures/\">Гибрид мыши и чего-то еще</a>.</li>\n<li><a href=\"https://arstechnica.com/gadgets/2017/11/microsoft-and-github-team-up-to-take-git-virtual-file-system-to-macos-linux/\">Microsoft и GitHub создадут GVFS</a>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast572.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-572.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast572.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Firefox вернулся!\nMozilla и их странный договор с Yahoo.\nСоциальное программирование в Atom.\nVisual Studio Live Share о том же.\nApple отложила выпуск HomePod.\nGoogle Maps с новым видом.\n1Password X для браузера.\nTesla показала новинки.\nГибрид мыши и чего-то еще.\nMicrosoft и GitHub создадут GVFS.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast572.mp3"
+  },
+  {
+    "url": "https://radio-t.com/p/2017/11/11/podcast-571/",
+    "title": "Радио-Т 571",
+    "date": "2017-11-11T17:34:08-06:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt571.jpg",
+    "file_name": "rt_podcast571",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt571.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://www.mongodb.com/blog/post/announcing-mongodb-36\">Выход MongoDB 3.6</a> - <em>00:06:13</em>.</li>\n<li><a href=\"https://dzone.com/articles/new-driver-features-for-mongodb-36\">Новые возможности драйверов для MongoDB 3.6</a> - <em>00:33:47</em>.</li>\n<li><a href=\"https://www.theguardian.com/technology/2017/nov/10/iphone-x-review-apple-face-id-all-screen-design-home-button\">Обзоры iPhone X</a> - <em>00:46:22</em>.</li>\n<li><a href=\"https://www.digitaltrends.com/home/google-home-mini-vs-amazon-echo-dot/\">Google Home Mini против Amazon Echo Dot</a> - <em>00:58:22</em>.</li>\n<li><a href=\"https://theoutline.com/post/2464/facebook-s-idiotic-solution-to-revenge-porn\">Facebook и его нелепая борьба с порно-местью</a> - <em>01:24:20</em>.</li>\n<li><a href=\"https://www.theverge.com/2017/11/10/16634442/lovense-sex-toy-spy-surveillance\">Устройства для взрослых записывают тайное</a> - <em>01:40:03</em>.</li>\n<li><a href=\"https://www.engadget.com/2017/11/09/logitech-will-brick-harmony-link-in-march/\">Logitech создал и решил кризис с Harmony Link</a> - <em>01:50:42</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a>, <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a> и <a href=\"https://sprintbox.ru/\">SprintBox</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast571.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-571.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast571.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Выход MongoDB 3.6 - 00:06:13.\nНовые возможности драйверов для MongoDB 3.6 - 00:33:47.\nОбзоры iPhone X - 00:46:22.\nGoogle Home Mini против Amazon Echo Dot - 00:58:22.\nFacebook и его нелепая борьба с порно-местью - 01:24:20.\nУстройства для взрослых записывают тайное - 01:40:03.\nLogitech создал и решил кризис с Harmony Link - 01:50:42.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean, Vscale и SprintBox",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast571.mp3",
+    "time_labels": [
+      {
+        "topic": "Выход MongoDB 3.6",
+        "time": "2017-11-10T15:06:13-06:00",
+        "duration": 1654
+      },
+      {
+        "topic": "Новые возможности драйверов для MongoDB 3.6",
+        "time": "2017-11-10T15:33:47-06:00",
+        "duration": 755
+      },
+      {
+        "topic": "Обзоры iPhone X",
+        "time": "2017-11-10T15:46:22-06:00",
+        "duration": 720
+      },
+      {
+        "topic": "Google Home Mini против Amazon Echo Dot",
+        "time": "2017-11-10T15:58:22-06:00",
+        "duration": 1558
+      },
+      {
+        "topic": "Facebook и его нелепая борьба с порно-местью",
+        "time": "2017-11-10T16:24:20-06:00",
+        "duration": 943
+      },
+      {
+        "topic": "Устройства для взрослых записывают тайное",
+        "time": "2017-11-10T16:40:03-06:00",
+        "duration": 639
+      },
+      {
+        "topic": "Logitech создал и решил кризис с Harmony Link",
+        "time": "2017-11-10T16:50:42-06:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/11/04/podcast-570/",
+    "title": "Радио-Т 570",
+    "date": "2017-11-04T18:35:18-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt570.jpg",
+    "file_name": "rt_podcast570",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt570.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"http://apdax.com\">В гостях у нас странный, но интересный продукт</a></li>\n<li><a href=\"http://www.smashcompany.com/technology/why-would-anyone-choose-docker-over-fat-binaries\">Толстые бинарники это наше все</a> - <em>00:42:46</em>.</li>\n<li><a href=\"https://blog.jetbrains.com/go/2017/11/02/announcing-goland-former-gogland-eap-18-final-product-name-templates-support-and-more/\">И тепрь оно GoLand</a> - <em>01:22:20</em>.</li>\n<li><a href=\"http://www.lispcast.com/clojure-and-types\">Clojure против мира статической типизации</a> - <em>01:28:24</em>.</li>\n<li><a href=\"https://stackoverflow.blog/2017/10/31/disliked-programming-languages/\">Анти-рейтинг языков программирования</a> - <em>01:40:16</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast570.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-570.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast570.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "В гостях у нас странный, но интересный продукт\nТолстые бинарники это наше все - 00:42:46.\nИ тепрь оно GoLand - 01:22:20.\nClojure против мира статической типизации - 01:28:24.\nАнти-рейтинг языков программирования - 01:40:16.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast570.mp3",
+    "time_labels": [
+      {
+        "topic": "Толстые бинарники это наше все",
+        "time": "2017-11-03T16:42:46-05:00",
+        "duration": 2374
+      },
+      {
+        "topic": "И тепрь оно GoLand",
+        "time": "2017-11-03T17:22:20-05:00",
+        "duration": 364
+      },
+      {
+        "topic": "Clojure против мира статической типизации",
+        "time": "2017-11-03T17:28:24-05:00",
+        "duration": 712
+      },
+      {
+        "topic": "Анти-рейтинг языков программирования",
+        "time": "2017-11-03T17:40:16-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/10/28/podcast-569/",
+    "title": "Радио-Т 569",
+    "date": "2017-10-28T19:45:04-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt569.jpg",
+    "file_name": "rt_podcast569",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt569.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://www.theverge.com/2017/10/26/16550908/google-pixelbook-review-chromebook-android-laptop\">Подробно о новом Pixelbook</a> - <em>00:11:32</em>.</li>\n<li><a href=\"https://biz.mail.ru/infra/\">Облачная виртуальная инфраструктура от Mail.Ru</a> - <em>00:27:10</em>.</li>\n<li><a href=\"https://habrahabr.ru/company/nixsolutions/blog/341034/\">Вред маленьких функций</a> - <em>00:40:56</em>.</li>\n<li><a href=\"https://www.codementor.io/ezekielbuchheit/no-i-have-no-side-code-projects-to-show-you-cz1tyhgdz\">Как жить без хобби проектов</a> - <em>01:10:43</em>.</li>\n<li><a href=\"https://github.com/yarrick/pingfs/blob/master/README\">Прелестный pingfs</a> - <em>01:20:51</em>.</li>\n<li><a href=\"https://techcrunch.com/2017/10/25/amazon-introduces-subscriptions-for-alexa-skills-makes-them-free-for-prime-members/\">Заработать на Alexa skills</a> - <em>01:26:34</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast569.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-569.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast569.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Подробно о новом Pixelbook - 00:11:32.\nОблачная виртуальная инфраструктура от Mail.Ru - 00:27:10.\nВред маленьких функций - 00:40:56.\nКак жить без хобби проектов - 01:10:43.\nПрелестный pingfs - 01:20:51.\nЗаработать на Alexa skills - 01:26:34.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast569.mp3",
+    "time_labels": [
+      {
+        "topic": "Подробно о новом Pixelbook",
+        "time": "2017-10-27T16:11:32-05:00",
+        "duration": 938
+      },
+      {
+        "topic": "Облачная виртуальная инфраструктура от Mail.Ru",
+        "time": "2017-10-27T16:27:10-05:00",
+        "duration": 826
+      },
+      {
+        "topic": "Вред маленьких функций",
+        "time": "2017-10-27T16:40:56-05:00",
+        "duration": 1787
+      },
+      {
+        "topic": "Как жить без хобби проектов",
+        "time": "2017-10-27T17:10:43-05:00",
+        "duration": 608
+      },
+      {
+        "topic": "Прелестный pingfs",
+        "time": "2017-10-27T17:20:51-05:00",
+        "duration": 343
+      },
+      {
+        "topic": "Заработать на Alexa skills",
+        "time": "2017-10-27T17:26:34-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/10/21/podcast-568/",
+    "title": "Радио-Т 568",
+    "date": "2017-10-21T18:45:28-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt568.jpg",
+    "file_name": "rt_podcast568",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt568.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://techcrunch.com/2017/10/19/mongodb-finishes-up-34-in-database-ipo/\">MongoDB на IPO</a> - <em>00:03:07</em>.</li>\n<li><a href=\"http://www.zdnet.com/article/microsofts-surface-book-2-is-what-the-next-macbook-pro-should-be-but-almost-certainly-wont/\">Microsoft Surface Book 2</a> - <em>00:45:40</em>.</li>\n<li><a href=\"https://arstechnica.com/information-technology/2017/10/severe-flaw-in-wpa2-protocol-leaves-wi-fi-traffic-open-to-eavesdropping/\">Проблемы с WPA2</a> - <em>01:08:54</em>.</li>\n<li><a href=\"http://www.businessinsider.com/apple-stock-price-iphone-x-impact-production-issues-kgi-securities-2017-10\">Всего 3М iPhone X для начала</a> - <em>01:18:16</em>.</li>\n<li><a href=\"https://arstechnica.com/gadgets/2017/10/the-mac-mini-isnt-dead-yet-says-tim-cook/\">Mac mini не совсем мертв</a> - <em>01:25:05</em>.</li>\n<li><a href=\"https://techcrunch.com/2017/10/20/this-hack-turns-connects-you-to-the-internet-via-a-virtual-modem/\">Виртуальный модем как хак</a> - <em>01:35:39</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast568.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-568.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast568.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "MongoDB на IPO - 00:03:07.\nMicrosoft Surface Book 2 - 00:45:40.\nПроблемы с WPA2 - 01:08:54.\nВсего 3М iPhone X для начала - 01:18:16.\nMac mini не совсем мертв - 01:25:05.\nВиртуальный модем как хак - 01:35:39.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast568.mp3",
+    "time_labels": [
+      {
+        "topic": "MongoDB на IPO",
+        "time": "2017-10-20T16:03:07-05:00",
+        "duration": 2553
+      },
+      {
+        "topic": "Microsoft Surface Book 2",
+        "time": "2017-10-20T16:45:40-05:00",
+        "duration": 1394
+      },
+      {
+        "topic": "Проблемы с WPA2",
+        "time": "2017-10-20T17:08:54-05:00",
+        "duration": 562
+      },
+      {
+        "topic": "Всего 3М iPhone X для начала",
+        "time": "2017-10-20T17:18:16-05:00",
+        "duration": 409
+      },
+      {
+        "topic": "Mac mini не совсем мертв",
+        "time": "2017-10-20T17:25:05-05:00",
+        "duration": 634
+      },
+      {
+        "topic": "Виртуальный модем как хак",
+        "time": "2017-10-20T17:35:39-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/10/14/podcast-567/",
+    "title": "Радио-Т 567",
+    "date": "2017-10-14T18:34:26-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt567.jpg",
+    "file_name": "rt_podcast567",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt567.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://www.engadget.com/2017/10/11/amazon-new-kindle-oasis/\">Новый Amazon Kindle с большим экраном</a> - <em>00:03:01</em>.</li>\n<li><a href=\"https://www.theverge.com/2017/10/4/16418642/2017-google-event-news-pixel-2-xl-home-chromebook\">События и новинки с  Pixel 2</a> - <em>00:22:54</em>.</li>\n<li><a href=\"http://www.bbc.com/news/technology-41551546\">Microsoft отказывается от Windows Mobile</a> - <em>01:14:11</em>.</li>\n<li><a href=\"https://techcrunch.com/2017/10/11/github-will-soon-warn-developers-of-insecure-dependencies-adds-news-feed-team-chat-and-more/\">GitHub проследит за зависимостями и доставит новостей</a> - <em>01:19:46</em>.</li>\n<li><a href=\"https://techcrunch.com/2017/10/11/pornhub-uses-computer-vision-to-id-actors-acts-in-its-videos/\">PornHub задействовал AI</a> - <em>01:30:11</em>.</li>\n<li><a href=\"http://www.zdnet.com/article/sex-robot-molested-destroyed-at-electronics-show/\">Люди против роботов</a> - <em>01:35:36</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a>, <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a> и <a href=\"https://sprintbox.ru/\">SprintBox</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast567.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-567.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast567.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Новый Amazon Kindle с большим экраном - 00:03:01.\nСобытия и новинки с  Pixel 2 - 00:22:54.\nMicrosoft отказывается от Windows Mobile - 01:14:11.\nGitHub проследит за зависимостями и доставит новостей - 01:19:46.\nPornHub задействовал AI - 01:30:11.\nЛюди против роботов - 01:35:36.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean, Vscale и SprintBox",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast567.mp3",
+    "time_labels": [
+      {
+        "topic": "Новый Amazon Kindle с большим экраном",
+        "time": "2017-10-13T16:03:01-05:00",
+        "duration": 1193
+      },
+      {
+        "topic": "События и новинки с  Pixel 2",
+        "time": "2017-10-13T16:22:54-05:00",
+        "duration": 3077
+      },
+      {
+        "topic": "Microsoft отказывается от Windows Mobile",
+        "time": "2017-10-13T17:14:11-05:00",
+        "duration": 335
+      },
+      {
+        "topic": "GitHub проследит за зависимостями и доставит новостей",
+        "time": "2017-10-13T17:19:46-05:00",
+        "duration": 625
+      },
+      {
+        "topic": "PornHub задействовал AI",
+        "time": "2017-10-13T17:30:11-05:00",
+        "duration": 325
+      },
+      {
+        "topic": "Люди против роботов",
+        "time": "2017-10-13T17:35:36-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/10/07/podcast-566/",
+    "title": "Радио-Т 566",
+    "date": "2017-10-07T19:22:46-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt566.jpg",
+    "file_name": "rt_podcast566",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt566.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://www.postgresql.org/about/news/1786/\">PostgreSQL 10</a> - <em>00:03:11</em>.</li>\n<li><a href=\"https://blogs.oracle.com/developers/announcing-fn\">Fn как-сервис от Oracle</a> - <em>00:56:41</em>.</li>\n<li><a href=\"http://www.smashcompany.com/technology/aws-does-not-protect-you-from-devops\">AWS и devops</a> - <em>01:28:00</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast566.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-566.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast566.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "PostgreSQL 10 - 00:03:11.\nFn как-сервис от Oracle - 00:56:41.\nAWS и devops - 01:28:00.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast566.mp3",
+    "time_labels": [
+      {
+        "topic": "PostgreSQL 10",
+        "time": "2017-10-06T16:03:11-05:00",
+        "duration": 3210
+      },
+      {
+        "topic": "Fn как-сервис от Oracle",
+        "time": "2017-10-06T16:56:41-05:00",
+        "duration": 1879
+      },
+      {
+        "topic": "AWS и devops",
+        "time": "2017-10-06T17:28:00-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/09/30/podcast-565/",
+    "title": "Радио-Т 565",
+    "date": "2017-09-30T19:13:44-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt565.jpg",
+    "file_name": "rt_podcast565",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt565.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://yandex.ru/20/\">20 лет Яндексу</a> - <em>00:02:11</em>.</li>\n<li><a href=\"https://flypigeon.co\">Новый сервис доставки данных</a> - <em>00:13:46</em>.</li>\n<li><a href=\"https://www.theverge.com/2017/9/27/16374254/amazon-event-2017-news-recap-echo-spot-fire-tv-hardware\">Что показал Amazon</a> - <em>00:22:34</em>.</li>\n<li><a href=\"https://aws.amazon.com/blogs/aws/aws-pinpoint-launches-two-way-text-messaging/\">AWS Pinpoint в обе стороны</a> - <em>00:46:15</em>.</li>\n<li><a href=\"https://techcrunch.com/2017/09/29/its-time-to-give-firefox-another-chance/\">Даем Firefox еще один шанс</a> - <em>00:52:53</em>.</li>\n<li><a href=\"https://www.oath.com/press/open-sourcing-vespa-yahoo-s-big-data-processing-and-serving-eng/\">Открытие Vespa</a> - <em>01:07:29</em>.</li>\n<li><a href=\"https://blog.plan99.net/its-time-to-kill-the-web-974a9fe80c89?gi=cbb2aa694813\">Время веба уходит</a> - <em>01:28:32</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast565.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-565.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast565.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "20 лет Яндексу - 00:02:11.\nНовый сервис доставки данных - 00:13:46.\nЧто показал Amazon - 00:22:34.\nAWS Pinpoint в обе стороны - 00:46:15.\nДаем Firefox еще один шанс - 00:52:53.\nОткрытие Vespa - 01:07:29.\nВремя веба уходит - 01:28:32.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast565.mp3",
+    "time_labels": [
+      {
+        "topic": "20 лет Яндексу",
+        "time": "2017-09-29T16:02:11-05:00",
+        "duration": 695
+      },
+      {
+        "topic": "Новый сервис доставки данных",
+        "time": "2017-09-29T16:13:46-05:00",
+        "duration": 528
+      },
+      {
+        "topic": "Что показал Amazon",
+        "time": "2017-09-29T16:22:34-05:00",
+        "duration": 1421
+      },
+      {
+        "topic": "AWS Pinpoint в обе стороны",
+        "time": "2017-09-29T16:46:15-05:00",
+        "duration": 398
+      },
+      {
+        "topic": "Даем Firefox еще один шанс",
+        "time": "2017-09-29T16:52:53-05:00",
+        "duration": 876
+      },
+      {
+        "topic": "Открытие Vespa",
+        "time": "2017-09-29T17:07:29-05:00",
+        "duration": 1263
+      },
+      {
+        "topic": "Время веба уходит",
+        "time": "2017-09-29T17:28:32-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/09/23/podcast-564/",
+    "title": "Радио-Т 564",
+    "date": "2017-09-23T18:48:07-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt564.jpg",
+    "file_name": "rt_podcast564",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt564.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://blogs.oracle.com/java/java-9-release-now-available\">Java 9 наступила</a> - <em>00:02:51</em>.</li>\n<li><a href=\"http://www.opennet.ru/opennews/art.shtml?num=47235\">Apple выпустила Swift 4.0</a> - <em>00:12:15</em>.</li>\n<li><a href=\"https://about.gitlab.com/2017/09/22/gitlab-10-0-released/\">GitLab 10.0 с Auto DevOps</a> - <em>00:35:18</em>.</li>\n<li><a href=\"http://blog.lunarlogic.io/2017/effective-collaboration-superstar-developers/\">Как правильно строить команду</a> - <em>00:59:06</em>.</li>\n<li><a href=\"https://commandcenter.blogspot.com/2017/09/go-ten-years-and-climbing.html\">Go 10 лет</a> - <em>01:23:38</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a>, <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a> и <a href=\"https://sprintbox.ru/\">SprintBox</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast564.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-564.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast564.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Java 9 наступила - 00:02:51.\nApple выпустила Swift 4.0 - 00:12:15.\nGitLab 10.0 с Auto DevOps - 00:35:18.\nКак правильно строить команду - 00:59:06.\nGo 10 лет - 01:23:38.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean, Vscale и SprintBox",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast564.mp3",
+    "time_labels": [
+      {
+        "topic": "Java 9 наступила",
+        "time": "2017-09-22T16:02:51-05:00",
+        "duration": 564
+      },
+      {
+        "topic": "Apple выпустила Swift 4.0",
+        "time": "2017-09-22T16:12:15-05:00",
+        "duration": 1383
+      },
+      {
+        "topic": "GitLab 10.0 с Auto DevOps",
+        "time": "2017-09-22T16:35:18-05:00",
+        "duration": 1428
+      },
+      {
+        "topic": "Как правильно строить команду",
+        "time": "2017-09-22T16:59:06-05:00",
+        "duration": 1472
+      },
+      {
+        "topic": "Go 10 лет",
+        "time": "2017-09-22T17:23:38-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/09/16/podcast-563/",
+    "title": "Радио-Т 563",
+    "date": "2017-09-16T17:55:44-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt563.jpg",
+    "file_name": "rt_podcast563",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt563.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://caddyserver.com/blog/accouncing-caddy-commercial-licenses.html\">Caddy и его странный путь в никуда</a> - <em>00:01:30</em>.</li>\n<li><a href=\"https://techcrunch.com/gallery/everything-apple-announced-at-its-iphone-x-keynote/\">Что Apple нам показала</a> - <em>00:26:33</em>.</li>\n<li><a href=\"http://mashable.com/2017/09/12/apple-finally-unveils-the-iphone-8-in-all-its-glory/\">iPhone 8</a> - <em>00:58:21</em>.</li>\n<li><a href=\"https://www.engadget.com/2017/09/12/apple-iphone-x-hands-on/\">iPhone X</a> - <em>01:02:05</em>.</li>\n<li><a href=\"https://habrahabr.ru/post/337882/\">Долгожданный релиз Sublime Text 3.0</a> - <em>01:36:17</em>.</li>\n<li><a href=\"http://blog.atom.io/2017/09/12/announcing-atom-ide.html\">Atom-IDE</a> - <em>01:52:56</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast563.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-563.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast563.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Caddy и его странный путь в никуда - 00:01:30.\nЧто Apple нам показала - 00:26:33.\niPhone 8 - 00:58:21.\niPhone X - 01:02:05.\nДолгожданный релиз Sublime Text 3.0 - 01:36:17.\nAtom-IDE - 01:52:56.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast563.mp3",
+    "time_labels": [
+      {
+        "topic": "Caddy и его странный путь в никуда",
+        "time": "2017-09-15T16:01:30-05:00",
+        "duration": 1503
+      },
+      {
+        "topic": "Что Apple нам показала",
+        "time": "2017-09-15T16:26:33-05:00",
+        "duration": 1908
+      },
+      {
+        "topic": "iPhone 8",
+        "time": "2017-09-15T16:58:21-05:00",
+        "duration": 224
+      },
+      {
+        "topic": "iPhone X",
+        "time": "2017-09-15T17:02:05-05:00",
+        "duration": 2052
+      },
+      {
+        "topic": "Долгожданный релиз Sublime Text 3.0",
+        "time": "2017-09-15T17:36:17-05:00",
+        "duration": 999
+      },
+      {
+        "topic": "Atom-IDE",
+        "time": "2017-09-15T17:52:56-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/09/09/podcast-562/",
+    "title": "Радио-Т 562",
+    "date": "2017-09-09T19:10:17-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt562.jpg",
+    "file_name": "rt_podcast562",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt562.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"http://www.refinery29.com/2017/09/171454/apple-iphone-8-event-predictions-2017\">Что Apple нам покажет</a> - <em>00:02:35</em>.</li>\n<li><a href=\"https://www.nginx.com/products/nginx-unit/\">NGINX Unit</a> - <em>00:19:46</em>.</li>\n<li><a href=\"https://www.nginx.com/products/nginx-controller/?utm_campaign=controller\">NGINX Controller</a> - <em>00:38:40</em>.</li>\n<li><a href=\"https://aws.amazon.com/blogs/aws/new-network-load-balancer-effortless-scaling-to-millions-of-requests-per-second/\">AWS Network Load Balancer</a> - <em>00:41:30</em>.</li>\n<li><a href=\"https://www.opennet.ru/opennews/art.shtml?num=47128\">Oracle увольняет почти весь персонал, развивавший Solaris</a> - <em>00:49:33</em>.</li>\n<li><a href=\"https://www.ansible.com/awx-project-faq\">RedHat открыл AWX</a> - <em>01:02:41</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast562.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-562.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast562.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Что Apple нам покажет - 00:02:35.\nNGINX Unit - 00:19:46.\nNGINX Controller - 00:38:40.\nAWS Network Load Balancer - 00:41:30.\nOracle увольняет почти весь персонал, развивавший Solaris - 00:49:33.\nRedHat открыл AWX - 01:02:41.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast562.mp3",
+    "time_labels": [
+      {
+        "topic": "Что Apple нам покажет",
+        "time": "2017-09-08T16:02:35-05:00",
+        "duration": 1031
+      },
+      {
+        "topic": "NGINX Unit",
+        "time": "2017-09-08T16:19:46-05:00",
+        "duration": 1134
+      },
+      {
+        "topic": "NGINX Controller",
+        "time": "2017-09-08T16:38:40-05:00",
+        "duration": 170
+      },
+      {
+        "topic": "AWS Network Load Balancer",
+        "time": "2017-09-08T16:41:30-05:00",
+        "duration": 483
+      },
+      {
+        "topic": "Oracle увольняет почти весь персонал, развивавший Solaris",
+        "time": "2017-09-08T16:49:33-05:00",
+        "duration": 788
+      },
+      {
+        "topic": "RedHat открыл AWX",
+        "time": "2017-09-08T17:02:41-05:00"
+      }
+    ]
+  },
+  {
+    "url": "https://radio-t.com/p/2017/09/02/podcast-561/",
+    "title": "Радио-Т 561",
+    "date": "2017-09-02T18:39:02-05:00",
+    "categories": [
+      "podcast"
+    ],
+    "image": "https://radio-t.com/images/radio-t/rt561.jpg",
+    "file_name": "rt_podcast561",
+    "body": "<p><img src=\"https://radio-t.com/images/radio-t/rt561.jpg\" alt=\"\" /></p>\n\n<ul>\n<li><a href=\"https://elsyms.com/the-art-of-over-engineering-your-side-projects/\">Как неправильно готовить личные проекты</a> - <em>00:03:33</em>.</li>\n<li><a href=\"https://medium.freecodecamp.org/why-i-hate-your-single-page-app-f08bb4ff9134?gi=dbfc70243139\">Что не так с SPA</a> - <em>00:22:23</em>.</li>\n<li><a href=\"https://habrahabr.ru/post/336470/\">Почему GitHub не может хостить ядро Linux</a> - <em>00:49:52</em>.</li>\n<li><a href=\"https://blog.frankel.ch/rise-fall-jvm-languages/\">Взлет и падение JVM языков</a> - <em>01:04:11</em>.</li>\n<li><a href=\"https://habrahabr.ru/company/jugru/blog/336864/\">Готовимся к Java 9</a> - <em>01:15:03</em>.</li>\n<li><a href=\"https://blog.rust-lang.org/2017/08/31/Rust-1.20.html\">Выход Rust 1.20</a> - <em>01:26:54</em>.</li>\n<li>Темы наших слушателей</li>\n</ul>\n\n<p><em>Спонсоры этого выпуска <a href=\"https://www.digitalocean.com\">DigitalOcean</a> и <a href=\"http://bit.ly/radio-t_vscale\">Vscale</a></em></p>\n\n<p><a href=\"http://cdn.radio-t.com/rt_podcast561.mp3\">аудио</a> ● <a href=\"http://chat.radio-t.com/logs/radio-t-561.html\">лог чата</a>\n<audio src=\"http://cdn.radio-t.com/rt_podcast561.mp3\" preload=\"none\"></audio></p>\n",
+    "show_notes": "Как неправильно готовить личные проекты - 00:03:33.\nЧто не так с SPA - 00:22:23.\nПочему GitHub не может хостить ядро Linux - 00:49:52.\nВзлет и падение JVM языков - 01:04:11.\nГотовимся к Java 9 - 01:15:03.\nВыход Rust 1.20 - 01:26:54.\nТемы наших слушателей\n\n\nСпонсоры этого выпуска DigitalOcean и Vscale",
+    "audio_url": "http://cdn.radio-t.com/rt_podcast561.mp3",
+    "time_labels": [
+      {
+        "topic": "Как неправильно готовить личные проекты",
+        "time": "2017-09-01T16:03:33-05:00",
+        "duration": 1130
+      },
+      {
+        "topic": "Что не так с SPA",
+        "time": "2017-09-01T16:22:23-05:00",
+        "duration": 1649
+      },
+      {
+        "topic": "Почему GitHub не может хостить ядро Linux",
+        "time": "2017-09-01T16:49:52-05:00",
+        "duration": 859
+      },
+      {
+        "topic": "Взлет и падение JVM языков",
+        "time": "2017-09-01T17:04:11-05:00",
+        "duration": 652
+      },
+      {
+        "topic": "Готовимся к Java 9",
+        "time": "2017-09-01T17:15:03-05:00",
+        "duration": 711
+      },
+      {
+        "topic": "Выход Rust 1.20",
+        "time": "2017-09-01T17:26:54-05:00"
+      }
+    ]
+  }
+]

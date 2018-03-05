@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Уведомления">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:summary="@string/not_show"
+            android:title="Напоминание о прямом эфире"
+            android:key="stream_notification"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Отчеты">
+        <SwitchPreference
+            android:checked="true"
+            android:defaultValue="true"
+            android:summary="@string/send"
+            android:title="Отчеты о сбоях"
+            android:key="crash_reports"/>
+
+        <Preference android:title="Сообщить о баге">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="mailto:kurt09@yandex.ru" />
+        </Preference>
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

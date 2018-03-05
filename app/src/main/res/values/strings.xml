@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Радио-Т</string>
+    <string name="error_occurred">Произошла ошибка.</string>
+    <string name="retry">Повторить</string>
+    <string name="no_data">Ничего нет.</string>
+    <string name="error">Ошибка</string>
+    <string name="error_source">Ошибка аудиопотока.</string>
+    <string name="search">Поиск</string>
+    <string name="settings">Настройки</string>
+    <string name="send">Отправлять</string>
+    <string name="not_send">Не отправлять</string>
+    <string name="show">Показывать</string>
+    <string name="not_show">Не показывать</string>
+    <string name="web">Открыть в браузере</string>
+    <string name="quote">Цитата</string>
+    <string name="message_deleted">Сообщение удалено</string>
+    <string name="download_gitter"><a href="https://play.google.com/store/apps/details?id=im.gitter.gitter">Скачать клиент для Gitter</a></string>
+</resources>

@@ -1,0 +1,14 @@
+.gradle
+*build/
+.idea
+*.iws
+*.ipr
+*.iml
+/local.properties
+.DS_Store
+/build
+/captures
+/projectFilesBackup
+.externalNativeBuild
+*.db
+*.png
