@@ -12,3 +12,4 @@
 .externalNativeBuild
 *.db
 *.png
+/prod

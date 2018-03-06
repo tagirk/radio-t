@@ -102,7 +102,7 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
     @OnPageChange(R.id.view_pager)
     fun onPageChange(position: Int) {
         updateData(position)
-        showHideBtnStream(position == 2 && playerViewModel.getCurrentPodcast().value?.url != STREAM_URL)
+        showHideBtnStream(position == 1 && playerViewModel.getCurrentPodcast().value?.url != STREAM_URL)
     }
 
     @OnClick(R.id.btn_play_stream)
@@ -130,7 +130,7 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
                 .getCurrentPodcast()
                 .observe(getViewLifecycleOwner()!!,
                         Observer {
-                            showHideBtnStream(it?.url != STREAM_URL && viewPager.currentItem == 2)
+                            showHideBtnStream(it?.url != STREAM_URL && viewPager.currentItem == 1)
                         })
     }
 
