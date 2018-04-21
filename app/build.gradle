@@ -6,7 +6,6 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion compileSdkProjectVersion
-    buildToolsVersion buildToolsProjectVersion
     defaultConfig {
         applicationId "su.tagir.apps.radiot"
         targetSdkVersion targetSdkProjectVersion
@@ -49,6 +48,7 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    buildToolsVersion '27.0.3'
 }
 
 dependencies {

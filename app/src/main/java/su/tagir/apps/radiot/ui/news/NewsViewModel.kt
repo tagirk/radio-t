@@ -20,7 +20,7 @@ class NewsViewModel
     val error = SingleLiveEvent<String>()
 
 
-    override fun getData() = LivePagedListBuilder(entryRepository.getNews(), PAGE_SIZE).build()
+    override fun getData() = LivePagedListBuilder(entryRepository.getEntries("news", "info"), PAGE_SIZE).build()
 
 
     override fun requestUpdates() {

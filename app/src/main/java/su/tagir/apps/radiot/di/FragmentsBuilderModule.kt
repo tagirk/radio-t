@@ -8,6 +8,7 @@ import su.tagir.apps.radiot.ui.chat.ChatFragment
 import su.tagir.apps.radiot.ui.hosts.HostsFragment
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
+import su.tagir.apps.radiot.ui.pirates.PiratesFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
@@ -45,4 +46,7 @@ abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
     abstract fun chatFragment(): ChatFragment
+
+    @ContributesAndroidInjector
+    abstract fun piratesFragment(): PiratesFragment
 }

@@ -12,10 +12,12 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.RTEntry
 import su.tagir.apps.radiot.model.entries.SearchResult
 import su.tagir.apps.radiot.model.entries.TimeLabel
+import su.tagir.apps.radiot.model.parser.PiratesParser
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.ui.common.AbsentLiveData
 import su.tagir.apps.radiot.utils.getDistinct
-import timber.log.Timber
+import java.net.HttpURLConnection
+import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,16 +44,31 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
                     .doOnSuccess { entryDao.saveRadioTEntries(it) }
                     .toCompletable()
 
-    fun getPodcasts() = entryDao.getPodcasts()
+    fun refreshPirates(): Completable {
+        return Completable.create { emitter ->
+            try {
+                val connection = URL("http://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.addRequestProperty("Accept", "application/xml")
+                connection.doInput = true
+                connection.connect()
+                val podcasts = PiratesParser.parsePirates(connection.inputStream)
+                entryDao.saveRadioTEntries(podcasts)
+                emitter.onComplete()
+            } catch (e: Exception) {
+                emitter.onError(e)
+            }
+        }
+    }
+
+    fun getEntries(vararg categories: String) = entryDao
+            .getEntries(categories)
 
     fun refreshNews(): Completable =
             restClient
                     .getPosts(PAGE_SIZE, "news,info")
                     .doOnSuccess { entryDao.saveRadioTEntries(it) }
                     .toCompletable()
-
-    fun getNews() =
-            entryDao.getNews()
 
 
     fun search(query: String): Completable =
@@ -106,11 +123,9 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
         if (ids.isEmpty()) {
             return
         }
-
         val downloadProgressMap = HashMap<Long, Int>()
         val fileNames = HashMap<Long, String>()
         downloadManager.checkDownloadStatus(ids, downloadProgressMap, fileNames)
-        Timber.d("ids: ${ids.size}, progress: ${downloadProgressMap.size}, fileNames: ${fileNames.size}")
         entryDao.updateDownloadStatus(ids, downloadProgressMap, fileNames)
     }
 

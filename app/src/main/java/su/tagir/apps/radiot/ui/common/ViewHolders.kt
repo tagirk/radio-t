@@ -107,11 +107,16 @@ class PodcastViewHolder(view: View, private val glide: GlideRequests?, private v
         }
         title.text = t.title
         val date = t.date?.longDateFormat()
+        val notes = if (t.showNotes.isNullOrBlank()) "" else t.showNotes?.replace("\n", "")
         val sb = SpannableStringBuilder()
                 .append(date)
-                .append(" - ")
-                .append(t.showNotes?.replace("\n", ""))
-        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length?.plus(3) ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        if (!notes.isNullOrBlank()) {
+            sb.append(" - ").append(notes)
+        }
+
+        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
         showNotes.text = sb
 
         val progress = t.downloadProgress
@@ -125,7 +130,7 @@ class PodcastViewHolder(view: View, private val glide: GlideRequests?, private v
         glide
                 ?.load(t.image)
                 ?.diskCacheStrategy(DiskCacheStrategy.ALL)
-                ?.transforms(CenterCrop(),RoundedCorners(cornerRadius))
+                ?.transforms(CenterCrop(), RoundedCorners(cornerRadius))
                 ?.placeholder(R.drawable.ic_notification_large)
                 ?.error(R.drawable.ic_notification_large)
                 ?.into(image)
@@ -150,18 +155,18 @@ class PodcastViewHolder(view: View, private val glide: GlideRequests?, private v
         callback.remove(podcast)
     }
 
-    private fun getImageByState(state:Int): Drawable?{
-        return when(state){
-            EntryState.PLAYING->{
+    private fun getImageByState(state: Int): Drawable? {
+        return when (state) {
+            EntryState.PLAYING -> {
                 val animation = ContextCompat.getDrawable(itemView.context, R.drawable.ic_equalizer_white_36dp) as AnimationDrawable?
                 DrawableCompat.setTintList(animation!!, ColorStateList.valueOf(accentColor))
                 animation.start()
                 animation
             }
-            EntryState.PAUSED->{
+            EntryState.PAUSED -> {
                 ContextCompat.getDrawable(itemView.context, R.drawable.ic_play_accent_24dp)
             }
-            else-> null
+            else -> null
         }
     }
 }
@@ -181,7 +186,7 @@ class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
     lateinit var progress: ProgressBar
 
     @BindView(R.id.cancel)
-    lateinit var cancel:ImageView
+    lateinit var cancel: ImageView
 
     @BindView(R.id.btn_download)
     lateinit var download: ImageButton
@@ -212,7 +217,8 @@ class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
                 .append(date)
                 .append(" - ")
                 .append(t.showNotes?.replace("\n", ""))
-        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length?.plus(3) ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length?.plus(3)
+                ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         showNotes.text = sb
 
         progress.visibleGone(false)

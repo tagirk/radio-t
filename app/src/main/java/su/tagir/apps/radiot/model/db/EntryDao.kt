@@ -43,26 +43,13 @@ abstract class EntryDao {
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.URL} = :url LIMIT 1")
     abstract fun getEntry(url: String?): LiveData<Entry?>
 
-    @Query("SELECT * FROM ${Entry.TABLE_NAME} " +
-            "WHERE ${Entry.CATEGORIES} IN ('podcast') ORDER BY date DESC")
-    abstract fun getPodcasts(): DataSource.Factory<Int, Entry>
+    @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.CATEGORIES} IN (:categories) ORDER BY ${Entry.DATE} DESC")
+    abstract fun getEntries(categories: Array<out String>): DataSource.Factory<Int, Entry>
 
-    @Query("SELECT * FROM ${Entry.TABLE_NAME} " +
-            "WHERE ${Entry.CATEGORIES} IN ('prep') ORDER BY date DESC")
-    abstract fun getPreps(): DataSource.Factory<Int, Entry>
-
-    @Query("SELECT * FROM ${Entry.TABLE_NAME} " +
-            "WHERE ${Entry.CATEGORIES} IN ('news','info') ORDER BY date DESC")
-    abstract fun getNews(): DataSource.Factory<Int, Entry>
-
-    @Query("SELECT * FROM ${Entry.TABLE_NAME} " +
-            "WHERE ${Entry.CATEGORIES} IN ('info') ORDER BY date DESC")
-    abstract fun getInfos(): DataSource.Factory<Int, Entry>
-
-    @Query("UPDATE ${Entry.TABLE_NAME} SET state = :state WHERE state != :state")
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.STATE} = :state WHERE ${Entry.STATE} != :state")
     abstract fun resetStates(state: Int): Int
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET state = :state WHERE audioUrl == :audioUrl")
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.STATE} = :state WHERE ${Entry.AUDIO_URl} == :audioUrl")
     abstract fun updateState(state: Int, audioUrl: String): Int
 
     @Transaction
@@ -87,13 +74,13 @@ abstract class EntryDao {
             "WHERE state = ${EntryState.PAUSED} OR state = ${EntryState.PLAYING} LIMIT 1")
     abstract fun getCurrentEntryLive(): LiveData<Entry>
 
-    @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE state = ${EntryState.PAUSED} OR state = ${EntryState.PLAYING} LIMIT 1")
+    @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.STATE} = ${EntryState.PAUSED} OR ${Entry.STATE} = ${EntryState.PLAYING} LIMIT 1")
     abstract fun getCurrentEntryCursor(): Cursor
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET state = :state WHERE state != ${EntryState.IDLE}")
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.STATE} = :state WHERE ${Entry.STATE} != ${EntryState.IDLE}")
     abstract fun updateCurrentEntryState(state: Int)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.PROGRESS} = :progress WHERE state = ${EntryState.PAUSED} OR state = ${EntryState.PLAYING}")
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.PROGRESS} = :progress WHERE ${Entry.STATE} = ${EntryState.PAUSED} OR ${Entry.STATE} = ${EntryState.PLAYING}")
     abstract fun updateCurrentEntryProgress(progress: Long)
 
     @Transaction
@@ -133,16 +120,22 @@ abstract class EntryDao {
     @Transaction
     open fun updateDownloadStatus(failedIds: List<Long>?, progressMap: Map<Long, Int>?, filePaths: Map<Long, String?>?) {
         failedIds
-                ?.forEach { id -> resetDownloadProgress(id)
-                Timber.d("resetDownloadProgress $id")}
+                ?.forEach { id ->
+                    resetDownloadProgress(id)
+                    Timber.d("resetDownloadProgress $id")
+                }
 
         progressMap
-                ?.forEach { updateDownloadProgress(it.value, it.key)
-                    Timber.d("updateDownloadProgress $it")}
+                ?.forEach {
+                    updateDownloadProgress(it.value, it.key)
+                    Timber.d("updateDownloadProgress $it")
+                }
 
         filePaths
-                ?.forEach { saveFilePath(it.value, it.key)
-                    Timber.d("saveFilePath $it")}
+                ?.forEach {
+                    saveFilePath(it.value, it.key)
+                    Timber.d("saveFilePath $it")
+                }
     }
 
     @Query("SELECT * FROM ${TimeLabel.TABLE_NAME} " +
@@ -174,7 +167,7 @@ abstract class EntryDao {
     abstract fun removeQuery(query: String?)
 
     private fun saveEntries(entries: List<RTEntry>?) {
-        entries?.forEach {entry->
+        entries?.forEach { entry ->
             if (findUrl(entry.url) == null) {
                 insertEntry(Entry(entry))
             } else {

@@ -1,10 +1,12 @@
 package su.tagir.apps.radiot.utils
 
 
+import android.annotation.SuppressLint
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.Observer
 import android.view.View
+import timber.log.Timber
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -48,6 +50,17 @@ fun Date.shortDateFormat(): String {
 
 fun Long?.convertMillis(): String {
     return (this?.div(1000)).convertSeconds()
+}
+
+@SuppressLint("SimpleDateFormat")
+fun String.parseDate(pattern: String):Date{
+    val format = SimpleDateFormat(pattern, Locale.ENGLISH)
+    return try {
+        format.parse(this)
+    }catch (e:Exception){
+        Timber.e(e)
+        Date()
+    }
 }
 
 fun Long?.convertSeconds(): String {

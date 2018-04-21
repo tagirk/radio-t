@@ -1,4 +1,4 @@
-package su.tagir.apps.radiot.ui.podcasts
+package su.tagir.apps.radiot.ui.pirates
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -20,7 +20,7 @@ import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import javax.inject.Inject
 
 @RuntimePermissions
-class PodcastsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
+class PiratesFragment :ListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -37,15 +37,15 @@ class PodcastsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callb
 
     override fun onResume() {
         super.onResume()
-        (listViewModel as PodcastsViewModel).startStatusTimer()
+        (listViewModel as PiratesViewModel).startStatusTimer()
     }
 
     override fun onPause() {
         super.onPause()
-        (listViewModel as PodcastsViewModel).stopStatusTimer()
+        (listViewModel as PiratesViewModel).stopStatusTimer()
     }
 
-    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(PodcastsViewModel::class.java)
+    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(PiratesViewModel::class.java)
 
     override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
 
@@ -61,7 +61,7 @@ class PodcastsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callb
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun startDownload(){
         if(entryForDownload!=null) {
-            (listViewModel as PodcastsViewModel).onDownloadClick(entryForDownload!!)
+            (listViewModel as PiratesViewModel).onDownloadClick(entryForDownload!!)
         }
     }
 
@@ -76,7 +76,7 @@ class PodcastsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callb
         }
         AlertDialog.Builder(context!!)
                 .setMessage("Удалить файл?")
-                .setPositiveButton("Да", { _, _ -> (listViewModel as PodcastsViewModel).onRemoveClick(entry) })
+                .setPositiveButton("Да", { _, _ -> (listViewModel as PiratesViewModel).onRemoveClick(entry) })
                 .setNegativeButton("Нет", null)
                 .create()
                 .show()
@@ -92,7 +92,7 @@ class PodcastsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callb
     }
 
     private fun observeViewModel() {
-        (listViewModel as PodcastsViewModel)
+        (listViewModel as PiratesViewModel)
                 .error
                 .observe(getViewLifecycleOwner()!!,
                         Observer {
@@ -101,4 +101,5 @@ class PodcastsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callb
                             }
                         })
     }
+
 }
