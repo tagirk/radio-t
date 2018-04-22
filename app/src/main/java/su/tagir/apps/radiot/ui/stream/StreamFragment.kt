@@ -117,6 +117,7 @@ class StreamFragment : BaseFragment(), Injectable {
                             hideTimer.visibleGone(it)
                             showTimer.visibleGone(!it)
                         })
+        streamViewModel.startTimer()
     }
 
     private fun initList() {

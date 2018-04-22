@@ -32,9 +32,6 @@ class StreamViewModel @Inject constructor(
 
     init {
         showTimer.value = newsRepository.showTimer
-        if (newsRepository.showTimer) {
-            startTimer()
-        }
     }
 
     override fun getData() = LivePagedListBuilder(newsRepository.getArticles(), PAGE_SIZE).build()
@@ -69,15 +66,16 @@ class StreamViewModel @Inject constructor(
         stopTimer()
     }
 
-    private fun startTimer() {
-        Timber.d("startTimer")
-        timerDisposable = Observable.just(1)
-                .doOnNext { setNextShowTime() }
-                .flatMap { Observable.interval(0L, 1L, TimeUnit.SECONDS) }
-                .subscribeOn(scheduler.computation())
-                .subscribe({ timer.postValue(updateTimer()) }, { Timber.e(it) })
+    fun startTimer() {
+        if (newsRepository.showTimer) {
+            timerDisposable = Observable.just(1)
+                    .doOnNext { setNextShowTime() }
+                    .flatMap { Observable.interval(0L, 1L, TimeUnit.SECONDS) }
+                    .subscribeOn(scheduler.computation())
+                    .subscribe({ timer.postValue(updateTimer()) }, { Timber.e(it) })
 
-        addDisposable(timerDisposable!!)
+            addDisposable(timerDisposable!!)
+        }
     }
 
     private fun stopTimer() {

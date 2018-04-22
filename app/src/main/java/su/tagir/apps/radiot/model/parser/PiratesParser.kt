@@ -15,19 +15,11 @@ object PiratesParser {
 
     private val IMG_PATTERN = Pattern.compile("<img src=\"([^\"]+)")
 
-    private val PODCAST = "item"
-    private val TITLE = "title"
-    private val DATE = "pubDate"
-    private val IMAGE = "description"
-    private val ENCLOSURE = "enclosure"
-    private val AUTHOR = "author"
-    private val SUMMARY = "summary"
-
-    private val NAMESPACE_ITUNES = "http://www.itunes.com/dtds/podcast-1.0.dtd"
-    private val ITUNES = "itunes"
-
-    private val ATTR_URL = "url"
-    private val ATTR_LENGTH = "length"
+    private const val PODCAST = "item"
+    private const val TITLE = "title"
+    private const val DATE = "pubDate"
+    private const val ENCLOSURE = "enclosure"
+    private const val ATTR_URL = "url"
 
     @Throws(IOException::class, XmlPullParserException::class)
     fun parsePirates(inputStream: InputStream): List<RTEntry> {

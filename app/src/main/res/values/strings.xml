@@ -6,6 +6,7 @@
     <string name="error">Ошибка</string>
     <string name="error_source">Ошибка аудиопотока.</string>
     <string name="search">Поиск</string>
+    <string name="chat">Чат</string>
     <string name="settings">Настройки</string>
     <string name="send">Отправлять</string>
     <string name="not_send">Не отправлять</string>
