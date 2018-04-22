@@ -105,7 +105,7 @@ abstract class EntryDao {
             "WHERE ${Entry.DOWNLOAD_ID} == :id")
     abstract fun deleteFilePath(id: Long?)
 
-    @Query("SELECT ${Entry.DOWNLOAD_ID} FROM ${Entry.TABLE_NAME} WHERE ${Entry.DOWNLOAD_ID} != -1")
+    @Query("SELECT ${Entry.DOWNLOAD_ID} FROM ${Entry.TABLE_NAME} WHERE ${Entry.DOWNLOAD_ID} != -1 AND ${Entry.DOWNLOAD_PROGRESS} != -1")
     abstract fun getDownloadIds(): List<Long>
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.DOWNLOAD_PROGRESS} = :progress " +
