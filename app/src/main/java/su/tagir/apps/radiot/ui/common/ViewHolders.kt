@@ -5,10 +5,13 @@ import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -57,7 +60,12 @@ class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
 
 }
 
-class PodcastViewHolder(view: View, private val glide: GlideRequests?, private val callback: EntriesAdapter.Callback) : RecyclerView.ViewHolder(view) {
+class PodcastViewHolder(view: View,
+                        private val type:Int,
+                        private val glide: GlideRequests?,
+                        private val callback: EntriesAdapter.Callback)
+
+    : RecyclerView.ViewHolder(view), MenuItem.OnMenuItemClickListener {
 
     @BindView(R.id.title)
     lateinit var title: TextView
@@ -115,7 +123,8 @@ class PodcastViewHolder(view: View, private val glide: GlideRequests?, private v
             sb.append(" - ").append(notes)
         }
 
-        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length
+                ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         showNotes.text = sb
 
@@ -138,6 +147,19 @@ class PodcastViewHolder(view: View, private val glide: GlideRequests?, private v
         blur.visibleGone(t.state == EntryState.PLAYING || t.state == EntryState.PAUSED)
         blur.setImageDrawable(getImageByState(t.state))
         this.podcast = t
+
+        itemView.setOnCreateContextMenuListener { menu, _, _ ->
+            menu?.add(Menu.NONE, ITEM_LISTEN, 0, R.string.listen)?.setOnMenuItemClickListener(this)
+            if (progress < 0 && t.file == null) {
+                menu?.add(Menu.NONE, ITEM_DOWNLOAD, 1, R.string.download)?.setOnMenuItemClickListener(this)
+            } else {
+                menu?.add(Menu.NONE, ITEM_DELETE, 1, R.string.delete)?.setOnMenuItemClickListener(this)
+            }
+            if(type== EntriesAdapter.TYPE_PODCAST) {
+                menu?.add(Menu.NONE, ITEM_WEB, 2, R.string.web)?.setOnMenuItemClickListener(this)
+                menu?.add(Menu.NONE, ITEM_CHAT, 3, R.string.chat_log)?.setOnMenuItemClickListener(this)
+            }
+        }
     }
 
     @OnClick(R.id.root)
@@ -152,7 +174,23 @@ class PodcastViewHolder(view: View, private val glide: GlideRequests?, private v
 
     @OnClick(R.id.btn_remove, R.id.cancel)
     fun onRemoveClick() {
-        callback.remove(podcast)
+        AlertDialog.Builder(itemView.context)
+                .setMessage("Удалить файл?")
+                .setPositiveButton("Да", { _, _ -> callback.remove(podcast) })
+                .setNegativeButton("Нет", null)
+                .create()
+                .show()
+    }
+
+    override fun onMenuItemClick(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            ITEM_LISTEN -> onPlayClick()
+            ITEM_DOWNLOAD -> onDownloadClick()
+            ITEM_DELETE -> onRemoveClick()
+            ITEM_WEB -> callback.openWebSite(podcast)
+            ITEM_CHAT -> callback.openChatLog(podcast)
+        }
+        return false
     }
 
     private fun getImageByState(state: Int): Drawable? {
@@ -163,11 +201,19 @@ class PodcastViewHolder(view: View, private val glide: GlideRequests?, private v
                 animation.start()
                 animation
             }
-            EntryState.PAUSED -> {
-                ContextCompat.getDrawable(itemView.context, R.drawable.ic_play_accent_24dp)
-            }
+            EntryState.PAUSED -> ContextCompat.getDrawable(itemView.context, R.drawable.ic_play_accent_24dp)
+
             else -> null
         }
+    }
+
+    companion object {
+
+        const val ITEM_LISTEN = 0
+        const val ITEM_DOWNLOAD = 1
+        const val ITEM_DELETE = 2
+        const val ITEM_WEB = 3
+        const val ITEM_CHAT = 4
     }
 }
 

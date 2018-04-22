@@ -4,6 +4,8 @@ import android.arch.paging.LivePagedListBuilder
 import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.model.repository.EntryRepository.Companion.PAGE_SIZE
@@ -17,6 +19,7 @@ import javax.inject.Inject
 
 class PodcastsViewModel
 @Inject constructor(private val entryRepository: EntryRepository,
+                    private val router: Router,
                     scheduler: BaseSchedulerProvider) : ListViewModel<Entry>(scheduler) {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -73,6 +76,14 @@ class PodcastsViewModel
                     Timber.e(t)
                     error.setValue(t.message)
                 }))
+    }
+
+    fun openWebSite(entry: Entry){
+        router.navigateTo(Screens.WEB_SCREEN, entry.url)
+    }
+
+    fun openChatLog(entry: Entry){
+        router.navigateTo(Screens.WEB_SCREEN, entry.chatUrl)
     }
 
 }

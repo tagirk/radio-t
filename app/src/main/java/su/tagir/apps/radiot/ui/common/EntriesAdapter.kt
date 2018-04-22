@@ -22,9 +22,9 @@ class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, p
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
-            TYPE_PODCAST -> {
+            TYPE_NEWS -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                PodcastViewHolder(view, glide, callback)
+                NewsViewHolder(view, callback)
             }
             TYPE_PREP -> {
                 val view = inflater.inflate(R.layout.item_entry, parent, false)
@@ -32,7 +32,7 @@ class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, p
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                NewsViewHolder(view, callback)
+                PodcastViewHolder(view, viewType, glide, callback)
             }
         }
     }
@@ -45,6 +45,10 @@ class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, p
         fun download(entry: Entry)
 
         fun remove(entry: Entry)
+
+        fun openWebSite(entry: Entry)
+
+        fun openChatLog(entry: Entry)
     }
 
     companion object {
@@ -52,6 +56,7 @@ class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, p
         const val TYPE_PREP = 1
         const val TYPE_PODCAST = 2
         const val TYPE_NEWS = 3
+        const val TYPE_PIRATES = 4
 
         private val diffCallback
             get() = object : DiffCallback<Entry>() {

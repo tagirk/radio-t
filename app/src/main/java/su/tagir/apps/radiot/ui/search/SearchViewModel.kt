@@ -82,6 +82,14 @@ class SearchViewModel
                 .subscribe({}, { t -> Timber.e(t) }))
     }
 
+    fun openWebSite(entry: Entry){
+        router.navigateTo(Screens.WEB_SCREEN, entry.url)
+    }
+
+    fun openChatLog(entry: Entry){
+        router.navigateTo(Screens.WEB_SCREEN, entry.chatUrl)
+    }
+
     fun removeQuery(query: String?) {
         entryRepository.removeQuery(query)
     }

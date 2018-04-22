@@ -87,6 +87,9 @@ data class Entry(
                     downloadId = -1,
                     downloadProgress = -1)
 
+    val chatUrl
+        get() = "https://chat.radio-t.com/logs/radio-t-${title?.substring(8)}.html"
+
     companion object {
         const val TABLE_NAME = "entry"
         const val URL = "url"

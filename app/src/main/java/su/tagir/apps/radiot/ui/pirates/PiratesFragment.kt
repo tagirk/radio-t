@@ -6,7 +6,6 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.widget.Toast
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
@@ -47,7 +46,7 @@ class PiratesFragment :ListFragment<Entry>(), Injectable, EntriesAdapter.Callbac
 
     override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(PiratesViewModel::class.java)
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this), this)
 
     override fun onClick(entry: Entry) {
         playerViewModel.onPlayClick(entry)
@@ -71,16 +70,15 @@ class PiratesFragment :ListFragment<Entry>(), Injectable, EntriesAdapter.Callbac
     }
 
     override fun remove(entry: Entry) {
-        if (context == null) {
-            return
-        }
-        AlertDialog.Builder(context!!)
-                .setMessage("Удалить файл?")
-                .setPositiveButton("Да", { _, _ -> (listViewModel as PiratesViewModel).onRemoveClick(entry) })
-                .setNegativeButton("Нет", null)
-                .create()
-                .show()
+        (listViewModel as PiratesViewModel).onRemoveClick(entry)
+    }
 
+    override fun openWebSite(entry: Entry) {
+//        (listViewModel as PodcastsViewModel).openWebSite(entry)
+    }
+
+    override fun openChatLog(entry: Entry) {
+//        (listViewModel as PodcastsViewModel).openChatLog(entry)
     }
 
     override fun onBackPressed() {
