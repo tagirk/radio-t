@@ -27,6 +27,8 @@ import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.ui.common.BaseFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
 import su.tagir.apps.radiot.ui.news.NewsViewModel
+import su.tagir.apps.radiot.ui.pirates.PiratesFragment
+import su.tagir.apps.radiot.ui.pirates.PiratesViewModel
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsViewModel
@@ -58,7 +60,7 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
     private lateinit var podcastsViewModel: PodcastsViewModel
     private lateinit var newsViewModel: NewsViewModel
     private lateinit var streamViewModel: StreamViewModel
-//    private lateinit var hostsViewModel: HostsViewModel
+    private lateinit var piratesViewModel: PiratesViewModel
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_main, container, false)
@@ -76,7 +78,7 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
         podcastsViewModel = getViewModel(PodcastsViewModel::class.java)
         newsViewModel = getViewModel(NewsViewModel::class.java)
         streamViewModel = getViewModel(StreamViewModel::class.java)
-//        hostsViewModel = getViewModel(HostsViewModel::class.java)
+        piratesViewModel = getViewModel(PiratesViewModel::class.java)
 
         observe()
     }
@@ -121,7 +123,7 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
             0 -> podcastsViewModel.loadData()
             1 -> streamViewModel.loadData()
             2 -> newsViewModel.loadData()
-//            3 -> hostsViewModel.loadData()
+            3 -> piratesViewModel.loadData()
         }
     }
 
@@ -154,19 +156,19 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
                 0 -> return PodcastsFragment()
                 1 -> return StreamFragment()
                 2 -> return NewsFragment()
-//                3 -> return HostsFragment()
+                3 -> return PiratesFragment()
             }
             return null
         }
 
-        override fun getCount() = 3
+        override fun getCount() = 4
 
         override fun getPageTitle(position: Int): CharSequence? {
             when (position) {
                 0 -> return "Подкасты"
                 1 -> return "Online вещание"
                 2 -> return "Новости"
-//                3 -> return "Ведущие"
+                3 -> return "Пираты"
             }
             return super.getPageTitle(position)
         }

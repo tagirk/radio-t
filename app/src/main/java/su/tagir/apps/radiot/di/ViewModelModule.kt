@@ -11,6 +11,7 @@ import su.tagir.apps.radiot.ui.chat.ChatViewModel
 import su.tagir.apps.radiot.ui.hosts.HostsViewModel
 import su.tagir.apps.radiot.ui.localcontent.LocalContentViewModel
 import su.tagir.apps.radiot.ui.news.NewsViewModel
+import su.tagir.apps.radiot.ui.pirates.PiratesViewModel
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastsViewModel
 import su.tagir.apps.radiot.ui.search.SearchViewModel
@@ -65,6 +66,11 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(ChatViewModel::class)
     abstract fun chatViewModel(chatViewModel: ChatViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(PiratesViewModel::class)
+    abstract fun piratesViewModel(piratesViewModel: PiratesViewModel): ViewModel
 
     @Binds
     abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory

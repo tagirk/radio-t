@@ -25,7 +25,7 @@ class SearchAdapter(private var items: List<Entry>?, private val glide: GlideReq
         return when (viewType) {
             EntriesAdapter.TYPE_PODCAST -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                PodcastViewHolder(view, glide, callback)
+                PodcastViewHolder(view, viewType, glide, callback)
             }
             EntriesAdapter.TYPE_PREP -> {
                 val view = inflater.inflate(R.layout.item_entry, parent, false)

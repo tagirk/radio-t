@@ -83,7 +83,7 @@ class PlayerViewModel
         val entry = currentPodcast.value ?: return
 
         if (entry.url != STREAM_URL) {
-            router.navigateTo(Screens.WEB_SCREEN, "https://chat.radio-t.com/logs/radio-t-${entry.title?.substring(8)}.html")
+            router.navigateTo(Screens.WEB_SCREEN, entry.chatUrl)
         } else {
             showStreamChat()
         }

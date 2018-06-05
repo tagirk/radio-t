@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/listen"
+        android:title="@string/listen"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/download"
+        android:title="@string/download"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/delete"
+        android:title="@string/delete"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/web"
+        android:title="@string/web"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/chat"
+        android:title="@string/chat_log"
+        app:showAsAction="ifRoom"/>
+
+</menu>

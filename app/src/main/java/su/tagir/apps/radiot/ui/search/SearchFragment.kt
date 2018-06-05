@@ -156,6 +156,15 @@ class SearchFragment : BaseFragment(), EntriesAdapter.Callback, RecentQueriesAda
         viewModel.onRemoveClick(entry)
     }
 
+    override fun openWebSite(entry: Entry) {
+        viewModel.openWebSite(entry)
+    }
+
+    override fun openChatLog(entry: Entry) {
+        viewModel.openChatLog(entry)
+    }
+
+
     override fun removeQuery(position: Int) {
         if (recentQueriesAdapter.currentList != null) {
             viewModel.removeQuery(recentQueriesAdapter.currentList!![position])

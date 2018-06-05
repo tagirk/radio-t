@@ -10,6 +10,7 @@ import javax.inject.Inject
 
 class NewsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
 
+
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
@@ -26,5 +27,9 @@ class NewsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callback 
 
     override fun remove(entry: Entry) {}
 
+    override fun openWebSite(entry: Entry) {
+    }
 
+    override fun openChatLog(entry: Entry) {
+    }
 }

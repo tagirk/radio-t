@@ -1,14 +1,11 @@
-package su.tagir.apps.radiot.ui.podcasts
+package su.tagir.apps.radiot.ui.pirates
 
 import android.arch.paging.LivePagedListBuilder
 import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import ru.terrakok.cicerone.Router
-import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.model.repository.EntryRepository.Companion.PAGE_SIZE
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.SingleLiveEvent
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
@@ -17,20 +14,20 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class PodcastsViewModel
-@Inject constructor(private val entryRepository: EntryRepository,
-                    private val router: Router,
-                    scheduler: BaseSchedulerProvider) : ListViewModel<Entry>(scheduler) {
+class PiratesViewModel @Inject constructor(
+        private val entryRepository:EntryRepository,
+        scheduler:BaseSchedulerProvider):ListViewModel<Entry>(scheduler) {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var intervalDisposable: Disposable? = null
 
     val error = SingleLiveEvent<String>()
 
-    override fun getData() = LivePagedListBuilder(entryRepository.getEntries("podcast"), PAGE_SIZE).build()
+    override fun getData() = LivePagedListBuilder(entryRepository.getEntries("pirates"), EntryRepository.PAGE_SIZE).build()
 
     override fun requestUpdates() {
-        addDisposable(entryRepository.refreshPodcasts()
+        addDisposable(entryRepository.refreshPirates()
+                .subscribeOn(scheduler.io())
                 .observeOn(scheduler.ui())
                 .subscribe({ state.postValue(ViewModelState.COMPLETE) },
                         { t ->
@@ -77,13 +74,4 @@ class PodcastsViewModel
                     error.setValue(t.message)
                 }))
     }
-
-    fun openWebSite(entry: Entry){
-        router.navigateTo(Screens.WEB_SCREEN, entry.url)
-    }
-
-    fun openChatLog(entry: Entry){
-        router.navigateTo(Screens.WEB_SCREEN, entry.chatUrl)
-    }
-
 }
