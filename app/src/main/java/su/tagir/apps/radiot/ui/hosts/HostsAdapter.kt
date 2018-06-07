@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.ui.hosts
 
 import android.arch.paging.PagedListAdapter
-import android.support.v7.recyclerview.extensions.DiffCallback
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -22,19 +22,19 @@ import su.tagir.apps.radiot.utils.visibleGone
 
 class HostsAdapter(private val glide: GlideRequests?, private val callback: Callback) : PagedListAdapter<Host, HostViewHolder>(diffCallback) {
 
-    override fun onBindViewHolder(holder: HostViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: HostViewHolder, position: Int) {
         val item = getItem(position)
-        holder?.bind(item)
+        holder.bind(item)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): HostViewHolder {
-        val inflater = LayoutInflater.from(parent?.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HostViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.item_host, parent, false)
         return HostViewHolder(view, glide, callback)
     }
 
     companion object {
-        private val diffCallback = object : DiffCallback<Host>() {
+        private val diffCallback = object : DiffUtil.ItemCallback<Host>() {
             override fun areItemsTheSame(oldItem: Host, newItem: Host) = oldItem.nickname == newItem.nickname
 
             override fun areContentsTheSame(oldItem: Host, newItem: Host) = oldItem == newItem

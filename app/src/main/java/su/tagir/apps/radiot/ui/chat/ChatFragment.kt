@@ -8,7 +8,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.IBinder
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
@@ -26,31 +25,14 @@ import butterknife.OnTextChanged
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
-import su.tagir.apps.radiot.ui.common.BaseFragment
-import su.tagir.apps.radiot.ui.viewmodel.ViewModelState
+import su.tagir.apps.radiot.model.entries.MessageFull
+import su.tagir.apps.radiot.ui.common.PagedListFragment
+import su.tagir.apps.radiot.ui.viewmodel.State
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import javax.inject.Inject
 
-class ChatFragment : BaseFragment(), Injectable, MessagesAdapter.Callback {
-
-    @BindView(R.id.progress)
-    lateinit var progress: View
-
-    @BindView(R.id.btn_retry)
-    lateinit var btnRetry: View
-
-    @BindView(R.id.text_error)
-    lateinit var errorText: View
-
-    @BindView(R.id.text_empty)
-    lateinit var emptyView: View
-
-    @BindView(R.id.list)
-    lateinit var list: RecyclerView
-
-    @BindView(R.id.refresh_layout)
-    lateinit var refreshLayout: SwipeRefreshLayout
+class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapter.Callback {
 
     @BindView(R.id.toolbar)
     lateinit var toolbar: Toolbar
@@ -72,17 +54,13 @@ class ChatFragment : BaseFragment(), Injectable, MessagesAdapter.Callback {
 
     private lateinit var chatViewModel: ChatViewModel
 
-    private lateinit var chatAdapter: MessagesAdapter
-
-    private var itemsCount = 0
-
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View {
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        chatViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(ChatViewModel::class.java)
+        chatViewModel = listViewModel as ChatViewModel
         toolbar.setNavigationOnClickListener { onBackPressed() }
         toolbar.inflateMenu(R.menu.menu_chat)
         toolbar.setOnMenuItemClickListener { item ->
@@ -93,6 +71,10 @@ class ChatFragment : BaseFragment(), Injectable, MessagesAdapter.Callback {
         }
         initMessages()
     }
+
+    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(ChatViewModel::class.java)
+
+    override fun createAdapter() = MessagesAdapter(GlideApp.with(this), this)
 
     override fun onResume() {
         super.onResume()
@@ -140,8 +122,6 @@ class ChatFragment : BaseFragment(), Injectable, MessagesAdapter.Callback {
     }
 
     private fun initMessages() {
-        chatAdapter = MessagesAdapter(GlideApp.with(this), this)
-        list.adapter = chatAdapter
         list.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
         list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
@@ -157,27 +137,6 @@ class ChatFragment : BaseFragment(), Injectable, MessagesAdapter.Callback {
         refreshLayout.isEnabled = false
 
         chatViewModel
-                .state
-                .observe(getViewLifecycleOwner()!!, Observer { t ->
-                    if (t != null) {
-                        showHideViews(t, itemsCount)
-
-                        val error = t.getErrorIfNotHandled()
-                        if (error != null) {
-                            showToast(error)
-                        }
-                    }
-                })
-
-        chatViewModel
-                .getData()
-                .observe(getViewLifecycleOwner()!!, Observer { t ->
-                    itemsCount = t?.size ?: 0
-                    showHideViews(chatViewModel.state.value, itemsCount)
-                    chatAdapter.setList(t)
-                })
-
-        chatViewModel
                 .messageSendState
                 .observe(getViewLifecycleOwner()!!, Observer { t ->
                     sendProgress.visibleInvisible(t?.loading == true)
@@ -186,25 +145,16 @@ class ChatFragment : BaseFragment(), Injectable, MessagesAdapter.Callback {
                     if (error != null) {
                         showToast(error)
                     }
+                    if(t?.completed==true){
+                        message.setText("")
+                    }
                 })
-        chatViewModel
-
-                .messageSendSuccess
-                .observe(getViewLifecycleOwner()!!, Observer { message.setText("") })
     }
 
-    private fun showHideViews(state: ViewModelState?, itemsCount: Int) {
-        if (state == null) {
-            return
-        }
-        val isEmpty = itemsCount == 0
-        progress.visibleGone(state.loading && isEmpty)
-        emptyView.visibleGone(state.isCompleted() && isEmpty)
-        errorText.visibleGone(state.error && isEmpty)
-        btnRetry.visibleGone(state.error && isEmpty)
-        refreshLayout.isRefreshing = state.refreshing
+    override fun showHideViews(state: State<List<MessageFull>>?) {
+        super.showHideViews(state)
+        loadMoreProgress.visibleGone(false)
     }
-
 
     private fun dismissKeyboard(windowToken: IBinder?) {
         val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

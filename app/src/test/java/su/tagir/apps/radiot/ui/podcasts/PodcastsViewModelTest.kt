@@ -84,7 +84,7 @@ class PodcastsViewModelTest {
         testScheduler.advanceTimeBy(1, TimeUnit.SECONDS)
 
         assertThat(podcastsViewModel.state.value?.error, `is`(true))
-        assertThat(podcastsViewModel.error.value == null, `is`(true))
+        assertThat(podcastsViewModel.downloadError.value == null, `is`(true))
         assertThat(podcastsViewModel.firstLaunch, `is`(false))
     }
 
@@ -107,7 +107,7 @@ class PodcastsViewModelTest {
         verify(entryRepository).refreshPodcasts()
         testScheduler.advanceTimeBy(1, TimeUnit.SECONDS)
         assertThat(podcastsViewModel.state.value?.error, `is`(true))
-        assertThat(podcastsViewModel.error.value, `is`("Error!"))
+        assertThat(podcastsViewModel.downloadError.value, `is`("Error!"))
         verifyNoMoreInteractions(entryRepository)
     }
 
@@ -117,7 +117,7 @@ class PodcastsViewModelTest {
         whenever(entryRepository.startDownload(entry.audioUrl)).thenReturn(Completable.complete())
         podcastsViewModel.onDownloadClick(entry)
         verify(entryRepository).startDownload(entry.audioUrl)
-        assertThat(podcastsViewModel.error.value == null, `is`(true))
+        assertThat(podcastsViewModel.downloadError.value == null, `is`(true))
         verifyNoMoreInteractions(entryRepository)
     }
 
@@ -126,7 +126,7 @@ class PodcastsViewModelTest {
         whenever(entryRepository.startDownload(entry.audioUrl)).thenReturn(Completable.error(error))
         podcastsViewModel.onDownloadClick(entry)
         verify(entryRepository).startDownload(entry.audioUrl)
-        assertThat(podcastsViewModel.error.value, `is`("Error!"))
+        assertThat(podcastsViewModel.downloadError.value, `is`("Error!"))
         verifyNoMoreInteractions(entryRepository)
     }
 
@@ -135,7 +135,7 @@ class PodcastsViewModelTest {
         whenever(entryRepository.deleteFile(1L)).thenReturn(Completable.complete())
         podcastsViewModel.onRemoveClick(entry)
         verify(entryRepository).deleteFile(entry.downloadId)
-        assertThat(podcastsViewModel.error.value == null, `is`(true))
+        assertThat(podcastsViewModel.downloadError.value == null, `is`(true))
         verifyNoMoreInteractions(entryRepository)
     }
 
@@ -144,7 +144,7 @@ class PodcastsViewModelTest {
         whenever(entryRepository.deleteFile(1L)).thenReturn(Completable.error(error))
         podcastsViewModel.onRemoveClick(entry)
         verify(entryRepository).deleteFile(entry.downloadId)
-        assertThat(podcastsViewModel.error.value, `is`("Error!"))
+        assertThat(podcastsViewModel.downloadError.value, `is`("Error!"))
         verifyNoMoreInteractions(entryRepository)
     }
 

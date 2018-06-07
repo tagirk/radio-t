@@ -1,15 +1,16 @@
 package su.tagir.apps.radiot.ui.news
 
-import android.arch.paging.LivePagedListBuilder
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.plusAssign
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.model.repository.EntryRepository.Companion.PAGE_SIZE
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.ui.common.SingleLiveEvent
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
-import su.tagir.apps.radiot.ui.viewmodel.ViewModelState
+import su.tagir.apps.radiot.ui.viewmodel.State
+import su.tagir.apps.radiot.ui.viewmodel.Status
+import timber.log.Timber
 import javax.inject.Inject
 
 class NewsViewModel
@@ -17,22 +18,45 @@ class NewsViewModel
                     schedulerProvider: BaseSchedulerProvider,
                     private val router: Router) : ListViewModel<Entry>(schedulerProvider) {
 
-    val error = SingleLiveEvent<String>()
+    private var loadDisposable: Disposable? = null
+
+    init {
+        disposable += entryRepository
+                .getEntries("news", "info")
+                .subscribe({
+                    val newState = state.value?.copy(data = it)
+                    state.value = newState
+                }, { Timber.e(it) })
+    }
 
 
-    override fun getData() = LivePagedListBuilder(entryRepository.getEntries("news", "info"), PAGE_SIZE).build()
+    override fun loadData() {
+        loadDisposable?.dispose()
+        loadDisposable = entryRepository.refreshNews()
+                .observeOn(scheduler.ui())
+                .doOnSubscribe { state.value = if (state.value == null) State(Status.LOADING) else state.value?.copy(Status.LOADING) }
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS) },
+                        {
+                            Timber.e(it)
+                            state.value = state.value?.copy(status = Status.ERROR)
+                        })
+
+        disposable += loadDisposable!!
+
+    }
 
 
     override fun requestUpdates() {
-        addDisposable(entryRepository.refreshNews()
+        loadDisposable?.dispose()
+        loadDisposable = entryRepository.refreshNews()
                 .observeOn(scheduler.ui())
-                .subscribe({ state.postValue(ViewModelState.COMPLETE) },
-                        { t ->
-                            if (state.value?.refreshing == true) {
-                                error.value = t.message
-                            }
-                            state.postValue(ViewModelState.error(t.message))
-                        }))
+                .doOnSubscribe { state.value = state.value?.copy(status = Status.REFRESHING) }
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS) },
+                        {
+                            Timber.e(it)
+                            state.value = state.value?.copy(status = Status.ERROR)
+                        })
+        disposable += loadDisposable!!
     }
 
     fun onEntryClick(entry: Entry) {

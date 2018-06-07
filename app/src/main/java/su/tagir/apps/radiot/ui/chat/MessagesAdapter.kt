@@ -2,7 +2,7 @@ package su.tagir.apps.radiot.ui.chat
 
 import android.annotation.SuppressLint
 import android.arch.paging.PagedListAdapter
-import android.support.v7.recyclerview.extensions.DiffCallback
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -26,14 +26,14 @@ import su.tagir.apps.radiot.utils.longDateTimeFormat
 class MessagesAdapter(private val glide: GlideRequests?,
                       private val callback: Callback) : PagedListAdapter<MessageFull, MessagesAdapter.MessageViewHolder>(MessagesDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): MessageViewHolder {
-        val inflater = LayoutInflater.from(parent?.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
         return MessageViewHolder(inflater.inflate(R.layout.item_chat_message, parent, false), glide, callback)
     }
 
-    override fun onBindViewHolder(holder: MessageViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         val item = getItem(position)
-        holder?.bind(item)
+        holder.bind(item)
     }
 
     class MessageViewHolder(itemView: View,
@@ -95,7 +95,7 @@ class MessagesAdapter(private val glide: GlideRequests?,
         }
     }
 
-    class MessagesDiffCallback : DiffCallback<MessageFull>() {
+    class MessagesDiffCallback : DiffUtil.ItemCallback<MessageFull>() {
 
         override fun areItemsTheSame(oldItem: MessageFull, newItem: MessageFull): Boolean {
             return oldItem.message?.id == newItem.message?.id

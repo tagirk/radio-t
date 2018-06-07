@@ -1,18 +1,17 @@
 package su.tagir.apps.radiot.ui.chat
 
 import android.arch.lifecycle.MutableLiveData
-import android.arch.paging.LivePagedListBuilder
-import android.arch.paging.PagedList
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.plusAssign
 import retrofit2.HttpException
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.model.repository.ChatRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.ui.common.SingleLiveEvent
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
-import su.tagir.apps.radiot.ui.viewmodel.ViewModelState
+import su.tagir.apps.radiot.ui.viewmodel.State
+import su.tagir.apps.radiot.ui.viewmodel.Status
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -21,49 +20,62 @@ class ChatViewModel @Inject constructor(
         private val router: Router,
         scheduler: BaseSchedulerProvider) : ListViewModel<MessageFull>(scheduler) {
 
-    val messageSendState = MutableLiveData<ViewModelState>()
-    val messageSendSuccess = SingleLiveEvent<Void>()
+    val messageSendState = MutableLiveData<State<Void>>()
 
     private var loadDisposable: Disposable? = null
 
     val isSignedIn: Boolean
         get() = chatRepository.isSignedIn
 
-    override fun getData() = LivePagedListBuilder(chatRepository.getMessages(), 50)
-            .setBoundaryCallback(boundaryCallback)
-            .build()
+    init {
+        disposable += chatRepository.getMessages()
+                .subscribe({
+                    val newState = state.value?.copy(data = it)
+                    state.value = newState
+                }, { Timber.e(it) })
+
+    }
 
 
-    override fun requestUpdates() {
+    override fun loadData() {
         loadDisposable?.dispose()
         loadDisposable = chatRepository
-                .updateMessages()
-                .subscribeOn(scheduler.io())
+                .loadMessages()
                 .observeOn(scheduler.ui())
-                .subscribe({
-                    state.value = ViewModelState.COMPLETE
-                }, {
+                .doOnSubscribe { state.value = if (state.value == null) State(Status.LOADING) else state.value?.copy(Status.LOADING) }
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS) }, {
                     Timber.e(it)
-                    state.value = ViewModelState.error(it.message)
-                    if (it is HttpException && it.code() == 401) {
-                        signOut()
-                    }
+                    state.value = state.value?.copy(status = Status.ERROR)
                 })
-        addDisposable(loadDisposable!!)
+        disposable += loadDisposable!!
         subscribeStream()
+    }
+
+    override fun loadMore() {
+        Timber.d("loadMore1")
+        if (loadDisposable != null && !loadDisposable!!.isDisposed) {
+            return
+        }
+        Timber.d("loadMore2")
+        loadDisposable = chatRepository.loadMessages(state.value?.data?.last()?.message?.id)
+                .observeOn(scheduler.ui())
+                .doOnSubscribe { state.value = state.value?.copy(status = Status.LOADING_MORE) }
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS) }, {
+                    Timber.e(it)
+                    state.value = state.value?.copy(status = Status.ERROR)
+                })
+        disposable += loadDisposable!!
     }
 
     fun sendMessage(message: String) {
         addDisposable(chatRepository.sendMessage(message.trim())
-                .subscribeOn(scheduler.io())
                 .observeOn(scheduler.ui())
-                .doOnSubscribe { messageSendState.value = ViewModelState.LOADING }
+                .doOnSubscribe { messageSendState.value = State(Status.LOADING) }
                 .subscribe({
-                    messageSendState.value = ViewModelState.COMPLETE
-                    messageSendSuccess.call()
+                    messageSendState.value = State(Status.SUCCESS)
                 }, {
                     Timber.e(it)
-                    messageSendState.value = ViewModelState.error(it.message)
+                    messageSendState.value = State(Status.ERROR, errorMessage = it.message)
                     if (it is HttpException && it.code() == 401) {
                         signOut()
                     }
@@ -97,42 +109,16 @@ class ChatViewModel @Inject constructor(
     }
 
     private fun subscribeStream() {
-        addDisposable(chatRepository
+        disposable+=chatRepository
                 .getMessageStream()
                 .subscribeOn(scheduler.io())
                 .observeOn(scheduler.ui())
-                .subscribe({}, { Timber.e(it) }))
+                .subscribe({}, { Timber.e(it) })
 
-        addDisposable(chatRepository
+       disposable+=chatRepository
                 .getEventsStream()
                 .subscribeOn(scheduler.io())
                 .observeOn(scheduler.io())
-                .subscribe({}, { Timber.e(it) }))
-    }
-
-    private val boundaryCallback = object : PagedList.BoundaryCallback<MessageFull>() {
-
-        override fun onItemAtEndLoaded(itemAtEnd: MessageFull) {
-            if (loadDisposable != null && !loadDisposable!!.isDisposed) {
-                return
-            }
-            val id = itemAtEnd.message?.id
-            state.value = ViewModelState.LOADING_MORE
-            loadDisposable = chatRepository
-                    .loadMessages(id)
-                    .subscribeOn(scheduler.io())
-                    .observeOn(scheduler.ui())
-                    .subscribe({
-                        state.value = ViewModelState.COMPLETE
-                    }, {
-                        Timber.e(it)
-                        state.value = ViewModelState.error(it.message)
-                        if (it is HttpException && it.code() == 401) {
-                            signOut()
-                        }
-                    })
-
-            addDisposable(loadDisposable!!)
-        }
+                .subscribe({}, { Timber.e(it) })
     }
 }

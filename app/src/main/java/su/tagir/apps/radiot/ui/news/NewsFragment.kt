@@ -5,10 +5,10 @@ import android.arch.lifecycle.ViewModelProviders
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.ListFragment
+import su.tagir.apps.radiot.ui.common.PagedListFragment
 import javax.inject.Inject
 
-class NewsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
+class NewsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
 
 
     @Inject

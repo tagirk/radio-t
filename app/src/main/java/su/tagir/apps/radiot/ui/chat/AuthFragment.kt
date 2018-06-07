@@ -18,7 +18,6 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.Toast
 import butterknife.BindView
 import butterknife.OnClick
 import su.tagir.apps.radiot.R
@@ -116,23 +115,19 @@ class AuthFragment : BaseFragment(), Injectable {
                 return viewModel.redirect(url)
             }
         }
-        viewModel.authEvent
+        viewModel.authEvent()
                 .observe(getViewLifecycleOwner()!!, Observer {
                     webView?.loadUrl(it)
                 })
 
-        viewModel.state
+        viewModel.state()
                 .observe(getViewLifecycleOwner()!!,
                         Observer {
                             progress?.visibleGone(it?.loading == true)
                             error?.visibleGone(it?.error == true)
-                        })
-
-        viewModel.message
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            if (it != null) {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                            val message = it?.getErrorIfNotHandled()
+                            if (message != null) {
+                                showToast(message)
                             }
                         })
     }

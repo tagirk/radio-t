@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.app.AlertDialog
-import android.support.v7.widget.RecyclerView
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -30,7 +29,7 @@ import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 
 
-class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) : RecyclerView.ViewHolder(view) {
+class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) :  DataBoundViewHolder<Entry>(view) {
 
     @BindView(R.id.title)
     lateinit var title: TextView
@@ -44,7 +43,7 @@ class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
         ButterKnife.bind(this, view)
     }
 
-    fun bind(t: Entry?) {
+    override fun bind(t: Entry?) {
         if (t == null) {
             return
         }
@@ -65,7 +64,7 @@ class PodcastViewHolder(view: View,
                         private val glide: GlideRequests?,
                         private val callback: EntriesAdapter.Callback)
 
-    : RecyclerView.ViewHolder(view), MenuItem.OnMenuItemClickListener {
+    : DataBoundViewHolder<Entry>(view), MenuItem.OnMenuItemClickListener {
 
     @BindView(R.id.title)
     lateinit var title: TextView
@@ -109,7 +108,7 @@ class PodcastViewHolder(view: View,
         ButterKnife.bind(this, view)
     }
 
-    fun bind(t: Entry?) {
+    override fun bind(t: Entry?) {
         if (t == null) {
             return
         }
@@ -217,7 +216,7 @@ class PodcastViewHolder(view: View,
     }
 }
 
-class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) : RecyclerView.ViewHolder(view) {
+class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) :  DataBoundViewHolder<Entry>(view) {
 
     @BindView(R.id.title)
     lateinit var title: TextView
@@ -253,7 +252,7 @@ class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
         ButterKnife.bind(this, view)
     }
 
-    fun bind(t: Entry?) {
+    override fun bind(t: Entry?) {
         if (t == null) {
             return
         }

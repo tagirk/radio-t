@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
-import io.reactivex.schedulers.Schedulers
+import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -26,13 +26,16 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideApiClient(): RestClient {
+    fun provideApiClient(scheduler: BaseSchedulerProvider): RestClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://radio-t.com/site-api/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
 
-        val httpClient = OkHttpClient.Builder()
+        val dispatcher = Dispatcher()
+        dispatcher.maxRequests = 1
+        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
+
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -48,13 +51,15 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideNewsApiClient(): NewsRestClient {
+    fun provideNewsApiClient(scheduler: BaseSchedulerProvider): NewsRestClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://news.radio-t.com/api/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
 
-        val httpClient = OkHttpClient.Builder()
+        val dispatcher = Dispatcher()
+        dispatcher.maxRequests = 1
+        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -70,14 +75,16 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseRestClient(): FirebaseRestClient {
+    fun provideFirebaseRestClient(scheduler: BaseSchedulerProvider): FirebaseRestClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://radiot-4ac4a.firebaseio.com/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
 
 
-        val httpClient = OkHttpClient.Builder()
+        val dispatcher = Dispatcher()
+        dispatcher.maxRequests = 1
+        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -93,14 +100,16 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideGitterAuthClient(): GitterAuthClient {
+    fun provideGitterAuthClient(scheduler: BaseSchedulerProvider): GitterAuthClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
 
 
-        val httpClient = OkHttpClient.Builder()
+        val dispatcher = Dispatcher()
+        dispatcher.maxRequests = 1
+        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
 
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
@@ -117,14 +126,16 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideGitterClient(authHolder: Prefs): GitterClient {
+    fun provideGitterClient(authHolder: Prefs, scheduler: BaseSchedulerProvider): GitterClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://api.gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
 
 
-        val httpClient = OkHttpClient.Builder()
+        val dispatcher = Dispatcher()
+        dispatcher.maxRequests = 1
+        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
         httpClient.addInterceptor(ApiHeadersInterceptor(authHolder))
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
@@ -141,11 +152,11 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideGitterStreamClient(authHolder: Prefs): GitterStreamClient {
+    fun provideGitterStreamClient(authHolder: Prefs, scheduler: BaseSchedulerProvider): GitterStreamClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://stream.gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
 
 
         val httpClient = OkHttpClient.Builder()
@@ -162,14 +173,13 @@ class AppModule {
     fun providePrefs(application: Application): Prefs = Prefs(application)
 
 
-
     @Singleton
     @Provides
     fun provideScheduler(): BaseSchedulerProvider = SchedulerProvider()
 
     @Singleton
     @Provides
-    fun provideGson():Gson =
+    fun provideGson(): Gson =
             GsonBuilder()
                     .create()
 

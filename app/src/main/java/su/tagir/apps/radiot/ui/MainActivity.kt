@@ -192,7 +192,7 @@ class MainActivity : AppCompatActivity(),
                         })
 
         playerViewModel
-                .seekEvent
+                .seekEvent()
                 .observe(this,
                         Observer {
                             if (it != null) {
@@ -205,20 +205,20 @@ class MainActivity : AppCompatActivity(),
                         })
 
         playerViewModel
-                .requestProgressEvent
+                .requestProgressEvent()
                 .observe(this,
                         Observer {
                             val progress = Progress()
                             try {
                                 audioService?.getProgress(progress)
-                                playerViewModel.progress.postValue(progress)
+                                playerViewModel.setProgress(progress)
                             } catch (e: RemoteException) {
                                 Timber.e(e)
                             }
                         })
 
         playerViewModel
-                .expandEvent
+                .expandEvent()
                 .observe(this, Observer {
                     Timber.d("expand")
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -326,13 +326,13 @@ class MainActivity : AppCompatActivity(),
         private val weakRef = WeakReference(mainActivity)
 
         override fun onStateChanged(loading: Boolean, state: Int) {
-            if (weakRef.get()?.playerViewModel?.loading?.value != loading) {
-                weakRef.get()?.playerViewModel?.loading?.postValue(loading)
+            if (weakRef.get()?.playerViewModel?.isLoading()?.value != loading) {
+                weakRef.get()?.playerViewModel?.setLoading(loading)
             }
         }
 
         override fun onError(error: String?) {
-            weakRef.get()?.playerViewModel?.error?.postValue(error)
+            weakRef.get()?.playerViewModel?.setError(error)
         }
     }
 }

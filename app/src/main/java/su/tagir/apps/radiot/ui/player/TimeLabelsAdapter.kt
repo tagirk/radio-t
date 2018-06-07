@@ -17,14 +17,14 @@ class TimeLabelsAdapter(private var items: List<TimeLabel>,
 
     override fun getItemCount() = items.size
 
-    override fun onBindViewHolder(holder: TimeLabelViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: TimeLabelViewHolder, position: Int) {
         val timeLabel = items[position]
-        holder?.bind(timeLabel)
-        holder?.itemView?.setOnClickListener { callback.onItemClick(timeLabel) }
+        holder.bind(timeLabel)
+        holder.itemView?.setOnClickListener { callback.onItemClick(timeLabel) }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): TimeLabelViewHolder {
-        val inflater = LayoutInflater.from(parent?.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimeLabelViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.item_time_label, parent, false)
         return TimeLabelViewHolder(view)
     }

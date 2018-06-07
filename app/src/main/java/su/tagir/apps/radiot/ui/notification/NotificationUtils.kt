@@ -103,18 +103,18 @@ fun createMediaNotification(entry: Entry?, paused: Boolean, context: Context): N
         val pause = Intent(context, PodcastStateService::class.java)
         pause.action = PodcastStateService.ACTION_PAUSE
         val pausePIntent = PendingIntent.getService(context, 42, pause, PendingIntent.FLAG_UPDATE_CURRENT)
-        notificationBuilder.addAction(R.drawable.ic_pause_black_24dp, "Pause", pausePIntent)
+        notificationBuilder.addAction(R.drawable.ic_pause_black_png, "Pause", pausePIntent)
     } else {
         val play = Intent(context, PodcastStateService::class.java)
         play.action = PodcastStateService.ACTION_RESUME
         val playPIntent = PendingIntent.getService(context, 41, play, PendingIntent.FLAG_UPDATE_CURRENT)
-        notificationBuilder.addAction(R.drawable.ic_play_arrow_black_24dp, "Play", playPIntent)
+        notificationBuilder.addAction(R.drawable.ic_play_black_png, "Play", playPIntent)
     }
 
     val stop = Intent(context, PodcastStateService::class.java)
     stop.action = PodcastStateService.ACTION_STOP
     val stopPIntent = PendingIntent.getService(context, 42, stop, PendingIntent.FLAG_UPDATE_CURRENT)
-    notificationBuilder.addAction(R.drawable.ic_close_24dp, "Stop", stopPIntent)
+    notificationBuilder.addAction(R.drawable.ic_clear_black_png, "Stop", stopPIntent)
 
     return notificationBuilder
             .setSmallIcon(R.drawable.ic_notification)

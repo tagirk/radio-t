@@ -215,7 +215,7 @@ class PlayerFragment : BaseFragment(), Injectable {
                         })
 
         playerViewModel
-                .error
+                .getError()
                 .observe(getViewLifecycleOwner()!!,
                         Observer { error ->
                             if (context != null) {
@@ -229,7 +229,7 @@ class PlayerFragment : BaseFragment(), Injectable {
                         })
 
         playerViewModel
-                .loading
+                .isLoading()
                 .observe(getViewLifecycleOwner()!!,
                         Observer { loading ->
                             btnForward.isEnabled = loading == false
@@ -242,12 +242,12 @@ class PlayerFragment : BaseFragment(), Injectable {
                         })
 
         playerViewModel
-                .sliding
+                .getSlidingValue()
                 .observe(getViewLifecycleOwner()!!,
                         Observer { slideOffset -> onSlide(slideOffset ?: 0f) })
 
         playerViewModel
-                .progress
+                .getProgress()
                 .observe(getViewLifecycleOwner()!!,
                         Observer { progress -> showProgress(progress) })
 
