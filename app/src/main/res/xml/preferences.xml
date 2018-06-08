@@ -1,24 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="Уведомления">
+    <PreferenceCategory android:title="Уведомления"
+        android:layout="@layout/pref_category">
+
         <SwitchPreference
             android:defaultValue="false"
             android:summary="@string/not_show"
             android:title="Напоминание о прямом эфире"
-            android:key="stream_notification"/>
+            android:key="stream_notification"
+            android:layout="@layout/pref_switch"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Отчеты">
+    <PreferenceCategory android:title="@string/night_mode"
+        android:layout="@layout/pref_category">
+
+        <ListPreference
+            android:layout="@layout/pref_list"
+            android:key="night_mode"
+            android:title="@string/night_mode"
+            android:dialogTitle="@string/night_mode"
+            android:entries="@array/night_mode"
+            android:entryValues="@array/night_mode" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Отчеты"
+        android:layout="@layout/pref_category">
+
         <SwitchPreference
             android:checked="true"
             android:defaultValue="true"
             android:summary="@string/send"
             android:title="Отчеты о сбоях"
-            android:key="crash_reports"/>
+            android:key="crash_reports"
+            android:layout="@layout/pref_switch"/>
 
-        <Preference android:title="Сообщить о баге">
+        <Preference android:title="Сообщить о баге"
+            android:layout="@layout/pref_title">
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="mailto:kurt09@yandex.ru" />

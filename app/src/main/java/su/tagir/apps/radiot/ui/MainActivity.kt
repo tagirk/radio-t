@@ -13,11 +13,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
+import android.preference.PreferenceManager
 import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -46,7 +48,8 @@ import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.search.SearchFragment
-import su.tagir.apps.radiot.ui.settings.SettingsActivity
+import su.tagir.apps.radiot.ui.settings.SettingsFragment
+import su.tagir.apps.radiot.ui.settings.SettingsFragment.Companion.KEY_NIGHT_MODE
 import su.tagir.apps.radiot.utils.visibleGone
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -90,9 +93,12 @@ class MainActivity : AppCompatActivity(),
     private var audioService: IAudioService? = null
 
     private val currentFragment
-        get() = supportFragmentManager.findFragmentById(R.id.fragment_container) as BaseFragment?
+        get() = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        setNightMode()
+
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -111,6 +117,7 @@ class MainActivity : AppCompatActivity(),
             bottomSheetBehavior.state = savedInstanceState.getInt("state")
         }
     }
+
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
@@ -146,8 +153,10 @@ class MainActivity : AppCompatActivity(),
     override fun onBackPressed() {
         if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        } else if (currentFragment is BaseFragment) {
+            (currentFragment as BaseFragment).onBackPressed()
         } else {
-            currentFragment?.onBackPressed() ?: super.onBackPressed()
+            super.onBackPressed()
         }
     }
 
@@ -251,7 +260,6 @@ class MainActivity : AppCompatActivity(),
     private val navigator = object : SupportAppNavigator(this, R.id.fragment_container) {
 
         override fun createActivityIntent(context: Context?, screenKey: String?, data: Any?): Intent? = when (screenKey) {
-            Screens.SETTINGS_SCREEN -> Intent(this@MainActivity, SettingsActivity::class.java)
             Screens.CHAT_ACTIVITY -> Intent(this@MainActivity, ChatActivity::class.java)
             else -> null
         }
@@ -260,6 +268,7 @@ class MainActivity : AppCompatActivity(),
             Screens.MAIN_SCREEN -> MainFragment()
             Screens.SEARCH_SCREEN -> SearchFragment()
             Screens.CONTENT_SCREEN -> LocalContentFragment.newInstance(data as String)
+            Screens.SETTINGS_SCREEN -> SettingsFragment()
             else -> null
         }
 
@@ -304,11 +313,24 @@ class MainActivity : AppCompatActivity(),
         fragmentContainer.requestLayout()
     }
 
+    private fun setNightMode() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val modes = resources.getStringArray(R.array.night_mode)
+        val mode = prefs.getString(KEY_NIGHT_MODE, modes[0])
+        when (mode) {
+            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
+            modes[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
+    }
+
     private fun bindService() {
         val intent = Intent(application, AudioService::class.java)
         intent.action = IAudioService::class.java.name
         bindService(intent, this, Context.BIND_AUTO_CREATE)
     }
+
 
     inner class BottomSheetCallback : BottomSheetBehavior.BottomSheetCallback() {
 

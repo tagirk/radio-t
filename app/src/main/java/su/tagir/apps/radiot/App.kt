@@ -58,6 +58,7 @@ class App : Application(),
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
+
         initTools()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

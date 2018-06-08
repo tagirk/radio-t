@@ -154,7 +154,7 @@ class StreamFragment : PagedListFragment<Article>(), Injectable {
         var primaryTextColor: Int = 0
 
         @JvmField
-        @BindColor(R.color.colorPrimaryDark)
+        @BindColor(R.color.colorUrl)
         var accentColor: Int = 0
 
         init {

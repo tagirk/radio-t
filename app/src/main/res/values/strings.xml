@@ -20,4 +20,8 @@
     <string name="listen">Прослушать</string>
     <string name="download">Загрузить</string>
     <string name="delete">Удалить</string>
+    <string name="night_mode">Ночной режим</string>
+    <string name="disabled">Отключен</string>
+    <string name="night_mode_auto">Автоматический ночной режим</string>
+    <string name="enabled">Включен</string>
 </resources>
