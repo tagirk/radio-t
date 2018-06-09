@@ -1,16 +1,16 @@
 package su.tagir.apps.radiot.ui.stream
 
 import android.arch.lifecycle.MutableLiveData
-import android.arch.paging.LivePagedListBuilder
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.plusAssign
 import su.tagir.apps.radiot.model.entries.Article
-import su.tagir.apps.radiot.model.repository.EntryRepository.Companion.PAGE_SIZE
 import su.tagir.apps.radiot.model.repository.NewsRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.SingleLiveEvent
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
-import su.tagir.apps.radiot.ui.viewmodel.ViewModelState
+import su.tagir.apps.radiot.ui.viewmodel.State
+import su.tagir.apps.radiot.ui.viewmodel.Status
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -21,7 +21,7 @@ class StreamViewModel @Inject constructor(
         private val newsRepository: NewsRepository,
         schedulerProvider: BaseSchedulerProvider) : ListViewModel<Article>(schedulerProvider) {
 
-
+    private var loadDisposable: Disposable? = null
     private val nextShow: Calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
     val showTimer = MutableLiveData<Boolean>()
     val timer = MutableLiveData<String?>()
@@ -32,21 +32,38 @@ class StreamViewModel @Inject constructor(
 
     init {
         showTimer.value = newsRepository.showTimer
+        disposable += newsRepository.getArticles()
+                .subscribe({
+                    val newState = state.value?.copy(data = it)
+                    state.value = newState
+                }, { Timber.e(it) })
     }
 
-    override fun getData() = LivePagedListBuilder(newsRepository.getArticles(), PAGE_SIZE).build()
+    override fun loadData() {
+        loadDisposable?.dispose()
+        loadDisposable = newsRepository.updateArticles()
+                .observeOn(scheduler.ui())
+                .doOnSubscribe { state.value = if (state.value == null) State(Status.LOADING) else state.value?.copy(Status.LOADING) }
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS) },
+                        {
+                            Timber.e(it)
+                            state.value = state.value?.copy(status = Status.ERROR)
+                        })
+
+        disposable += loadDisposable!!
+    }
 
     override fun requestUpdates() {
-        addDisposable(newsRepository.updateArticles()
+        loadDisposable?.dispose()
+        loadDisposable = newsRepository.updateArticles()
                 .observeOn(scheduler.ui())
-                .subscribe({ state.postValue(ViewModelState.COMPLETE) },
-                        { t ->
-                            Timber.e(t)
-                            if (state.value?.refreshing == true) {
-                                error.value = t.message
-                            }
-                            state.postValue(ViewModelState.error(t.message))
-                        }))
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS) },
+                        {
+                            Timber.e(it)
+                            state.value = state.value?.copy(status = Status.ERROR)
+                        })
+
+        disposable += loadDisposable!!
     }
 
     fun showTimer() {
@@ -131,6 +148,6 @@ class StreamViewModel @Inject constructor(
                 .retry()
                 .subscribe({}, { Timber.e(it) })
 
-        addDisposable(activeThemeDisposable)
+        disposable += activeThemeDisposable
     }
 }

@@ -14,12 +14,12 @@ import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.ListFragment
+import su.tagir.apps.radiot.ui.common.PagedListFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import javax.inject.Inject
 
 @RuntimePermissions
-class PodcastsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
+class PodcastsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -92,7 +92,7 @@ class PodcastsFragment : ListFragment<Entry>(), Injectable, EntriesAdapter.Callb
 
     private fun observeViewModel() {
         (listViewModel as PodcastsViewModel)
-                .error
+                .getDownloadError()
                 .observe(getViewLifecycleOwner()!!,
                         Observer {
                             if (it != null) {

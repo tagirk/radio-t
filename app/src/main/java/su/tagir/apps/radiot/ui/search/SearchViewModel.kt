@@ -2,62 +2,122 @@ package su.tagir.apps.radiot.ui.search
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
-import android.arch.paging.LivePagedListBuilder
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.plusAssign
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.model.repository.EntryRepository.Companion.PAGE_SIZE
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.ui.viewmodel.BaseViewModel
-import su.tagir.apps.radiot.ui.viewmodel.ViewModelState
+import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
+import su.tagir.apps.radiot.ui.viewmodel.State
+import su.tagir.apps.radiot.ui.viewmodel.Status
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class SearchViewModel
-@Inject constructor(private val entryRepository: EntryRepository,
-                    private val router: Router,
-                    schedulerProvider: BaseSchedulerProvider) : BaseViewModel(schedulerProvider) {
+class SearchViewModel @Inject constructor(private val entryRepository: EntryRepository,
+                                          private val router: Router,
+                                          schedulerProvider: BaseSchedulerProvider) : ListViewModel<Entry>(schedulerProvider) {
 
+    private var dataDisposable: Disposable? = null
+    private var loadDisposable: Disposable? = null
 
-    private val query = MutableLiveData<String>()
-    val data: LiveData<List<Entry>>
-    val state = MutableLiveData<ViewModelState?>()
-    val resentSearches = LivePagedListBuilder(entryRepository.getRecentSearches(), PAGE_SIZE).build()
+    private val recentSearches = MutableLiveData<List<String>>()
+
+    private var query: String = ""
+        set(value) {
+            field = value
+            observeSearchResults()
+            loadData()
+        }
+
 
     private lateinit var intervalDisposable: Disposable
 
     init {
-        data = Transformations
-                .switchMap(query, { query -> entryRepository.getForQuery(query) })
+
+        disposable += entryRepository.getRecentSearches()
+                .subscribe({ recentSearches.postValue(it) },
+                        { Timber.e(it) })
     }
 
+    fun getRecentSearches(): LiveData<List<String>> = recentSearches
 
-    fun search(query: String?) {
-        if (query.isNullOrBlank()) {
+    fun search(query: String) {
+        if (this.query == query) {
             return
         }
-        this.query.value = query
-        state.postValue(ViewModelState.LOADING)
-        addDisposable(entryRepository
-                .search(query!!)
-                .subscribe({ state.postValue(ViewModelState.COMPLETE) },
-                        { state.postValue(ViewModelState.error(it.message)) }))
+        this.query = query
     }
 
-    fun searchMore() {
-        if (state.value?.loading == true || state.value?.loadingMore == true) {
+    private fun observeSearchResults() {
+        dataDisposable?.dispose()
+        dataDisposable = entryRepository.getForQuery(query)
+                .observeOn(scheduler.ui())
+                .subscribe({
+                    val newState = state.value?.copy(data = it)
+                    state.value = newState
+                }, { Timber.e(it) })
+        disposable += dataDisposable!!
+    }
+
+    override fun loadData() {
+        loadDisposable?.dispose()
+        loadDisposable = entryRepository.search(query)
+                .observeOn(scheduler.ui())
+                .doOnSubscribe { state.value = if (state.value == null) State(Status.LOADING) else state.value?.copy(Status.LOADING) }
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS, hasNextPage = true) }, {
+                    Timber.e(it)
+                    state.value = state.value?.copy(status = Status.ERROR)
+                })
+
+        disposable += loadDisposable!!
+    }
+
+    override fun requestUpdates() {
+        loadDisposable?.dispose()
+        loadDisposable = entryRepository.search(query)
+                .observeOn(scheduler.ui())
+                .doOnSubscribe { state.value = state.value?.copy(status = Status.REFRESHING) }
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS, hasNextPage = true) }, {
+                    Timber.e(it)
+                    state.value = state.value?.copy(status = Status.ERROR)
+                })
+        disposable += loadDisposable!!
+    }
+
+    override fun loadMore() {
+        if (loadDisposable != null && !loadDisposable!!.isDisposed) {
             return
         }
-        state.value = ViewModelState.LOADING_MORE
-        addDisposable(entryRepository
-                .searchNextPage(query.value!!)
-                .subscribe({ state.postValue(ViewModelState.COMPLETE) },
-                        { state.postValue(ViewModelState.error(it.message)) }))
+        state.value = state.value?.copy(status = Status.LOADING_MORE)
+        loadDisposable = entryRepository.searchNextPage(query, itemCount)
+                .observeOn(scheduler.ui())
+                .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS, hasNextPage = it) }, {
+                    Timber.e(it)
+                    state.value = state.value?.copy(status = Status.ERROR)
+                })
+        disposable += loadDisposable!!
+    }
+
+    private val itemCount
+        get() = state.value?.data?.size ?: 0
+
+    fun startStatusTimer() {
+        intervalDisposable =
+                Observable
+                        .interval(0L, 5L, TimeUnit.SECONDS)
+                        .subscribeOn(scheduler.computation())
+                        .observeOn(scheduler.diskIO())
+                        .subscribe({ entryRepository.checkDownloadStatus() }, { Timber.e(it) })
+
+        disposable += intervalDisposable
+    }
+
+    fun stopStatusTimer() {
+        intervalDisposable.dispose()
     }
 
     fun onEntryCkick(entry: Entry) {
@@ -82,11 +142,11 @@ class SearchViewModel
                 .subscribe({}, { t -> Timber.e(t) }))
     }
 
-    fun openWebSite(entry: Entry){
+    fun openWebSite(entry: Entry) {
         router.navigateTo(Screens.WEB_SCREEN, entry.url)
     }
 
-    fun openChatLog(entry: Entry){
+    fun openChatLog(entry: Entry) {
         router.navigateTo(Screens.WEB_SCREEN, entry.chatUrl)
     }
 
@@ -96,18 +156,5 @@ class SearchViewModel
 
     fun onBackClick() {
         router.exit()
-    }
-
-    fun onResume() {
-        intervalDisposable =
-                Observable
-                        .interval(0L, 5L, TimeUnit.SECONDS)
-                        .subscribe({ entryRepository.checkDownloadStatus() }, { Timber.e(it) })
-
-        addDisposable(intervalDisposable)
-    }
-
-    fun onPause() {
-        intervalDisposable.dispose()
     }
 }

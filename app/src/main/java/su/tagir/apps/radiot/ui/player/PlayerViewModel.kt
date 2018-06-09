@@ -2,9 +2,9 @@ package su.tagir.apps.radiot.ui.player
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.plusAssign
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
@@ -15,10 +15,8 @@ import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.ChatRepository
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.ui.common.AbsentLiveData
 import su.tagir.apps.radiot.ui.common.SingleLiveEvent
 import su.tagir.apps.radiot.ui.viewmodel.BaseViewModel
-import su.tagir.apps.radiot.utils.getDistinct
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -29,29 +27,25 @@ class PlayerViewModel
                     private val router: Router,
                     scheduler: BaseSchedulerProvider) : BaseViewModel(scheduler) {
 
-    internal val error = SingleLiveEvent<String>()
-    internal val seekEvent = SingleLiveEvent<Long>()
-    val expandEvent = SingleLiveEvent<Void>()
-    internal val requestProgressEvent = SingleLiveEvent<Void>()
-    internal val loading = MutableLiveData<Boolean>()
-    private val currentPodcast = entryRepository.getCurrent()
-    internal val progress = MutableLiveData<Progress>()
-    private val timeLabels: LiveData<List<TimeLabel>>
-
-    internal val sliding = MutableLiveData<Float>()
+    private val error = SingleLiveEvent<String>()
+    private val seekEvent = SingleLiveEvent<Long>()
+    private val expandEvent = SingleLiveEvent<Void>()
+    private val requestProgressEvent = SingleLiveEvent<Void>()
+    private val loading = MutableLiveData<Boolean>()
+    private val currentPodcast = MutableLiveData<Entry>()
+    private val progress = MutableLiveData<Progress>()
+    private val timeLabels=MutableLiveData<List<TimeLabel>>()
+    private val sliding = MutableLiveData<Float>()
 
     private var progressDisposable: Disposable? = null
 
     init {
-        timeLabels = Transformations
-                .switchMap(currentPodcast,
-                        { currentPodcast ->
-                            if (currentPodcast == null) {
-                                AbsentLiveData.create()
-                            } else {
-                                entryRepository.getTimeLabels(currentPodcast).getDistinct()
-                            }
-                        })
+        currentPodcast.value = null
+        disposable+=entryRepository.getCurrent()
+                .doOnNext{currentPodcast.postValue(it)}
+                .flatMap { entryRepository.getTimeLabels(it) }
+                .retry(3)
+                .subscribe({timeLabels.postValue(it)},{Timber.e(it)})
 
     }
 
@@ -59,15 +53,15 @@ class PlayerViewModel
         sliding.value = slideOffset
     }
 
-    internal fun getCurrentPodcast() = currentPodcast
+    fun getCurrentPodcast() = currentPodcast
 
-    internal fun getTimeLabels() = timeLabels
+    fun getTimeLabels() = timeLabels
 
-    internal fun onPlayClick(podcast: Entry) {
+    fun onPlayClick(podcast: Entry) {
         entryRepository.play(podcast)
     }
 
-    internal fun onPauseClick() {
+    fun onPauseClick() {
         entryRepository.pause()
     }
 
@@ -125,4 +119,30 @@ class PlayerViewModel
     fun onArticleClick(article: Article?){
         router.navigateTo(Screens.WEB_SCREEN, article?.link)
     }
+
+    fun setProgress(progress: Progress){
+        this.progress.postValue(progress)
+    }
+
+    fun getProgress(): LiveData<Progress> = progress
+
+    fun setLoading(loading: Boolean){
+        this.loading.postValue(loading)
+    }
+
+    fun isLoading(): LiveData<Boolean> = loading
+
+    fun getSlidingValue(): LiveData<Float> = sliding
+
+    fun setError(error: String?){
+        this.error.postValue(error)
+    }
+
+    fun getError(): LiveData<String> = error
+
+    fun seekEvent(): LiveData<Long> = seekEvent
+
+    fun requestProgressEvent(): LiveData<Void> = requestProgressEvent
+
+    fun expandEvent(): LiveData<Void> = expandEvent
 }

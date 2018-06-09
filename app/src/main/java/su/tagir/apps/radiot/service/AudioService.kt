@@ -9,7 +9,6 @@ import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -87,6 +86,8 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
     private lateinit var audioFocusRequest: AudioFocusRequest
 
     private var playOnFocusGain = true
+    private var playbackDelayed = false
+    private val focusLock = Any()
 
     private var isForeground = false
 
@@ -166,7 +167,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             }
             ACTION_RESUME -> resumePlay()
             ACTION_PAUSE -> player?.playWhenReady = false
-            ACTION_STOP ->{
+            ACTION_STOP -> {
                 player?.stop()
                 isForeground = false
                 stopForeground(true)
@@ -182,22 +183,42 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
     override fun onAudioFocusChange(p0: Int) {
         when (p0) {
             AudioManager.AUDIOFOCUS_LOSS -> {
+                Timber.d("focus loss")
+                synchronized(focusLock) {
+                    playOnFocusGain = false
+                    playbackDelayed = false
+                }
                 player?.playWhenReady = false
-                playOnFocusGain = false
             }
 
-            AudioManager.AUDIOFOCUS_GAIN -> player?.playWhenReady = playOnFocusGain
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                Timber.d("focus gain")
+                if (playbackDelayed || playOnFocusGain) {
+                    synchronized(focusLock) {
+                        playbackDelayed = false
+                        playOnFocusGain = false
+                    }
+                    player?.playWhenReady = true
+                }
+            }
 
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-            AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                playOnFocusGain = player?.playWhenReady ?: false
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT-> {
+                Timber.d("focus loss transient")
+                synchronized(focusLock) {
+                    playOnFocusGain = true
+                    playbackDelayed = false
+                }
                 player?.playWhenReady = false
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->{
+                Timber.d("focus loss transient can duck")
             }
         }
     }
 
     private fun configureAudioManager() {
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val res: Int
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val playbackAttributes = AudioAttributes.Builder()
@@ -212,11 +233,22 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
                     .setAudioAttributes(playbackAttributes)
                     .build()
 
-            audioManager.requestAudioFocus(audioFocusRequest)
+            res = audioManager.requestAudioFocus(audioFocusRequest)
         } else {
             @Suppress("DEPRECATION")
-            audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
+            res = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
         }
+
+        synchronized(focusLock) {
+            if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+
+            } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                player?.playWhenReady = true
+            } else if (res == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
+                playbackDelayed = true
+            }
+        }
+
     }
 
     private fun resumePlay() {

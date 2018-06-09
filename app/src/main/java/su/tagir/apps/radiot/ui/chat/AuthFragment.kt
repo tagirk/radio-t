@@ -18,7 +18,6 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.Toast
 import butterknife.BindView
 import butterknife.OnClick
 import su.tagir.apps.radiot.R
@@ -30,20 +29,20 @@ import javax.inject.Inject
 
 class AuthFragment : BaseFragment(), Injectable {
 
-    @BindView(R.id.web_view)
-    lateinit var webView: WebView
+    @JvmField @BindView(R.id.web_view)
+    var webView: WebView? = null
 
-    @BindView(R.id.progress)
-    lateinit var progress: ProgressBar
+    @JvmField @BindView(R.id.progress)
+    var progress: ProgressBar? = null
 
-    @BindView(R.id.toolbar)
-    lateinit var toolbar: Toolbar
+    @JvmField @BindView(R.id.toolbar)
+    var toolbar: Toolbar? = null
 
-    @BindView(R.id.btn_retry)
-    lateinit var retry: Button
+    @JvmField @BindView(R.id.btn_retry)
+    var retry: Button? = null
 
-    @BindView(R.id.error)
-    lateinit var error: LinearLayout
+    @JvmField @BindView(R.id.error)
+    var error: LinearLayout? = null
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -56,14 +55,31 @@ class AuthFragment : BaseFragment(), Injectable {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AuthViewModel::class.java)
-        toolbar.setNavigationOnClickListener { onBackPressed() }
+        toolbar?.setNavigationOnClickListener { onBackPressed() }
         viewModel.authParams = AuthParams(getString(R.string.oauth_key), getString(R.string.oauth_secret), getString(R.string.redirect_url), "code")
         initWebView()
         viewModel.startAuth()
     }
 
+    override fun onResume() {
+        super.onResume()
+        webView?.onResume()
+        webView?.resumeTimers()
+    }
+
+    override fun onPause() {
+        webView?.pauseTimers()
+        webView?.onPause()
+        super.onPause()
+    }
+
+
     override fun onBackPressed() {
-        viewModel.onBackClicked()
+        if (webView?.canGoBack() == true) {
+            webView?.goBack()
+        } else {
+            viewModel.onBackClicked()
+        }
     }
 
     @OnClick(R.id.btn_retry)
@@ -73,16 +89,16 @@ class AuthFragment : BaseFragment(), Injectable {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView() {
-        webView.settings.javaScriptEnabled = true
-        webView.webViewClient = object : WebViewClient() {
+        webView?.settings?.javaScriptEnabled = true
+        webView?.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                progress.visibleGone(true)
+                progress?.visibleGone(true)
                 super.onPageStarted(view, url, favicon)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                progress.visibleGone(false)
+                progress?.visibleGone(false)
             }
 
             @Suppress("OverridingDeprecatedMember")
@@ -99,23 +115,19 @@ class AuthFragment : BaseFragment(), Injectable {
                 return viewModel.redirect(url)
             }
         }
-        viewModel.authEvent
+        viewModel.authEvent()
                 .observe(getViewLifecycleOwner()!!, Observer {
-                    webView.loadUrl(it)
+                    webView?.loadUrl(it)
                 })
 
-        viewModel.state
+        viewModel.state()
                 .observe(getViewLifecycleOwner()!!,
                         Observer {
-                            progress.visibleGone(it?.loading == true)
-                            error.visibleGone(it?.error == true)
-                        })
-
-        viewModel.message
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            if (it != null) {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                            progress?.visibleGone(it?.loading == true)
+                            error?.visibleGone(it?.error == true)
+                            val message = it?.getErrorIfNotHandled()
+                            if (message != null) {
+                                showToast(message)
                             }
                         })
     }

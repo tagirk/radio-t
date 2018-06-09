@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.ui.search
 
 import android.arch.paging.PagedListAdapter
-import android.support.v7.recyclerview.extensions.DiffCallback
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -15,14 +15,14 @@ import su.tagir.apps.radiot.R
 class RecentQueriesAdapter(private val callback: Callback) : PagedListAdapter<String, QueryViewHolder>(diffCallback) {
 
 
-    override fun onBindViewHolder(holder: QueryViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: QueryViewHolder, position: Int) {
        val item = getItem(position)
-        holder?.bind(item)
-        holder?.itemView?.setOnClickListener { callback.onQueryClick(item) }
+        holder.bind(item)
+        holder.itemView?.setOnClickListener { callback.onQueryClick(item) }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): QueryViewHolder {
-        val inflater = LayoutInflater.from(parent?.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QueryViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.item_resent_query, parent, false)
         return QueryViewHolder(view)
     }
@@ -34,7 +34,7 @@ class RecentQueriesAdapter(private val callback: Callback) : PagedListAdapter<St
     companion object {
 
 
-        private val diffCallback = object : DiffCallback<String>() {
+        private val diffCallback = object : DiffUtil.ItemCallback<String>() {
             override fun areItemsTheSame(oldItem: String, newItem: String) = oldItem == newItem
 
             override fun areContentsTheSame(oldItem: String, newItem: String) = oldItem == newItem

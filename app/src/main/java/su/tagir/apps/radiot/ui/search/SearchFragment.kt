@@ -3,9 +3,9 @@ package su.tagir.apps.radiot.ui.search
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.arch.paging.PagedList
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
@@ -13,44 +13,22 @@ import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
 import butterknife.BindView
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.ui.common.BaseFragment
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.viewmodel.ViewModelState
+import su.tagir.apps.radiot.ui.common.ListFragment
+import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
 import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
 
-class SearchFragment : BaseFragment(), EntriesAdapter.Callback, RecentQueriesAdapter.Callback, Injectable, ItemTouchHelper.Callback {
+class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQueriesAdapter.Callback, Injectable, ItemTouchHelper.Callback {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    @BindView(R.id.progress)
-    lateinit var progress: View
-
-    @BindView(R.id.btn_retry)
-    lateinit var btnRetry: View
-
-    @BindView(R.id.text_error)
-    lateinit var errorText: View
-
-    @BindView(R.id.text_empty)
-    lateinit var emptyView: View
-
-    @BindView(R.id.refresh_layout)
-    lateinit var refreshLayout: SwipeRefreshLayout
-
-    @BindView(R.id.list)
-    lateinit var list: RecyclerView
-
-    @BindView(R.id.load_more_progress)
-    lateinit var loadMoreProgress: ProgressBar
 
     @BindView(R.id.search_view)
     lateinit var searchView: SearchView
@@ -65,16 +43,16 @@ class SearchFragment : BaseFragment(), EntriesAdapter.Callback, RecentQueriesAda
     lateinit var layoutEntries: View
 
     private lateinit var viewModel: SearchViewModel
-    private lateinit var adapter: SearchAdapter
+//    private lateinit var adapter: SearchAdapter
     private lateinit var recentQueriesAdapter: RecentQueriesAdapter
     private val handler = Handler()
 
-    private var itemsCount = 0
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter = SearchAdapter(null, GlideApp.with(this), this)
-        list.adapter = adapter
+//        adapter = SearchAdapter(null, GlideApp.with(this), this)
+//        list.adapter = adapter
 
         recentQueriesAdapter = RecentQueriesAdapter(this)
         recentQueries.adapter = recentQueriesAdapter
@@ -88,10 +66,11 @@ class SearchFragment : BaseFragment(), EntriesAdapter.Callback, RecentQueriesAda
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(SearchViewModel::class.java)
+        viewModel = listViewModel as SearchViewModel
+
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.search(query)
+                viewModel.search(query ?: "")
                 return false
             }
 
@@ -107,16 +86,7 @@ class SearchFragment : BaseFragment(), EntriesAdapter.Callback, RecentQueriesAda
             }
         })
 
-        list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-                val layoutManager = recyclerView!!.layoutManager as LinearLayoutManager
-                val lastPosition = layoutManager
-                        .findLastVisibleItemPosition()
-                if (lastPosition == adapter.itemCount - 1) {
-                    viewModel.searchMore()
-                }
-            }
-        })
+
 
         observe()
         searchView.requestFocus()
@@ -125,19 +95,26 @@ class SearchFragment : BaseFragment(), EntriesAdapter.Callback, RecentQueriesAda
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_search, container, false)
 
+    override fun createViewModel(): ListViewModel<Entry>  = ViewModelProviders.of(this, viewModelFactory).get(SearchViewModel::class.java)
+
+    override fun createAdapter()= SearchAdapter(GlideApp.with(this), this)
+
+    override val layoutManager: RecyclerView.LayoutManager
+        get() = LinearLayoutManager(context)
+
     override fun onBackPressed() {
         viewModel.onBackClick()
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel.onResume()
+        viewModel.startStatusTimer()
     }
 
     override fun onPause() {
         super.onPause()
         handler.removeCallbacksAndMessages(null)
-        viewModel.onPause()
+        viewModel.stopStatusTimer()
     }
 
     override fun onClick(entry: Entry) {
@@ -172,32 +149,9 @@ class SearchFragment : BaseFragment(), EntriesAdapter.Callback, RecentQueriesAda
     }
 
     private fun observe() {
-        viewModel.data
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { entries ->
-                            adapter.replace(entries)
-                            itemsCount = entries?.size ?: 0
-                            showHideViews(viewModel.state.value)
-                        })
-
-        viewModel.state
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { state -> showHideViews(state) })
-
-        viewModel.resentSearches.observe(getViewLifecycleOwner()!!,
-                Observer { queries -> recentQueriesAdapter.setList(queries) })
+        viewModel.getRecentSearches().observe(getViewLifecycleOwner()!!,
+                Observer { queries -> recentQueriesAdapter.submitList(queries as PagedList<String>) })
     }
 
-    private fun showHideViews(state: ViewModelState?) {
-        if (state == null) {
-            return
-        }
-        val isEmpty = itemsCount == 0
-        progress.visibleGone(state.loading)
-        emptyView.visibleGone(state.isCompleted() && isEmpty)
-        errorText.visibleGone(state.error && isEmpty)
-        btnRetry.visibleGone(state.error && isEmpty)
-        loadMoreProgress.visibleGone(state.loadingMore)
-        list.visibleGone(!state.loading)
-    }
+
 }

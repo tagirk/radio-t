@@ -5,13 +5,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
+    buildToolsVersion buildToolsProjectVersion
     compileSdkVersion compileSdkProjectVersion
     defaultConfig {
         applicationId "su.tagir.apps.radiot"
         targetSdkVersion targetSdkProjectVersion
         minSdkVersion minSdkProjectVersion
-        versionCode 6
-        versionName "0.6"
+        versionCode 8
+        versionName "0.8"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -48,7 +49,7 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
-    buildToolsVersion '27.0.3'
+
 }
 
 dependencies {
@@ -57,7 +58,8 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:recyclerview-v7:$supportLibraryVersion"
-    implementation "com.android.support.constraint:constraint-layout:1.1.0"
+    implementation "com.android.support:preference-v7:$supportLibraryVersion"
+    implementation "com.android.support.constraint:constraint-layout:1.1.1"
 
     implementation 'saschpe.android:customtabs:1.1.0'
 
@@ -66,6 +68,7 @@ dependencies {
 
     implementation "android.arch.persistence.room:runtime:$roomVersion"
     kapt "android.arch.persistence.room:compiler:$roomVersion"
+    implementation "android.arch.persistence.room:rxjava2:$roomVersion"
 
     implementation "android.arch.paging:runtime:$pagingVersion"
     implementation "android.arch.paging:rxjava2:1.0.0-rc1"
@@ -103,7 +106,7 @@ dependencies {
 
     implementation 'com.facebook.stetho:stetho:1.5.0'
 
-    implementation('com.crashlytics.sdk.android:crashlytics:2.9.3@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
     }
     implementation "com.google.firebase:firebase-core:$firebaseVersion"
@@ -114,6 +117,7 @@ dependencies {
     }
     kapt "com.github.hotchemi:permissionsdispatcher-processor:$permissionsDispatcherVersion"
 
+
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
@@ -123,8 +127,8 @@ dependencies {
     testCompile "org.hamcrest:hamcrest-all:$hamcrestVersion"
     testImplementation 'org.json:json:20140107'
     testImplementation "com.squareup.okhttp3:mockwebserver:3.9.1"
-    testImplementation "android.arch.core:core-testing:$lifecycleVersion"
-    testImplementation "android.arch.persistence.room:testing:$roomVersion"
+    testImplementation "android.arch.core:core-testing:$archVersion"
+    testImplementation "android.arch.persistence.room:testing:$archVersion"
 
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

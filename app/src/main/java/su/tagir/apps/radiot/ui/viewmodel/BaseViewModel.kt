@@ -8,14 +8,14 @@ import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 
 abstract class BaseViewModel(protected val scheduler: BaseSchedulerProvider): ViewModel() {
 
-    private val compositeDisposable = CompositeDisposable()
+    protected val disposable = CompositeDisposable()
 
     override fun onCleared() {
-        compositeDisposable.clear()
+        disposable.clear()
     }
 
     protected fun addDisposable(disposable: Disposable){
-        compositeDisposable.add(disposable)
+        this.disposable.add(disposable)
     }
 
 }

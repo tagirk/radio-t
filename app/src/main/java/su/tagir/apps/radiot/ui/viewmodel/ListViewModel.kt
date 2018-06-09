@@ -2,34 +2,33 @@ package su.tagir.apps.radiot.ui.viewmodel
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.paging.PagedList
+import android.support.annotation.MainThread
 import android.support.annotation.VisibleForTesting
-import io.reactivex.disposables.CompositeDisposable
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 
 abstract class ListViewModel<T>(scheduler: BaseSchedulerProvider) : BaseViewModel(scheduler) {
 
-    val state = MutableLiveData<ViewModelState?>()
-
-    private val compositeDisposable = CompositeDisposable()
+    protected val state = MutableLiveData<State<List<T>>>()
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var firstLaunch = true
 
-    abstract fun getData(): LiveData<PagedList<T>>
+    @MainThread
+    abstract fun loadData()
 
-    fun loadData() {
-        if (firstLaunch) {
-            update(false)
-        }
-        firstLaunch = false
+    @MainThread
+    open fun loadMore() {
     }
 
-    fun update(refresh: Boolean) {
-        state.postValue(if (refresh) ViewModelState.REFRESHING else ViewModelState.LOADING)
+    @MainThread
+    fun update() {
         requestUpdates()
     }
 
-    protected abstract fun requestUpdates()
+    @MainThread
+    protected open fun requestUpdates() {
+    }
 
+    @MainThread
+    fun state(): LiveData<State<List<T>>> = state
 }

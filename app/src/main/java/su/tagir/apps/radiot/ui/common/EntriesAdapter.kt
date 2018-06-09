@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.ui.common
 
 import android.arch.paging.PagedListAdapter
-import android.support.v7.recyclerview.extensions.DiffCallback
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -11,7 +11,7 @@ import su.tagir.apps.radiot.model.entries.Entry
 
 class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, private val callback: Callback) : PagedListAdapter<Entry, RecyclerView.ViewHolder>(diffCallback) {
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is PodcastViewHolder -> holder.bind(getItem(position))
             is PrepViewHolder -> holder.bind(getItem(position))
@@ -59,7 +59,7 @@ class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, p
         const val TYPE_PIRATES = 4
 
         private val diffCallback
-            get() = object : DiffCallback<Entry>() {
+            get() = object : DiffUtil.ItemCallback<Entry>() {
                 override fun areItemsTheSame(oldItem: Entry, newItem: Entry) = oldItem.url == newItem.url
 
                 override fun areContentsTheSame(oldItem: Entry, newItem: Entry) = oldItem == newItem
