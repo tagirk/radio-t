@@ -1,60 +1,43 @@
 package su.tagir.apps.radiot.ui
 
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.view.ViewPager
+import android.support.design.widget.NavigationView
+import android.support.v4.widget.DrawerLayout
+import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import butterknife.BindView
-import butterknife.OnClick
-import butterknife.OnPageChange
-import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.STREAM_URL
-import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.ui.common.BaseFragment
-import su.tagir.apps.radiot.ui.news.NewsFragment
 import su.tagir.apps.radiot.ui.news.NewsViewModel
-import su.tagir.apps.radiot.ui.pirates.PiratesFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesViewModel
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
-import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsViewModel
-import su.tagir.apps.radiot.ui.stream.StreamFragment
 import su.tagir.apps.radiot.ui.stream.StreamViewModel
 import javax.inject.Inject
 
-class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener {
+class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    @BindView(R.id.view_pager)
-    lateinit var viewPager: ViewPager
+    @BindView(R.id.drawer_layout)
+    lateinit var drawerLayout: DrawerLayout
 
-    @BindView(R.id.tabs)
-    lateinit var tabs: TabLayout
+    @BindView(R.id.nav_view)
+    lateinit var navigationView: NavigationView
 
     @BindView(R.id.toolbar)
     lateinit var toolbar: Toolbar
 
-    @BindView(R.id.btn_play_stream)
-    lateinit var btnStream: FloatingActionButton
-
-    @Inject
-    lateinit var router: Router
+    private lateinit var homeDrawable: DrawerArrowDrawable
 
     private lateinit var playerViewModel: PlayerViewModel
     private lateinit var podcastsViewModel: PodcastsViewModel
@@ -62,14 +45,18 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
     private lateinit var streamViewModel: StreamViewModel
     private lateinit var piratesViewModel: PiratesViewModel
 
+
+
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_main, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        toolbar.inflateMenu(R.menu.menu_main)
-        toolbar.setOnMenuItemClickListener(this)
-        initFragments()
+//        toolbar.inflateMenu(R.menu.menu_main)
+//        toolbar.setOnMenuItemClickListener(this)
+
+        navigationView.setNavigationItemSelectedListener(this)
+//        initFragments()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -80,43 +67,22 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
         streamViewModel = getViewModel(StreamViewModel::class.java)
         piratesViewModel = getViewModel(PiratesViewModel::class.java)
 
-        observe()
     }
 
     override fun onResume() {
         super.onResume()
-        updateData(viewPager.currentItem)
-    }
-
-    override fun onBackPressed() {
-        router.finishChain()
+//        updateData(viewPager.currentItem)
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.search -> router.navigateTo(Screens.SEARCH_SCREEN)
-            R.id.chat -> playerViewModel.showStreamChat()
-            R.id.settings -> router.navigateTo(Screens.SETTINGS_SCREEN)
+//            R.id.search -> router.navigateTo(Screens.SEARCH_SCREEN)
+//            R.id.chat -> playerViewModel.showStreamChat()
+//            R.id.settings -> router.navigateTo(Screens.SETTINGS_SCREEN)
         }
         return false
     }
 
-    @OnPageChange(R.id.view_pager)
-    fun onPageChange(position: Int) {
-        updateData(position)
-        showHideBtnStream(position == 1 && playerViewModel.getCurrentPodcast().value?.url != STREAM_URL)
-    }
-
-    @OnClick(R.id.btn_play_stream)
-    fun playStream() {
-        playerViewModel.onPlayStreamClick()
-    }
-
-    private fun initFragments() {
-        val fragmentAdapter = FragmentAdapter(childFragmentManager)
-        viewPager.adapter = fragmentAdapter
-        tabs.setupWithViewPager(viewPager)
-    }
 
     private fun updateData(position: Int) {
         when (position) {
@@ -127,51 +93,12 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
         }
     }
 
-    private fun observe() {
-        playerViewModel
-                .getCurrentPodcast()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            showHideBtnStream(it?.url != STREAM_URL && viewPager.currentItem == 1)
-                        })
-    }
-
-    private fun showHideBtnStream(show: Boolean) {
-        if (show) {
-            btnStream.show()
-        } else {
-            btnStream.hide()
-        }
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        return false
     }
 
     private fun <T : ViewModel> getViewModel(clazz: Class<T>): T {
         return ViewModelProviders.of(activity!!, viewModelFactory).get(clazz)
     }
 
-    private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
-
-
-        override fun getItem(position: Int): Fragment? {
-            when (position) {
-                0 -> return PodcastsFragment()
-                1 -> return StreamFragment()
-                2 -> return NewsFragment()
-                3 -> return PiratesFragment()
-            }
-            return null
-        }
-
-        override fun getCount() = 4
-
-        override fun getPageTitle(position: Int): CharSequence? {
-            when (position) {
-                0 -> return "Подкасты"
-                1 -> return "Online вещание"
-                2 -> return "Новости"
-                3 -> return "Пираты"
-            }
-            return super.getPageTitle(position)
-        }
-
-    }
 }

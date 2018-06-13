@@ -21,8 +21,10 @@ import android.widget.TextView
 import butterknife.*
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Article
+import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.PagedListFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.utils.shortDateFormat
@@ -48,6 +50,7 @@ class StreamFragment : PagedListFragment<Article>(), Injectable {
 
     private lateinit var playerViewModel: PlayerViewModel
     private lateinit var streamViewModel: StreamViewModel
+    private lateinit var mainViewModel: MainViewModel
 
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
@@ -57,6 +60,7 @@ class StreamFragment : PagedListFragment<Article>(), Injectable {
         super.onActivityCreated(savedInstanceState)
         streamViewModel = listViewModel as StreamViewModel
         playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
         observeViewModel()
 
     }
@@ -71,6 +75,7 @@ class StreamFragment : PagedListFragment<Article>(), Injectable {
 
     override fun onResume() {
         super.onResume()
+        mainViewModel.setCurrentScreen(Screens.STREAM_SCREEN)
         initTimer()
         streamViewModel.updateActiveTheme()
     }

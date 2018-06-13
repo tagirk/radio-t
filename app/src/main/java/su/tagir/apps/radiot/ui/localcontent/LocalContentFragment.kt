@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -13,8 +14,8 @@ import android.webkit.WebView
 import butterknife.BindView
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.BaseFragment
-import su.tagir.apps.radiot.utils.longDateFormat
 import javax.inject.Inject
 
 
@@ -25,28 +26,25 @@ class LocalContentFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClick
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private lateinit var viewModel: LocalContentViewModel
+    private lateinit var mainViewModel: MainViewModel
 
     @BindView(R.id.web_view)
     lateinit var webView: WebView
 
-    @BindView(R.id.toolbar)
-    lateinit var toolbar: Toolbar
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_content, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        toolbar.inflateMenu(R.menu.menu_content)
-        toolbar.setOnMenuItemClickListener(this)
-        toolbar.setNavigationOnClickListener { onBackPressed() }
+        webView.setBackgroundColor(ContextCompat.getColor(view.context, R.color.colorBackground))
 
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(LocalContentViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
 
         viewModel.getEntry()
                 .observe(getViewLifecycleOwner()!!,
@@ -54,17 +52,12 @@ class LocalContentFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClick
                             val sb = "<HTML><HEAD><LINK href=\"material.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>" +
                                     entry?.body +
                                     "</body></HTML>"
-                            webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
 
-                            toolbar.title = entry?.title
-                            toolbar.subtitle = entry?.date?.longDateFormat()
+                            webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
+                            mainViewModel.setCurrentScreen(entry?.title?:"")
                         })
 
         viewModel.setId(arguments?.getString(ARG_ID))
-    }
-
-    override fun onBackPressed() {
-        viewModel.onBackPressed()
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean {

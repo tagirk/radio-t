@@ -24,4 +24,8 @@
     <string name="disabled">Отключен</string>
     <string name="night_mode_auto">Автоматический ночной режим</string>
     <string name="enabled">Включен</string>
+    <string name="podcasts">Подкасты</string>
+    <string name="stream">Онлайн вещание</string>
+    <string name="news">Новости</string>
+    <string name="pirates">Пираты</string>
 </resources>

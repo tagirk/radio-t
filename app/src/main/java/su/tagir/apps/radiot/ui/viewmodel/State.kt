@@ -1,6 +1,6 @@
 package su.tagir.apps.radiot.ui.viewmodel
 
-data class State<T>(val status: Status,
+data class State<out T>(val status: Status,
                     val data: T? = null,
                     private val errorMessage: String? = null,
                     val hasNextPage: Boolean = true) {

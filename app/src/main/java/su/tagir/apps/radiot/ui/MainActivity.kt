@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.ui
 
+import android.animation.ValueAnimator
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
@@ -11,18 +12,26 @@ import android.content.ServiceConnection
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteException
-import android.preference.PreferenceManager
 import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.BottomSheetBehavior
-import android.support.design.widget.CoordinatorLayout
+import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
+import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.app.AppCompatDelegate
+import android.support.v7.graphics.drawable.DrawerArrowDrawable
+import android.support.v7.widget.SearchView
+import android.support.v7.widget.Toolbar
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import butterknife.BindColor
 import butterknife.BindDimen
 import butterknife.BindView
@@ -43,20 +52,24 @@ import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.service.IAudioService
 import su.tagir.apps.radiot.service.IAudioServiceCallback
 import su.tagir.apps.radiot.ui.chat.ChatActivity
-import su.tagir.apps.radiot.ui.common.BaseFragment
+import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
+import su.tagir.apps.radiot.ui.news.NewsFragment
+import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
+import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
+import su.tagir.apps.radiot.ui.search.SearchViewModel
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
-import su.tagir.apps.radiot.ui.settings.SettingsFragment.Companion.KEY_NIGHT_MODE
+import su.tagir.apps.radiot.ui.stream.StreamFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
-        HasSupportFragmentInjector, ServiceConnection {
+        HasSupportFragmentInjector, ServiceConnection, NavigationView.OnNavigationItemSelectedListener {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
@@ -73,6 +86,17 @@ class MainActivity : AppCompatActivity(),
     @BindView(R.id.fragment_container)
     lateinit var fragmentContainer: FrameLayout
 
+    @BindView(R.id.drawer_layout)
+    lateinit var drawerLayout: DrawerLayout
+
+    @BindView(R.id.nav_view)
+    lateinit var navigationView: NavigationView
+
+    @BindView(R.id.toolbar)
+    lateinit var toolbar: Toolbar
+
+    private lateinit var homeDrawable: DrawerArrowDrawable
+
     @JvmField
     @BindColor(R.color.colorPrimary)
     var primaryColor: Int = 0
@@ -87,27 +111,60 @@ class MainActivity : AppCompatActivity(),
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     private lateinit var playerViewModel: PlayerViewModel
+    private lateinit var mainViewModel: MainViewModel
+    private lateinit var searchViewModel: SearchViewModel
 
     private val serviceCallback = AudioServiceCallback(this)
 
     private var audioService: IAudioService? = null
 
+    val handler = Handler()
+
     private val currentFragment
         get() = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
+    private var isHomeAsUp = false
+        set(value) {
+            if (field != value) {
+                field = value
+                val anim = if (value) ValueAnimator.ofFloat(0f, 1f) else ValueAnimator.ofFloat(1f, 0f)
+                anim.addUpdateListener { valueAnimator ->
+                    val slideOffset = valueAnimator.animatedValue as Float
+                    homeDrawable.progress = slideOffset
+                }
+                anim.interpolator = DecelerateInterpolator()
+
+                anim.duration = 300
+                anim.start()
+            }
+            drawerLayout.setDrawerLockMode(if (value) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        setNightMode()
-
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         ButterKnife.bind(this)
 
+        homeDrawable = DrawerArrowDrawable(toolbar.context)
+        toolbar.navigationIcon = homeDrawable
+        toolbar.setNavigationOnClickListener {
+            when {
+                drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
+                isHomeAsUp -> onBackPressed()
+                else -> drawerLayout.openDrawer(GravityCompat.START)
+            }
+        }
+
+        navigationView.setNavigationItemSelectedListener(this)
+
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.setBottomSheetCallback(BottomSheetCallback())
 
+        initSearchView()
+
         playerViewModel = getViewModel(PlayerViewModel::class.java)
+        mainViewModel = getViewModel(MainViewModel::class.java)
 
         observe()
 
@@ -130,7 +187,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onStop() {
-        super.onStop()
+        handler.removeCallbacksAndMessages(null)
         try {
             audioService?.unregisterCallback(serviceCallback)
             audioService?.onActivityStopped()
@@ -138,6 +195,7 @@ class MainActivity : AppCompatActivity(),
             Timber.e(e)
         }
         unbindService(this)
+        super.onStop()
     }
 
     override fun onResumeFragments() {
@@ -151,16 +209,28 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else if (currentFragment is BaseFragment) {
-            (currentFragment as BaseFragment).onBackPressed()
-        } else {
-            super.onBackPressed()
+        when {
+            bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED -> bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
+            currentFragment is BackClickHandler -> (currentFragment as BackClickHandler).onBackClick()
+            else -> super.onBackPressed()
         }
     }
 
     override fun supportFragmentInjector() = dispatchingAndroidInjector
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        drawerLayout.closeDrawer(GravityCompat.START)
+        when (item.itemId) {
+            R.id.nav_podcats -> mainViewModel.navigateToPodcasts()
+            R.id.nav_stream -> mainViewModel.navigateToStream()
+            R.id.nav_news -> mainViewModel.navigateToNews()
+            R.id.nav_settings -> mainViewModel.navigateToSettings()
+            R.id.nav_chat -> mainViewModel.navigateToChat()
+            R.id.nav_pirates -> mainViewModel.navigateToPirates()
+        }
+        return false
+    }
 
     override fun onServiceDisconnected(name: ComponentName?) {
         try {
@@ -229,9 +299,91 @@ class MainActivity : AppCompatActivity(),
         playerViewModel
                 .expandEvent()
                 .observe(this, Observer {
-                    Timber.d("expand")
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 })
+
+        mainViewModel
+                .getCurrentScreen()
+                .observe(this, Observer {
+                    dismissKeyboard(fragmentContainer.windowToken)
+                    toolbar.menu.findItem(R.id.search).isVisible = false
+                    when (it) {
+                        Screens.SETTINGS_SCREEN -> {
+                            isHomeAsUp = true
+                            toolbar.setTitle(R.string.settings)
+                        }
+                        Screens.PODCASTS_SCREEN -> {
+                            isHomeAsUp = false
+                            toolbar.setTitle(R.string.podcasts)
+                            toolbar.menu.findItem(R.id.search).isVisible = true
+                        }
+                        Screens.NEWS_SCREEN -> {
+                            isHomeAsUp = false
+                            toolbar.setTitle(R.string.news)
+                        }
+                        Screens.STREAM_SCREEN -> {
+                            isHomeAsUp = false
+                            toolbar.setTitle(R.string.stream)
+                        }
+                        Screens.PIRATES_SCREEN -> {
+                            isHomeAsUp = false
+                            toolbar.setTitle(R.string.pirates)
+                        }
+                        Screens.SEARCH_SCREEN -> {
+                            isHomeAsUp = true
+                            toolbar.title = null
+                            toolbar.menu.findItem(R.id.search).isVisible = true
+                        }
+                        else -> {
+                            isHomeAsUp = true
+                            toolbar.title = it
+
+                        }
+                    }
+                })
+
+
+    }
+
+    private fun initSearchView() {
+        toolbar.inflateMenu(R.menu.menu_main)
+
+        toolbar.menu.findItem(R.id.search).setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                mainViewModel.navigateToSearch()
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?) = false
+
+        })
+        val searchView = toolbar.menu.findItem(R.id.search).actionView as SearchView
+        searchView.setOnCloseListener {
+            mainViewModel.back()
+            return@setOnCloseListener false
+        }
+        searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
+            if (hasFocus && currentFragment !is SearchFragment) {
+                mainViewModel.navigateToSearch()
+            }
+        }
+        searchViewModel = getViewModel(SearchViewModel::class.java)
+        searchViewModel.closeEvent().observe(this, Observer {
+            searchView.isIconified = true
+        })
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                handler.removeCallbacksAndMessages(null)
+                handler.postDelayed({ searchViewModel.search(newText ?: "") }, 1000)
+
+                return false
+            }
+
+        })
     }
 
     private fun initBottomSheet() {
@@ -250,12 +402,19 @@ class MainActivity : AppCompatActivity(),
         if (currentFragment == null) {
             supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_container, MainFragment())
+                    .replace(R.id.fragment_container, PodcastTabsFragment())
                     .commitNowAllowingStateLoss()
         }
     }
 
     private fun <T : ViewModel> getViewModel(clazz: Class<T>): T = ViewModelProviders.of(this, viewModelFactory).get(clazz)
+
+    private fun dismissKeyboard(windowToken: IBinder?) {
+        val imm = getSystemService(
+                Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
+
+    }
 
     private val navigator = object : SupportAppNavigator(this, R.id.fragment_container) {
 
@@ -265,10 +424,13 @@ class MainActivity : AppCompatActivity(),
         }
 
         override fun createFragment(screenKey: String?, data: Any?): Fragment? = when (screenKey) {
-            Screens.MAIN_SCREEN -> MainFragment()
+            Screens.PODCASTS_SCREEN -> PodcastTabsFragment()
+            Screens.STREAM_SCREEN -> StreamFragment()
+            Screens.NEWS_SCREEN -> NewsFragment()
             Screens.SEARCH_SCREEN -> SearchFragment()
             Screens.CONTENT_SCREEN -> LocalContentFragment.newInstance(data as String)
             Screens.SETTINGS_SCREEN -> SettingsFragment()
+            Screens.PIRATES_SCREEN -> PiratesTabsFragment()
             else -> null
         }
 
@@ -308,22 +470,11 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun setBottomMargin(margin: Int) {
-        val params = fragmentContainer.layoutParams as CoordinatorLayout.LayoutParams
+        val params = fragmentContainer.layoutParams as LinearLayout.LayoutParams
         params.bottomMargin = margin
         fragmentContainer.requestLayout()
     }
 
-    private fun setNightMode() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val modes = resources.getStringArray(R.array.night_mode)
-        val mode = prefs.getString(KEY_NIGHT_MODE, modes[0])
-        when (mode) {
-            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
-            modes[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-
-    }
 
     private fun bindService() {
         val intent = Intent(application, AudioService::class.java)

@@ -26,13 +26,14 @@ import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.MessageFull
+import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.common.PagedListFragment
 import su.tagir.apps.radiot.ui.viewmodel.State
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import javax.inject.Inject
 
-class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapter.Callback {
+class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapter.Callback, BackClickHandler {
 
     @BindView(R.id.toolbar)
     lateinit var toolbar: Toolbar
@@ -61,7 +62,7 @@ class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapt
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         chatViewModel = listViewModel as ChatViewModel
-        toolbar.setNavigationOnClickListener { onBackPressed() }
+        toolbar.setNavigationOnClickListener { onBackClick() }
         toolbar.inflateMenu(R.menu.menu_chat)
         toolbar.setOnMenuItemClickListener { item ->
             when(item?.itemId){
@@ -81,7 +82,7 @@ class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapt
         chatViewModel.loadData()
     }
 
-    override fun onBackPressed() {
+    override fun onBackClick() {
         chatViewModel.onBackClicked()
     }
 

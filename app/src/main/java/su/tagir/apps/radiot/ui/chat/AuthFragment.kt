@@ -22,12 +22,13 @@ import butterknife.BindView
 import butterknife.OnClick
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.common.BaseFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
 
-class AuthFragment : BaseFragment(), Injectable {
+class AuthFragment : BaseFragment(), Injectable, BackClickHandler {
 
     @JvmField @BindView(R.id.web_view)
     var webView: WebView? = null
@@ -55,7 +56,7 @@ class AuthFragment : BaseFragment(), Injectable {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AuthViewModel::class.java)
-        toolbar?.setNavigationOnClickListener { onBackPressed() }
+        toolbar?.setNavigationOnClickListener { onBackClick() }
         viewModel.authParams = AuthParams(getString(R.string.oauth_key), getString(R.string.oauth_secret), getString(R.string.redirect_url), "code")
         initWebView()
         viewModel.startAuth()
@@ -74,7 +75,7 @@ class AuthFragment : BaseFragment(), Injectable {
     }
 
 
-    override fun onBackPressed() {
+    override fun onBackClick() {
         if (webView?.canGoBack() == true) {
             webView?.goBack()
         } else {

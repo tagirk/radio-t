@@ -99,10 +99,6 @@ abstract class PagedListFragment<T> : BaseFragment() {
         listViewModel.update()
     }
 
-    override fun onBackPressed() {
-
-    }
-
     abstract fun createViewModel(): ListViewModel<T>
 
     abstract fun createAdapter(): PagedListAdapter<T, out RecyclerView.ViewHolder>

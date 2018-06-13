@@ -13,6 +13,7 @@ import permissions.dispatcher.RuntimePermissions
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.common.PagedListFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
@@ -25,12 +26,14 @@ class PodcastsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     private lateinit var playerViewModel: PlayerViewModel
+    private lateinit var mainViewModel: MainViewModel
 
     private var entryForDownload: Entry? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
         observeViewModel()
     }
 
@@ -58,11 +61,11 @@ class PodcastsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.
     }
 
     override fun openWebSite(entry: Entry) {
-        (listViewModel as PodcastsViewModel).openWebSite(entry)
+       mainViewModel.openWebSite(entry.url)
     }
 
     override fun openChatLog(entry: Entry) {
-        (listViewModel as PodcastsViewModel).openChatLog(entry)
+        mainViewModel.openWebSite(entry.chatUrl)
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -80,9 +83,6 @@ class PodcastsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.
     override fun remove(entry: Entry) {
         (listViewModel as PodcastsViewModel).onRemoveClick(entry)
 
-    }
-
-    override fun onBackPressed() {
     }
 
     @SuppressLint("NeedOnRequestPermissionsResult")

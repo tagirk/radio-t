@@ -32,10 +32,15 @@ class PiratesViewModel @Inject constructor(
         disposable += entryRepository
                 .getEntries("pirates")
                 .subscribe({
-                    val newState = state.value?.copy(data = it)
+                    val newState = if (state.value == null)
+                        State(Status.SUCCESS, it)
+                    else
+                        state.value?.copy(data = it)
+
                     state.value = newState
                 }, { Timber.e(it) })
 
+        loadData()
     }
 
     override fun loadData() {

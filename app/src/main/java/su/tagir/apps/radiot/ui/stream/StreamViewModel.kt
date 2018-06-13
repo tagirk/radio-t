@@ -37,6 +37,8 @@ class StreamViewModel @Inject constructor(
                     val newState = state.value?.copy(data = it)
                     state.value = newState
                 }, { Timber.e(it) })
+
+        loadData()
     }
 
     override fun loadData() {

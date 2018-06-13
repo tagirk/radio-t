@@ -5,8 +5,6 @@ import android.support.annotation.VisibleForTesting
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
-import ru.terrakok.cicerone.Router
-import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
@@ -20,7 +18,6 @@ import javax.inject.Inject
 
 class PodcastsViewModel
 @Inject constructor(private val entryRepository: EntryRepository,
-                    private val router: Router,
                     scheduler: BaseSchedulerProvider) : ListViewModel<Entry>(scheduler) {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -34,7 +31,11 @@ class PodcastsViewModel
         disposable += entryRepository
                 .getEntries("podcast")
                 .subscribe({
-                    val newState = state.value?.copy(data = it)
+                    val newState = if (state.value == null)
+                        State(Status.SUCCESS, it)
+                    else
+                        state.value?.copy(data = it)
+
                     state.value = newState
                 }, { Timber.e(it) })
     }
@@ -101,14 +102,6 @@ class PodcastsViewModel
                     Timber.e(t)
                     downloadError.setValue(t.message)
                 }))
-    }
-
-    fun openWebSite(entry: Entry) {
-        router.navigateTo(Screens.WEB_SCREEN, entry.url)
-    }
-
-    fun openChatLog(entry: Entry) {
-        router.navigateTo(Screens.WEB_SCREEN, entry.chatUrl)
     }
 
     fun getDownloadError(): LiveData<String> = downloadError

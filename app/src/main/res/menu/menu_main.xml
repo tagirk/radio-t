@@ -5,16 +5,8 @@
     <item android:id="@+id/search"
         android:icon="@drawable/ic_search_24dp"
         android:title="@string/search"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom"
+        app:actionViewClass="android.support.v7.widget.SearchView" />
 
-    <item android:id="@+id/chat"
-        android:icon="@drawable/ic_chat_white"
-        android:title="@string/chat"
-        app:showAsAction="ifRoom"/>
-
-    <item android:id="@+id/settings"
-        android:icon="@drawable/ic_settings_24dp"
-        android:title="@string/settings"
-        app:showAsAction="never"/>
 
 </menu>

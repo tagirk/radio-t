@@ -46,6 +46,9 @@ abstract class EntryDao {
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.CATEGORIES} IN (:categories) ORDER BY ${Entry.DATE} DESC")
     abstract fun getEntries(categories: Array<out String>): DataSource.Factory<Int, Entry>
 
+    @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.CATEGORIES} IN (:categories) AND ${Entry.FILE} != '' ORDER BY ${Entry.DATE} DESC")
+    abstract fun getDownloadedEntries(categories: Array<out String>): DataSource.Factory<Int, Entry>
+
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.STATE} = :state WHERE ${Entry.STATE} != :state")
     abstract fun resetStates(state: Int): Int
 

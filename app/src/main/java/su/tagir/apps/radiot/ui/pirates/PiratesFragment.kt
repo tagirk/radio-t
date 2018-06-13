@@ -81,8 +81,6 @@ class PiratesFragment :PagedListFragment<Entry>(), Injectable, EntriesAdapter.Ca
 //        (listViewModel as PodcastsViewModel).openChatLog(entry)
     }
 
-    override fun onBackPressed() {
-    }
 
     @SuppressLint("NeedOnRequestPermissionsResult")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

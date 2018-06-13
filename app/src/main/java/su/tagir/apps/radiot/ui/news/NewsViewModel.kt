@@ -27,6 +27,8 @@ class NewsViewModel
                     val newState = state.value?.copy(data = it)
                     state.value = newState
                 }, { Timber.e(it) })
+
+        loadData()
     }
 
 

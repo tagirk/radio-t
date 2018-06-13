@@ -12,7 +12,6 @@ import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.model.entries.TimeLabel
-import su.tagir.apps.radiot.model.repository.ChatRepository
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.SingleLiveEvent
@@ -23,7 +22,6 @@ import javax.inject.Inject
 
 class PlayerViewModel
 @Inject constructor(private val entryRepository: EntryRepository,
-                    private val chatRepository: ChatRepository,
                     private val router: Router,
                     scheduler: BaseSchedulerProvider) : BaseViewModel(scheduler) {
 

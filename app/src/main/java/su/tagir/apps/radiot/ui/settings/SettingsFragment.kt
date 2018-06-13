@@ -1,24 +1,38 @@
 package su.tagir.apps.radiot.ui.settings
 
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatDelegate
 import android.support.v7.app.AppCompatDelegate.*
 import android.support.v7.preference.PreferenceFragmentCompat
-import android.support.v7.widget.Toolbar
-import android.view.View
 import com.evernote.android.job.JobManager
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.Screens
+import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.job.StreamNotificationJob
+import su.tagir.apps.radiot.ui.MainViewModel
+import javax.inject.Inject
 
 
-class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener, Injectable {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private lateinit var mainViewModel: MainViewModel
 
 
     companion object {
         const val KEY_NOTIF_STREAM = "stream_notification"
         const val KEY_CRASH_REPORTS = "crash_reports"
         const val KEY_NIGHT_MODE = "night_mode"
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -40,15 +54,9 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setNavigationOnClickListener { activity?.onBackPressed() }
-    }
-
     override fun onResume() {
         super.onResume()
+        mainViewModel.setCurrentScreen(Screens.SETTINGS_SCREEN)
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 

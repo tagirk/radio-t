@@ -7,6 +7,7 @@ import android.content.ContentProvider
 import android.content.SharedPreferences
 import android.os.Build
 import android.preference.PreferenceManager
+import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
@@ -70,8 +71,20 @@ class App : Application(),
                 .addJobCreator(RadiotJobCreator())
 
         registerActivityLifecycleCallbacks(CustomTabsActivityLifecycleCallbacks())
+        setNightMode()
     }
 
+    private fun setNightMode() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val modes = resources.getStringArray(R.array.night_mode)
+        val mode = prefs.getString(SettingsFragment.KEY_NIGHT_MODE, modes[0])
+        when (mode) {
+            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
+            modes[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
+    }
 
     private fun initTools() {
 

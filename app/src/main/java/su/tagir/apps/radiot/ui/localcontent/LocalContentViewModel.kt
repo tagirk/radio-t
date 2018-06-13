@@ -32,8 +32,4 @@ class LocalContentViewModel
     fun openInBrowser() {
         router.navigateTo(Screens.WEB_SCREEN, entry.value?.url)
     }
-
-    fun onBackPressed() {
-        router.exit()
-    }
 }
