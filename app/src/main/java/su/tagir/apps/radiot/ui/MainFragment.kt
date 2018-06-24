@@ -20,7 +20,7 @@ import su.tagir.apps.radiot.ui.news.NewsViewModel
 import su.tagir.apps.radiot.ui.pirates.PiratesViewModel
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastsViewModel
-import su.tagir.apps.radiot.ui.stream.StreamViewModel
+import su.tagir.apps.radiot.ui.stream.ArticlesViewModel
 import javax.inject.Inject
 
 class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener, NavigationView.OnNavigationItemSelectedListener {
@@ -42,7 +42,7 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
     private lateinit var playerViewModel: PlayerViewModel
     private lateinit var podcastsViewModel: PodcastsViewModel
     private lateinit var newsViewModel: NewsViewModel
-    private lateinit var streamViewModel: StreamViewModel
+    private lateinit var articlesViewModel: ArticlesViewModel
     private lateinit var piratesViewModel: PiratesViewModel
 
 
@@ -64,7 +64,7 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
         playerViewModel = getViewModel(PlayerViewModel::class.java)
         podcastsViewModel = getViewModel(PodcastsViewModel::class.java)
         newsViewModel = getViewModel(NewsViewModel::class.java)
-        streamViewModel = getViewModel(StreamViewModel::class.java)
+        articlesViewModel = getViewModel(ArticlesViewModel::class.java)
         piratesViewModel = getViewModel(PiratesViewModel::class.java)
 
     }
@@ -87,7 +87,7 @@ class MainFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener
     private fun updateData(position: Int) {
         when (position) {
             0 -> podcastsViewModel.loadData()
-            1 -> streamViewModel.loadData()
+            1 -> articlesViewModel.loadData()
             2 -> newsViewModel.loadData()
             3 -> piratesViewModel.loadData()
         }

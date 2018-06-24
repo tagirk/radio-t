@@ -23,15 +23,14 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
-import android.support.v7.widget.SearchView
 import android.support.v7.widget.Toolbar
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
-import android.widget.FrameLayout
-import android.widget.LinearLayout
+import android.widget.*
 import butterknife.BindColor
 import butterknife.BindDimen
 import butterknife.BindView
@@ -45,8 +44,9 @@ import ru.terrakok.cicerone.commands.Forward
 import saschpe.android.customtabs.CustomTabsHelper
 import saschpe.android.customtabs.WebViewFallback
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
-import su.tagir.apps.radiot.model.entries.EntryState
+import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.service.IAudioService
@@ -60,16 +60,16 @@ import su.tagir.apps.radiot.ui.player.PlayerFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
-import su.tagir.apps.radiot.ui.search.SearchViewModel
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
-import su.tagir.apps.radiot.ui.stream.StreamFragment
+import su.tagir.apps.radiot.ui.stream.ArticlesFragment
 import su.tagir.apps.radiot.utils.visibleGone
+import su.tagir.apps.radiot.utils.visibleInvisible
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
-        HasSupportFragmentInjector, ServiceConnection, NavigationView.OnNavigationItemSelectedListener {
+        HasSupportFragmentInjector, ServiceConnection, RadioGroup.OnCheckedChangeListener {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
@@ -95,6 +95,9 @@ class MainActivity : AppCompatActivity(),
     @BindView(R.id.toolbar)
     lateinit var toolbar: Toolbar
 
+    private lateinit var timeLeft: TextView
+    private lateinit var playStream: ImageButton
+    private lateinit var pauseStream: ImageButton
     private lateinit var homeDrawable: DrawerArrowDrawable
 
     @JvmField
@@ -112,13 +115,12 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var playerViewModel: PlayerViewModel
     private lateinit var mainViewModel: MainViewModel
-    private lateinit var searchViewModel: SearchViewModel
 
     private val serviceCallback = AudioServiceCallback(this)
 
     private var audioService: IAudioService? = null
 
-    val handler = Handler()
+    private val handler = Handler()
 
     private val currentFragment
         get() = supportFragmentManager.findFragmentById(R.id.fragment_container)
@@ -145,6 +147,7 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         ButterKnife.bind(this)
+        setSupportActionBar(toolbar)
 
         homeDrawable = DrawerArrowDrawable(toolbar.context)
         toolbar.navigationIcon = homeDrawable
@@ -156,12 +159,16 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-        navigationView.setNavigationItemSelectedListener(this)
+        navigationView.findViewById<RadioGroup>(R.id.nav_items).setOnCheckedChangeListener(this)
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.setBottomSheetCallback(BottomSheetCallback())
 
-        initSearchView()
+        timeLeft = findViewById(R.id.time_left)
+        playStream = findViewById(R.id.play)
+        playStream.setOnClickListener { playerViewModel.onPlayStreamClick() }
+        pauseStream = findViewById(R.id.pause)
+        pauseStream.setOnClickListener { playerViewModel.onPauseClick() }
 
         playerViewModel = getViewModel(PlayerViewModel::class.java)
         mainViewModel = getViewModel(MainViewModel::class.java)
@@ -175,6 +182,19 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater?.inflate(R.menu.menu_main, menu)
+        menu?.findItem(R.id.search)?.isVisible = currentFragment is PodcastTabsFragment
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.search -> mainViewModel.navigateToSearch()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
@@ -184,6 +204,7 @@ class MainActivity : AppCompatActivity(),
     override fun onStart() {
         super.onStart()
         bindService()
+        mainViewModel.start()
     }
 
     override fun onStop() {
@@ -195,6 +216,7 @@ class MainActivity : AppCompatActivity(),
             Timber.e(e)
         }
         unbindService(this)
+        mainViewModel.stop()
         super.onStop()
     }
 
@@ -219,17 +241,16 @@ class MainActivity : AppCompatActivity(),
 
     override fun supportFragmentInjector() = dispatchingAndroidInjector
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+    override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
         drawerLayout.closeDrawer(GravityCompat.START)
-        when (item.itemId) {
+        when (checkedId) {
             R.id.nav_podcats -> mainViewModel.navigateToPodcasts()
-            R.id.nav_stream -> mainViewModel.navigateToStream()
+            R.id.nav_themes -> mainViewModel.navigateToStream()
             R.id.nav_news -> mainViewModel.navigateToNews()
             R.id.nav_settings -> mainViewModel.navigateToSettings()
             R.id.nav_chat -> mainViewModel.navigateToChat()
             R.id.nav_pirates -> mainViewModel.navigateToPirates()
         }
-        return false
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
@@ -258,9 +279,9 @@ class MainActivity : AppCompatActivity(),
                         Observer { entry ->
                             bottomSheet.visibleGone(entry != null)
                             setBottomMargin(if (entry != null) peekHeight else 0)
-
+                            showHideBtnStream(entry?.url == STREAM_URL && entry.state == PLAYING)
                             when (entry?.state) {
-                                EntryState.PLAYING -> {
+                                PLAYING -> {
                                     if (audioService == null) {
                                         bindService()
                                     }
@@ -306,7 +327,6 @@ class MainActivity : AppCompatActivity(),
                 .getCurrentScreen()
                 .observe(this, Observer {
                     dismissKeyboard(fragmentContainer.windowToken)
-                    toolbar.menu.findItem(R.id.search).isVisible = false
                     when (it) {
                         Screens.SETTINGS_SCREEN -> {
                             isHomeAsUp = true
@@ -315,7 +335,6 @@ class MainActivity : AppCompatActivity(),
                         Screens.PODCASTS_SCREEN -> {
                             isHomeAsUp = false
                             toolbar.setTitle(R.string.podcasts)
-                            toolbar.menu.findItem(R.id.search).isVisible = true
                         }
                         Screens.NEWS_SCREEN -> {
                             isHomeAsUp = false
@@ -323,7 +342,7 @@ class MainActivity : AppCompatActivity(),
                         }
                         Screens.STREAM_SCREEN -> {
                             isHomeAsUp = false
-                            toolbar.setTitle(R.string.stream)
+                            toolbar.setTitle(R.string.themes)
                         }
                         Screens.PIRATES_SCREEN -> {
                             isHomeAsUp = false
@@ -332,7 +351,6 @@ class MainActivity : AppCompatActivity(),
                         Screens.SEARCH_SCREEN -> {
                             isHomeAsUp = true
                             toolbar.title = null
-                            toolbar.menu.findItem(R.id.search).isVisible = true
                         }
                         else -> {
                             isHomeAsUp = true
@@ -342,48 +360,16 @@ class MainActivity : AppCompatActivity(),
                     }
                 })
 
+        mainViewModel.getTimer()
+                .observe(this, Observer {
+                    timeLeft.text = it
+                })
 
     }
 
-    private fun initSearchView() {
-        toolbar.inflateMenu(R.menu.menu_main)
-
-        toolbar.menu.findItem(R.id.search).setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                mainViewModel.navigateToSearch()
-                return true
-            }
-
-            override fun onMenuItemActionCollapse(item: MenuItem?) = false
-
-        })
-        val searchView = toolbar.menu.findItem(R.id.search).actionView as SearchView
-        searchView.setOnCloseListener {
-            mainViewModel.back()
-            return@setOnCloseListener false
-        }
-        searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
-            if (hasFocus && currentFragment !is SearchFragment) {
-                mainViewModel.navigateToSearch()
-            }
-        }
-        searchViewModel = getViewModel(SearchViewModel::class.java)
-        searchViewModel.closeEvent().observe(this, Observer {
-            searchView.isIconified = true
-        })
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                handler.removeCallbacksAndMessages(null)
-                handler.postDelayed({ searchViewModel.search(newText ?: "") }, 1000)
-
-                return false
-            }
-
-        })
+    private fun showHideBtnStream(playing: Boolean) {
+        playStream.visibleInvisible(!playing)
+        pauseStream.visibleInvisible(playing)
     }
 
     private fun initBottomSheet() {
@@ -425,7 +411,7 @@ class MainActivity : AppCompatActivity(),
 
         override fun createFragment(screenKey: String?, data: Any?): Fragment? = when (screenKey) {
             Screens.PODCASTS_SCREEN -> PodcastTabsFragment()
-            Screens.STREAM_SCREEN -> StreamFragment()
+            Screens.STREAM_SCREEN -> ArticlesFragment()
             Screens.NEWS_SCREEN -> NewsFragment()
             Screens.SEARCH_SCREEN -> SearchFragment()
             Screens.CONTENT_SCREEN -> LocalContentFragment.newInstance(data as String)

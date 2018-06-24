@@ -8,9 +8,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.support.v7.widget.SearchView
+import android.view.*
+import android.widget.ImageView
 import butterknife.BindView
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
@@ -18,7 +18,6 @@ import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.MainViewModel
-import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.common.ListFragment
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
@@ -26,7 +25,7 @@ import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
 class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQueriesAdapter.Callback,
-        Injectable, ItemTouchHelper.Callback, BackClickHandler {
+        Injectable, ItemTouchHelper.Callback{
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -43,6 +42,12 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
     private val handler = Handler()
 
     private lateinit var mainViewModel: MainViewModel
+    private var searchView: SearchView? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -53,7 +58,6 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
         android.support.v7.widget.helper.ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recentQueries)
 
         refreshLayout.isEnabled = false
-
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -66,16 +70,13 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_search, container, false)
 
-    override fun createViewModel(): ListViewModel<Entry>  = ViewModelProviders.of(activity!!, viewModelFactory).get(SearchViewModel::class.java)
+    override fun createViewModel(): ListViewModel<Entry> = ViewModelProviders.of(activity!!, viewModelFactory).get(SearchViewModel::class.java)
 
-    override fun createAdapter()= SearchAdapter(GlideApp.with(this), this)
+    override fun createAdapter() = SearchAdapter(GlideApp.with(this), this)
 
     override val layoutManager: RecyclerView.LayoutManager
         get() = LinearLayoutManager(context)
 
-    override fun onBackClick() {
-        viewModel.close()
-    }
 
     override fun onResume() {
         super.onResume()
@@ -89,16 +90,22 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
         viewModel.onPause()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.menu_search, menu)
+        initSearchView(menu)
+
+    }
+
     override fun onClick(entry: Entry) {
         if (entry.audioUrl != null) {
             viewModel.onEntryClick(entry)
-        }else{
+        } else {
             mainViewModel.openWebSite(entry.url)
         }
     }
 
     override fun onQueryClick(query: String?) {
-        viewModel.search(query?:"")
+       searchView?.setQuery(query, false)
     }
 
     override fun download(entry: Entry) {
@@ -124,18 +131,36 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
         }
     }
 
-
-
     private fun observe() {
         viewModel.getRecentSearches().observe(getViewLifecycleOwner()!!,
                 Observer { queries -> recentQueriesAdapter.submitList(queries as PagedList<String>) })
 
-        viewModel.searchEvent().observe(getViewLifecycleOwner()!!,
-                Observer {
-                    layoutEntries.visibleGone(!it.isNullOrBlank())
-                    recentQueries.visibleGone(it.isNullOrBlank())
-                })
     }
 
+    private fun initSearchView(menu: Menu?) {
+        searchView = menu?.findItem(R.id.search_view)?.actionView as SearchView?
+        searchView?.setIconifiedByDefault(false)
+        searchView?.maxWidth = Int.MAX_VALUE
+        val magImage = searchView?.findViewById(android.support.v7.appcompat.R.id.search_mag_icon) as ImageView?
+        magImage?.visibility = View.GONE
+        magImage?.setImageDrawable(null)
 
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                handler.removeCallbacksAndMessages(null)
+                handler.postDelayed({
+                    viewModel.search(newText ?: "")
+                    layoutEntries.visibleGone(!newText.isNullOrBlank())
+                    recentQueries.visibleGone(newText.isNullOrBlank())
+                }, 1000)
+
+                return false
+            }
+
+        })
+    }
 }

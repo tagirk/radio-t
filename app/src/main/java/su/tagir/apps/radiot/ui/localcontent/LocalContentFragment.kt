@@ -5,11 +5,7 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
-import android.support.v7.widget.Toolbar
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.webkit.WebView
 import butterknife.BindView
 import su.tagir.apps.radiot.R
@@ -19,7 +15,7 @@ import su.tagir.apps.radiot.ui.common.BaseFragment
 import javax.inject.Inject
 
 
-class LocalContentFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClickListener {
+class LocalContentFragment : BaseFragment(), Injectable {
 
 
     @Inject
@@ -31,6 +27,10 @@ class LocalContentFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClick
     @BindView(R.id.web_view)
     lateinit var webView: WebView
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_content, container, false)
@@ -60,12 +60,18 @@ class LocalContentFragment : BaseFragment(), Injectable, Toolbar.OnMenuItemClick
         viewModel.setId(arguments?.getString(ARG_ID))
     }
 
-    override fun onMenuItemClick(item: MenuItem?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.menu_content, menu)
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item?.itemId){
             R.id.web -> viewModel.openInBrowser()
         }
         return false
     }
+
 
     companion object {
         const val ARG_ID = "entry_id"

@@ -8,7 +8,6 @@ import io.reactivex.rxkotlin.plusAssign
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.ui.common.SingleLiveEvent
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
 import su.tagir.apps.radiot.ui.viewmodel.State
 import su.tagir.apps.radiot.ui.viewmodel.Status
@@ -26,15 +25,12 @@ class SearchViewModel @Inject constructor(private val entryRepository: EntryRepo
 
     private val recentSearches = MutableLiveData<List<String>>()
 
-    private val closeSearchEvent = SingleLiveEvent<Void>()
-    private val searchEvent = SingleLiveEvent<String>()
 
     private var query: String = ""
         set(value) {
             field = value
             observeSearchResults()
             loadData()
-            searchEvent.value = value
         }
 
 
@@ -62,7 +58,7 @@ class SearchViewModel @Inject constructor(private val entryRepository: EntryRepo
         loadDisposable?.dispose()
         loadDisposable = entryRepository.search(query)
                 .observeOn(scheduler.ui())
-                .doOnSubscribe { state.value = if (state.value == null) State(Status.LOADING) else state.value?.copy(Status.LOADING) }
+                .doOnSubscribe { state.value = State(Status.LOADING)}
                 .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS, hasNextPage = true) }, {
                     Timber.e(it)
                     state.value = state.value?.copy(status = Status.ERROR)
@@ -143,12 +139,4 @@ class SearchViewModel @Inject constructor(private val entryRepository: EntryRepo
     fun removeQuery(query: String?) {
         entryRepository.removeQuery(query)
     }
-
-    fun close() {
-        closeSearchEvent.call()
-    }
-
-    fun closeEvent(): LiveData<Void> = closeSearchEvent
-
-    fun searchEvent(): LiveData<String> = searchEvent
 }

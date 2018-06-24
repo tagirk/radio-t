@@ -1,10 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.NavigationView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_view"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:fitsSystemWindows="true"
-    app:menu="@menu/nav_drawer"
-    app:headerLayout="@layout/nav_header"/>
+    app:itemTextColor="@color/colorPrimaryText"
+    app:itemIconTint="@color/colorPrimaryText">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/stream_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/header"
+            layout="@layout/nav_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/time_left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/header">
+
+            <RadioGroup
+                android:id="@+id/nav_items"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_podcats"
+                    android:text="@string/podcasts"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimaryText"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_radio_24dp" />
+
+                <RadioButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_themes"
+                    android:text="@string/themes"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimaryText"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_cast_24dp" />
+
+                <RadioButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_pirates"
+                    android:text="@string/pirates"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimaryText"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_radio_24dp" />
+
+                <RadioButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_news"
+                    android:text="@string/news"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimaryText"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_rss_feed_24dp" />
+
+                <RadioButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_chat"
+                    android:text="@string/chat"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@color/colorPrimaryText"
+                    android:textStyle="bold"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_chat_black_24dp" />
+
+                <RadioButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_settings"
+                    android:text="@string/settings"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@color/colorPrimaryText"
+                    android:textStyle="bold"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_settings_24dp" />
+
+            </RadioGroup>
+        </ScrollView>
+
+
+        <TextView
+            android:id="@+id/time_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimaryText"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/play"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/play"
+            style="?borderlessButtonStyle"
+            android:layout_width="56dp"
+            android:layout_height="0dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_play_circle_filled_48dp"
+            app:layout_constraintBottom_toBottomOf="@id/time_left"
+            app:layout_constraintTop_toTopOf="@+id/time_left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/time_left"
+            tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/pause"
+            style="?borderlessButtonStyle"
+            android:layout_width="56dp"
+            android:layout_height="0dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_pause_circle_filled_48dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/time_left"
+            app:layout_constraintTop_toTopOf="@+id/time_left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/time_left"
+            tools:ignore="ContentDescription" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.design.widget.NavigationView>

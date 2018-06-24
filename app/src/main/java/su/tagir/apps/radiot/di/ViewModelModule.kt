@@ -19,7 +19,7 @@ import su.tagir.apps.radiot.ui.podcasts.PodcastsViewModel
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsViewModel
 
 import su.tagir.apps.radiot.ui.search.SearchViewModel
-import su.tagir.apps.radiot.ui.stream.StreamViewModel
+import su.tagir.apps.radiot.ui.stream.ArticlesViewModel
 import su.tagir.apps.radiot.ui.viewmodel.ViewModelFactory
 import kotlin.reflect.KClass
 
@@ -73,8 +73,8 @@ abstract class ViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(StreamViewModel::class)
-    abstract fun streamViewModel(streamViewModel: StreamViewModel): ViewModel
+    @ViewModelKey(ArticlesViewModel::class)
+    abstract fun streamViewModel(articlesViewModel: ArticlesViewModel): ViewModel
 
     @Binds
     @IntoMap

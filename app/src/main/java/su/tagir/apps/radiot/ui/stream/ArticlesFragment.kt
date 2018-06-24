@@ -1,6 +1,5 @@
 package su.tagir.apps.radiot.ui.stream
 
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.arch.paging.PagedListAdapter
@@ -16,9 +15,11 @@ import android.text.style.UnderlineSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
-import butterknife.*
+import butterknife.BindColor
+import butterknife.BindDimen
+import butterknife.BindView
+import butterknife.ButterKnife
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
@@ -28,10 +29,9 @@ import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.PagedListFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.utils.shortDateFormat
-import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
-class StreamFragment : PagedListFragment<Article>(), Injectable {
+class ArticlesFragment : PagedListFragment<Article>(), Injectable {
 
     @Inject
     internal lateinit var router: Router
@@ -39,33 +39,22 @@ class StreamFragment : PagedListFragment<Article>(), Injectable {
     @Inject
     internal lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    @BindView(R.id.timer)
-    internal lateinit var timer: TextView
-
-    @BindView(R.id.show_timer)
-    lateinit var showTimer: ImageView
-
-    @BindView(R.id.hide_timer)
-    lateinit var hideTimer: ImageView
-
     private lateinit var playerViewModel: PlayerViewModel
-    private lateinit var streamViewModel: StreamViewModel
+    private lateinit var articlesViewModel: ArticlesViewModel
     private lateinit var mainViewModel: MainViewModel
 
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
-            inflater.inflate(R.layout.fragment_stream, container, false)
+            inflater.inflate(R.layout.fragment_entry_list, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        streamViewModel = listViewModel as StreamViewModel
+        articlesViewModel = listViewModel as ArticlesViewModel
         playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
         mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
-        observeViewModel()
-
     }
 
-    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(StreamViewModel::class.java)
+    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(ArticlesViewModel::class.java)
 
     override fun createAdapter() = ArticlesAdapter(object : ArticlesAdapter.Callback {
         override fun onArticleClick(article: Article?) {
@@ -76,43 +65,12 @@ class StreamFragment : PagedListFragment<Article>(), Injectable {
     override fun onResume() {
         super.onResume()
         mainViewModel.setCurrentScreen(Screens.STREAM_SCREEN)
-        initTimer()
-        streamViewModel.updateActiveTheme()
+        articlesViewModel.updateActiveTheme()
     }
 
     override fun onPause() {
         super.onPause()
-        streamViewModel.dispose()
-    }
-
-    @OnClick(R.id.timer_layout)
-    fun showHideTimer() {
-        if (timer.visibility == View.GONE) {
-            streamViewModel.showTimer()
-        } else {
-            streamViewModel.hideTimer()
-        }
-    }
-
-    private fun initTimer() {
-        streamViewModel
-                .showTimer
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            if (it == null) {
-                                return@Observer
-                            }
-                            timer.visibleGone(it)
-                            hideTimer.visibleGone(it)
-                            showTimer.visibleGone(!it)
-                        })
-        streamViewModel.startTimer()
-    }
-
-    private fun observeViewModel() {
-        streamViewModel
-                .timer
-                .observe(getViewLifecycleOwner()!!, Observer { timer.text = it })
+        articlesViewModel.dispose()
     }
 
 
