@@ -60,9 +60,14 @@ class MainViewModel @Inject constructor(private val router: Router,
         router.navigateTo(Screens.SEARCH_SCREEN)
     }
 
-    fun back() {
-        router.exit()
+    fun navigateToAbout() {
+        router.navigateTo(Screens.ABOUT_SCREEN)
     }
+
+    fun navigateToCredits() {
+        router.navigateTo(Screens.CREDITS_SCREEN)
+    }
+
 
     fun start() {
         timerDisposable = Observable.just(1)
@@ -121,4 +126,6 @@ class MainViewModel @Inject constructor(private val router: Router,
 
         return result
     }
+
+
 }

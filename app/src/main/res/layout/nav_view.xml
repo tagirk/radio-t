@@ -7,8 +7,8 @@
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:fitsSystemWindows="true"
-    app:itemTextColor="@color/colorPrimaryText"
-    app:itemIconTint="@color/colorPrimaryText">
+    app:itemIconTint="@color/colorPrimaryText"
+    app:itemTextColor="@color/colorPrimaryText">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/stream_view"
@@ -20,25 +20,26 @@
             layout="@layout/nav_header"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ScrollView
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:orientation="vertical"
             app:layout_constraintBottom_toTopOf="@id/time_left"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/header">
 
-            <RadioGroup
+            <LinearLayout
                 android:id="@+id/nav_items"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <RadioButton
+                <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:id="@+id/nav_podcats"
@@ -54,7 +55,7 @@
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_radio_24dp" />
 
-                <RadioButton
+                <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:id="@+id/nav_themes"
@@ -70,7 +71,7 @@
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_cast_24dp" />
 
-                <RadioButton
+                <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:id="@+id/nav_pirates"
@@ -84,9 +85,9 @@
                     android:textStyle="bold"
                     android:textColor="@color/colorPrimaryText"
                     android:background="?selectableItemBackground"
-                    android:drawableStart="@drawable/ic_radio_24dp" />
+                    android:drawableStart="@drawable/ic_pirates" />
 
-                <RadioButton
+                <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:id="@+id/nav_news"
@@ -102,7 +103,7 @@
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_rss_feed_24dp" />
 
-                <RadioButton
+                <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:id="@+id/nav_chat"
@@ -118,7 +119,7 @@
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_chat_black_24dp" />
 
-                <RadioButton
+                <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:id="@+id/nav_settings"
@@ -134,7 +135,23 @@
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_settings_24dp" />
 
-            </RadioGroup>
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_about"
+                    android:text="@string/about"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@color/colorPrimaryText"
+                    android:textStyle="bold"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_info_24dp" />
+
+            </LinearLayout>
         </ScrollView>
 
 
@@ -142,10 +159,10 @@
             android:id="@+id/time_left"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="16dp"
             android:gravity="center_vertical"
-            android:textStyle="bold"
+            android:padding="16dp"
             android:textColor="@color/colorPrimaryText"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/play"
             app:layout_constraintStart_toStartOf="parent" />
@@ -158,9 +175,9 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_play_circle_filled_48dp"
             app:layout_constraintBottom_toBottomOf="@id/time_left"
-            app:layout_constraintTop_toTopOf="@+id/time_left"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/time_left"
+            app:layout_constraintTop_toTopOf="@+id/time_left"
             tools:ignore="ContentDescription" />
 
         <ImageButton
@@ -172,9 +189,9 @@
             android:src="@drawable/ic_pause_circle_filled_48dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/time_left"
-            app:layout_constraintTop_toTopOf="@+id/time_left"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/time_left"
+            app:layout_constraintTop_toTopOf="@+id/time_left"
             tools:ignore="ContentDescription" />
 
 

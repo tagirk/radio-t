@@ -18,7 +18,9 @@ import android.os.RemoteException
 import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.NavigationView
+import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
@@ -30,7 +32,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import butterknife.BindColor
 import butterknife.BindDimen
 import butterknife.BindView
@@ -55,11 +60,15 @@ import su.tagir.apps.radiot.ui.chat.ChatActivity
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
+import su.tagir.apps.radiot.ui.pirates.PiratesFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
+import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
+import su.tagir.apps.radiot.ui.settings.AboutFragment
+import su.tagir.apps.radiot.ui.settings.CreditsFragment
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
 import su.tagir.apps.radiot.ui.stream.ArticlesFragment
 import su.tagir.apps.radiot.utils.visibleGone
@@ -69,7 +78,7 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
-        HasSupportFragmentInjector, ServiceConnection, RadioGroup.OnCheckedChangeListener {
+        HasSupportFragmentInjector, ServiceConnection, View.OnClickListener {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
@@ -159,7 +168,11 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-        navigationView.findViewById<RadioGroup>(R.id.nav_items).setOnCheckedChangeListener(this)
+        val navItems = navigationView.findViewById<LinearLayout>(R.id.nav_items)
+
+        for (i in 0 until navItems.childCount) {
+            navItems.getChildAt(i).setOnClickListener(this)
+        }
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.setBottomSheetCallback(BottomSheetCallback())
@@ -241,15 +254,36 @@ class MainActivity : AppCompatActivity(),
 
     override fun supportFragmentInjector() = dispatchingAndroidInjector
 
-    override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
+    override fun onClick(v: View?) {
         drawerLayout.closeDrawer(GravityCompat.START)
-        when (checkedId) {
-            R.id.nav_podcats -> mainViewModel.navigateToPodcasts()
-            R.id.nav_themes -> mainViewModel.navigateToStream()
-            R.id.nav_news -> mainViewModel.navigateToNews()
+        when (v?.id) {
+            R.id.nav_podcats -> {
+                if (currentFragment !is PodcastsFragment) {
+                    mainViewModel.navigateToPodcasts()
+                }
+            }
+            R.id.nav_themes -> {
+                if (currentFragment !is ArticlesFragment) {
+                    mainViewModel.navigateToStream()
+                }
+            }
+            R.id.nav_news -> {
+                if (currentFragment !is NewsFragment) {
+                    mainViewModel.navigateToNews()
+                }
+            }
             R.id.nav_settings -> mainViewModel.navigateToSettings()
             R.id.nav_chat -> mainViewModel.navigateToChat()
-            R.id.nav_pirates -> mainViewModel.navigateToPirates()
+            R.id.nav_pirates -> {
+                if (currentFragment !is PiratesFragment) {
+                    mainViewModel.navigateToPirates()
+                }
+            }
+            R.id.nav_about -> {
+                if (currentFragment !is AboutFragment) {
+                    mainViewModel.navigateToAbout()
+                }
+            }
         }
     }
 
@@ -352,6 +386,14 @@ class MainActivity : AppCompatActivity(),
                             isHomeAsUp = true
                             toolbar.title = null
                         }
+                        Screens.ABOUT_SCREEN ->{
+                            isHomeAsUp = true
+                            toolbar.setTitle(R.string.about)
+                        }
+                        Screens.CREDITS_SCREEN ->{
+                            isHomeAsUp = true
+                            toolbar.setTitle(R.string.credits)
+                        }
                         else -> {
                             isHomeAsUp = true
                             toolbar.title = it
@@ -417,6 +459,8 @@ class MainActivity : AppCompatActivity(),
             Screens.CONTENT_SCREEN -> LocalContentFragment.newInstance(data as String)
             Screens.SETTINGS_SCREEN -> SettingsFragment()
             Screens.PIRATES_SCREEN -> PiratesTabsFragment()
+            Screens.CREDITS_SCREEN -> CreditsFragment()
+            Screens.ABOUT_SCREEN -> AboutFragment()
             else -> null
         }
 
@@ -428,6 +472,15 @@ class MainActivity : AppCompatActivity(),
             } else {
                 super.applyCommand(command)
             }
+        }
+
+        override fun setupFragmentTransactionAnimation(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
+            fragmentTransaction?.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+        }
+
+        override fun createStartActivityOptions(command: Command?, activityIntent: Intent?): Bundle? {
+            val options = ActivityOptionsCompat.makeCustomAnimation(this@MainActivity, R.anim.fade_in, R.anim.fade_out)
+            return options.toBundle()
         }
 
         private fun openWithResolveActivity(url: String) {

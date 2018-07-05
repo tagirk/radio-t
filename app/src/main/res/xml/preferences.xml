@@ -37,13 +37,6 @@
             android:key="crash_reports"
             android:layout="@layout/pref_switch"/>
 
-        <Preference android:title="Сообщить о баге"
-            android:layout="@layout/pref_title">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="mailto:kurt09@yandex.ru" />
-        </Preference>
-
     </PreferenceCategory>
 
 

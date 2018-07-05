@@ -11,8 +11,8 @@ android {
         applicationId "su.tagir.apps.radiot"
         targetSdkVersion targetSdkProjectVersion
         minSdkVersion minSdkProjectVersion
-        versionCode 8
-        versionName "0.8"
+        versionCode 9
+        versionName "0.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 

@@ -11,11 +11,13 @@ object Screens {
     const val WEB_SCREEN = "web_screen"
     const val RESOLVE_ACTIVITY = "resolve_activity"
     const val SETTINGS_SCREEN = "settings_screen"
+    const val ABOUT_SCREEN = "about_screen"
 
     const val CHAT_ACTIVITY = "chat_activity"
     const val CHAT_AUTH_SCREEN = "chat_auth_screen"
     const val CHAT_SCREEN = "chat_screen"
     const val CHAT_START_SCREEN = "chat_start_screen"
     const val PIRATES_SCREEN = "pirates_screen"
+    const val CREDITS_SCREEN = "credits_screen"
 
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference android:title="Версия"
+        android:layout="@layout/pref_title"
+        android:key="version">
+    </Preference>
+
+    <Preference android:title="Благодарности"
+        android:layout="@layout/pref_title"
+        android:key="credits">
+    </Preference>
+
+    <Preference android:title="Сообщить о баге"
+        android:layout="@layout/pref_title">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="mailto:kurt09@yandex.ru" />
+    </Preference>
+
+</PreferenceScreen>
