@@ -1,6 +1,5 @@
-package su.tagir.apps.radiot.ui.podcasts
+package su.tagir.apps.radiot.ui.news
 
-import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -18,10 +17,10 @@ import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.BaseFragment
-import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsFragment
 import javax.inject.Inject
 
-class PodcastTabsFragment: BaseFragment(), Injectable {
+class NewsTabsFragment: BaseFragment(), Injectable {
+
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -34,7 +33,7 @@ class PodcastTabsFragment: BaseFragment(), Injectable {
 
     private lateinit var mainViewModel: MainViewModel
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View=
+    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_tabs, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,14 +43,13 @@ class PodcastTabsFragment: BaseFragment(), Injectable {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mainViewModel = getViewModel(MainViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
     }
 
     override fun onResume() {
         super.onResume()
-        mainViewModel.setCurrentScreen(Screens.PODCASTS_SCREEN)
+        mainViewModel.setCurrentScreen(Screens.NEWS_SCREEN)
     }
-
 
     private fun initFragments() {
         val fragmentAdapter = FragmentAdapter(childFragmentManager)
@@ -59,18 +57,13 @@ class PodcastTabsFragment: BaseFragment(), Injectable {
         tabs.setupWithViewPager(viewPager)
     }
 
-    private fun <T : ViewModel> getViewModel(clazz: Class<T>): T {
-        return ViewModelProviders.of(activity!!, viewModelFactory).get(clazz)
-    }
-
-
     private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
 
 
         override fun getItem(position: Int): Fragment? {
             when (position) {
-                0 -> return PodcastsFragment()
-                1 -> return DownloadedPodcastsFragment()
+                0 -> return ArticlesFragment()
+                1 -> return NewsFragment()
             }
             return null
         }
@@ -79,8 +72,8 @@ class PodcastTabsFragment: BaseFragment(), Injectable {
 
         override fun getPageTitle(position: Int): CharSequence? {
             when (position) {
-                0 -> return "Все"
-                1 -> return "Загруженные"
+                0 -> return "Темы от авторов"
+                1 -> return "Новости подкаста"
             }
             return super.getPageTitle(position)
         }

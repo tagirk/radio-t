@@ -85,7 +85,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
     private lateinit var audioManager: AudioManager
     private lateinit var audioFocusRequest: AudioFocusRequest
 
-    private var playOnFocusGain = true
+    private var playOnFocusGain = false
     private var playbackDelayed = false
     private val focusLock = Any()
 
@@ -183,34 +183,32 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
     override fun onAudioFocusChange(p0: Int) {
         when (p0) {
             AudioManager.AUDIOFOCUS_LOSS -> {
-                Timber.d("focus loss")
                 synchronized(focusLock) {
                     playOnFocusGain = false
                     playbackDelayed = false
+                    player?.playWhenReady = false
                 }
-                player?.playWhenReady = false
+
             }
 
             AudioManager.AUDIOFOCUS_GAIN -> {
-                Timber.d("focus gain")
                 if (playbackDelayed || playOnFocusGain) {
                     synchronized(focusLock) {
                         playbackDelayed = false
                         playOnFocusGain = false
+                        player?.playWhenReady = true
                     }
-                    player?.playWhenReady = true
                 }
             }
 
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT-> {
-                Timber.d("focus loss transient")
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 synchronized(focusLock) {
-                    playOnFocusGain = true
+                    playOnFocusGain = player?.playWhenReady == true
                     playbackDelayed = false
+                    player?.playWhenReady = false
                 }
-                player?.playWhenReady = false
             }
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->{
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 Timber.d("focus loss transient can duck")
             }
         }
@@ -240,15 +238,13 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         }
 
         synchronized(focusLock) {
-            if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
-
-            } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                player?.playWhenReady = true
-            } else if (res == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
-                playbackDelayed = true
+            when (res) {
+                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                }
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> player?.playWhenReady = true
+                AudioManager.AUDIOFOCUS_REQUEST_DELAYED -> playbackDelayed = true
             }
         }
-
     }
 
     private fun resumePlay() {
@@ -310,10 +306,14 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             isPlaying -> {
                 state = if (player?.playWhenReady == true) EntryState.PLAYING else EntryState.PAUSED
                 playOnFocusGain = player?.playWhenReady ?: false
+                if (player?.playWhenReady != true) {
+                    playbackDelayed = false
+                }
             }
             else -> {
                 state = EntryState.PAUSED
                 playOnFocusGain = false
+                playbackDelayed = false
             }
         }
         val progress = player?.currentPosition ?: 0

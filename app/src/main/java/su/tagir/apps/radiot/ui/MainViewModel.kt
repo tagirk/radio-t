@@ -32,10 +32,6 @@ class MainViewModel @Inject constructor(private val router: Router,
         router.newRootScreen(Screens.PODCASTS_SCREEN)
     }
 
-    fun navigateToStream() {
-        router.newRootScreen(Screens.STREAM_SCREEN)
-    }
-
     fun navigateToNews() {
         router.newRootScreen(Screens.NEWS_SCREEN)
     }

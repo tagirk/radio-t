@@ -1,4 +1,4 @@
-package su.tagir.apps.radiot.ui.stream
+package su.tagir.apps.radiot.ui.news
 
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable

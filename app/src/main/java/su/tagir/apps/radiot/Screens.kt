@@ -4,7 +4,6 @@ package su.tagir.apps.radiot
 object Screens {
 
     const val PODCASTS_SCREEN = "podcasts_screen"
-    const val STREAM_SCREEN = "stream_screen"
     const val NEWS_SCREEN = "news_screen"
     const val SEARCH_SCREEN  = "search_screen"
     const val CONTENT_SCREEN = "content_screen"

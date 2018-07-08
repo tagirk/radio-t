@@ -10,7 +10,6 @@ import android.widget.Toast
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
@@ -44,7 +43,7 @@ class PiratesFragment :PagedListFragment<Entry>(), Injectable, EntriesAdapter.Ca
         (listViewModel as PiratesViewModel).stopStatusTimer()
     }
 
-    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(PiratesViewModel::class.java)
+    override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(PiratesViewModel::class.java)
 
     override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this), this)
 

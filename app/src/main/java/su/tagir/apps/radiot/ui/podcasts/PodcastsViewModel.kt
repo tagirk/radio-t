@@ -38,6 +38,8 @@ class PodcastsViewModel
 
                     state.value = newState
                 }, { Timber.e(it) })
+
+        loadData()
     }
 
     override fun loadData() {

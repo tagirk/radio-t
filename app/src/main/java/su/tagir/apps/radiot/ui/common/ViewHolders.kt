@@ -20,7 +20,6 @@ import butterknife.*
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
@@ -62,9 +61,7 @@ class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
 class PodcastViewHolder(view: View,
                         private val type:Int,
                         private val glide: GlideRequests?,
-                        private val callback: EntriesAdapter.Callback)
-
-    : DataBoundViewHolder<Entry>(view), MenuItem.OnMenuItemClickListener {
+                        private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view), MenuItem.OnMenuItemClickListener {
 
     @BindView(R.id.title)
     lateinit var title: TextView

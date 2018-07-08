@@ -2,12 +2,13 @@ package su.tagir.apps.radiot.di
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import su.tagir.apps.radiot.ui.MainFragment
 import su.tagir.apps.radiot.ui.chat.AuthFragment
 import su.tagir.apps.radiot.ui.chat.ChatFragment
 import su.tagir.apps.radiot.ui.hosts.HostsFragment
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
+import su.tagir.apps.radiot.ui.news.ArticlesFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
+import su.tagir.apps.radiot.ui.news.NewsTabsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.pirates.downloaded.DownloadedPiratesFragment
@@ -19,13 +20,9 @@ import su.tagir.apps.radiot.ui.search.SearchFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.ui.settings.CreditsFragment
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
-import su.tagir.apps.radiot.ui.stream.ArticlesFragment
 
 @Module
 abstract class FragmentsBuilderModule {
-
-    @ContributesAndroidInjector
-    abstract fun mainFragment(): MainFragment
 
     @ContributesAndroidInjector
     abstract fun podcastTabsFragment(): PodcastTabsFragment
@@ -47,6 +44,9 @@ abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
     abstract fun playerFragment(): PlayerFragment
+
+    @ContributesAndroidInjector
+    abstract fun newsTabsFragment(): NewsTabsFragment
 
     @ContributesAndroidInjector
     abstract fun newsFragment(): NewsFragment

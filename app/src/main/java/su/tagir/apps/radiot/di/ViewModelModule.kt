@@ -11,15 +11,14 @@ import su.tagir.apps.radiot.ui.chat.AuthViewModel
 import su.tagir.apps.radiot.ui.chat.ChatViewModel
 import su.tagir.apps.radiot.ui.hosts.HostsViewModel
 import su.tagir.apps.radiot.ui.localcontent.LocalContentViewModel
+import su.tagir.apps.radiot.ui.news.ArticlesViewModel
 import su.tagir.apps.radiot.ui.news.NewsViewModel
 import su.tagir.apps.radiot.ui.pirates.PiratesViewModel
 import su.tagir.apps.radiot.ui.pirates.downloaded.DownloadedPiratesViewModel
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastsViewModel
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsViewModel
-
 import su.tagir.apps.radiot.ui.search.SearchViewModel
-import su.tagir.apps.radiot.ui.stream.ArticlesViewModel
 import su.tagir.apps.radiot.ui.viewmodel.ViewModelFactory
 import kotlin.reflect.KClass
 

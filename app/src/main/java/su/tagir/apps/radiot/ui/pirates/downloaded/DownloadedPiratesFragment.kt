@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.widget.Toast
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.MainViewModel
@@ -33,8 +32,6 @@ class DownloadedPiratesFragment: PagedListFragment<Entry>(), EntriesAdapter.Call
 
     override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
 
-
-
     override fun onClick(entry: Entry) {
         playerViewModel.onPlayClick(entry)
     }
@@ -50,7 +47,6 @@ class DownloadedPiratesFragment: PagedListFragment<Entry>(), EntriesAdapter.Call
 
     override fun remove(entry: Entry) {
         (listViewModel as DownloadedPiratesViewModel).onRemoveClick(entry)
-
     }
 
     override fun download(entry: Entry) {

@@ -13,7 +13,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import butterknife.BindView
-import butterknife.OnPageChange
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
@@ -33,11 +32,10 @@ class PiratesTabsFragment: BaseFragment(), Injectable {
     @BindView(R.id.tabs)
     lateinit var tabs: TabLayout
 
-    private lateinit var podcastsViewModel: PiratesViewModel
     private lateinit var mainViewModel: MainViewModel
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View=
-            inflater.inflate(R.layout.fragment_podcasts, container, false)
+            inflater.inflate(R.layout.fragment_tabs, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,20 +44,14 @@ class PiratesTabsFragment: BaseFragment(), Injectable {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        podcastsViewModel = getViewModel(PiratesViewModel::class.java)
         mainViewModel = getViewModel(MainViewModel::class.java)
     }
 
     override fun onResume() {
         super.onResume()
         mainViewModel.setCurrentScreen(Screens.PIRATES_SCREEN)
-        updateData(viewPager.currentItem)
     }
 
-    @OnPageChange(R.id.view_pager)
-    fun onPageChange(position: Int) {
-        updateData(position)
-    }
 
     private fun initFragments() {
         val fragmentAdapter = FragmentAdapter(childFragmentManager)
@@ -69,12 +61,6 @@ class PiratesTabsFragment: BaseFragment(), Injectable {
 
     private fun <T : ViewModel> getViewModel(clazz: Class<T>): T {
         return ViewModelProviders.of(activity!!, viewModelFactory).get(clazz)
-    }
-
-    private fun updateData(position: Int) {
-        when (position) {
-            0 -> podcastsViewModel.loadData()
-        }
     }
 
     private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {

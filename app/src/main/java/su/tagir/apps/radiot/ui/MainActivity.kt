@@ -60,6 +60,7 @@ import su.tagir.apps.radiot.ui.chat.ChatActivity
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
+import su.tagir.apps.radiot.ui.news.NewsTabsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
@@ -70,7 +71,6 @@ import su.tagir.apps.radiot.ui.search.SearchFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.ui.settings.CreditsFragment
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
-import su.tagir.apps.radiot.ui.stream.ArticlesFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import timber.log.Timber
@@ -262,11 +262,6 @@ class MainActivity : AppCompatActivity(),
                     mainViewModel.navigateToPodcasts()
                 }
             }
-            R.id.nav_themes -> {
-                if (currentFragment !is ArticlesFragment) {
-                    mainViewModel.navigateToStream()
-                }
-            }
             R.id.nav_news -> {
                 if (currentFragment !is NewsFragment) {
                     mainViewModel.navigateToNews()
@@ -374,10 +369,6 @@ class MainActivity : AppCompatActivity(),
                             isHomeAsUp = false
                             toolbar.setTitle(R.string.news)
                         }
-                        Screens.STREAM_SCREEN -> {
-                            isHomeAsUp = false
-                            toolbar.setTitle(R.string.themes)
-                        }
                         Screens.PIRATES_SCREEN -> {
                             isHomeAsUp = false
                             toolbar.setTitle(R.string.pirates)
@@ -400,6 +391,7 @@ class MainActivity : AppCompatActivity(),
 
                         }
                     }
+                    invalidateOptionsMenu()
                 })
 
         mainViewModel.getTimer()
@@ -453,8 +445,7 @@ class MainActivity : AppCompatActivity(),
 
         override fun createFragment(screenKey: String?, data: Any?): Fragment? = when (screenKey) {
             Screens.PODCASTS_SCREEN -> PodcastTabsFragment()
-            Screens.STREAM_SCREEN -> ArticlesFragment()
-            Screens.NEWS_SCREEN -> NewsFragment()
+            Screens.NEWS_SCREEN -> NewsTabsFragment()
             Screens.SEARCH_SCREEN -> SearchFragment()
             Screens.CONTENT_SCREEN -> LocalContentFragment.newInstance(data as String)
             Screens.SETTINGS_SCREEN -> SettingsFragment()
@@ -509,9 +500,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun setBottomMargin(margin: Int) {
-        val params = fragmentContainer.layoutParams as LinearLayout.LayoutParams
-        params.bottomMargin = margin
-        fragmentContainer.requestLayout()
+        fragmentContainer.setPadding(0, 0, 0, margin)
     }
 
 

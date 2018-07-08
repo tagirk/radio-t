@@ -1,4 +1,4 @@
-package su.tagir.apps.radiot.ui.stream
+package su.tagir.apps.radiot.ui.news
 
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
@@ -22,7 +22,6 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.ui.MainViewModel
@@ -54,7 +53,7 @@ class ArticlesFragment : PagedListFragment<Article>(), Injectable {
         mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
     }
 
-    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(ArticlesViewModel::class.java)
+    override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(ArticlesViewModel::class.java)
 
     override fun createAdapter() = ArticlesAdapter(object : ArticlesAdapter.Callback {
         override fun onArticleClick(article: Article?) {
@@ -64,7 +63,6 @@ class ArticlesFragment : PagedListFragment<Article>(), Injectable {
 
     override fun onResume() {
         super.onResume()
-        mainViewModel.setCurrentScreen(Screens.STREAM_SCREEN)
         articlesViewModel.updateActiveTheme()
     }
 

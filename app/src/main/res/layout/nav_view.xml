@@ -50,42 +50,11 @@
                     android:paddingEnd="16dp"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
+                    android:gravity="center_vertical"
                     android:textStyle="bold"
                     android:textColor="@color/colorPrimaryText"
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_radio_24dp" />
-
-                <TextView
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:id="@+id/nav_themes"
-                    android:text="@string/themes"
-                    android:button="@null"
-                    android:drawablePadding="32dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimaryText"
-                    android:background="?selectableItemBackground"
-                    android:drawableStart="@drawable/ic_cast_24dp" />
-
-                <TextView
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:id="@+id/nav_pirates"
-                    android:text="@string/pirates"
-                    android:button="@null"
-                    android:drawablePadding="32dp"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimaryText"
-                    android:background="?selectableItemBackground"
-                    android:drawableStart="@drawable/ic_pirates" />
 
                 <TextView
                     android:layout_height="wrap_content"
@@ -99,9 +68,27 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
                     android:textStyle="bold"
+                    android:gravity="center_vertical"
                     android:textColor="@color/colorPrimaryText"
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_rss_feed_24dp" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_pirates"
+                    android:text="@string/pirates"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorPrimaryText"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_pirates" />
 
                 <TextView
                     android:layout_height="wrap_content"
@@ -116,6 +103,7 @@
                     android:paddingBottom="8dp"
                     android:textColor="@color/colorPrimaryText"
                     android:textStyle="bold"
+                    android:gravity="center_vertical"
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_chat_black_24dp" />
 
@@ -132,6 +120,7 @@
                     android:paddingBottom="8dp"
                     android:textColor="@color/colorPrimaryText"
                     android:textStyle="bold"
+                    android:gravity="center_vertical"
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_settings_24dp" />
 
@@ -148,13 +137,18 @@
                     android:paddingBottom="8dp"
                     android:textColor="@color/colorPrimaryText"
                     android:textStyle="bold"
+                    android:gravity="center_vertical"
                     android:background="?selectableItemBackground"
                     android:drawableStart="@drawable/ic_info_24dp" />
 
             </LinearLayout>
         </ScrollView>
 
-
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/colorDivider"
+            app:layout_constraintBottom_toTopOf="@+id/time_left"/>
         <TextView
             android:id="@+id/time_left"
             android:layout_width="0dp"

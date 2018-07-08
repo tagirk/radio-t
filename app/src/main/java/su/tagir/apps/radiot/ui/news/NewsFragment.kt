@@ -3,7 +3,6 @@ package su.tagir.apps.radiot.ui.news
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.MainViewModel
@@ -24,17 +23,12 @@ class NewsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.Call
         mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
     }
 
-    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(NewsViewModel::class.java)
+    override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(NewsViewModel::class.java)
 
     override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_NEWS, null, this)
 
     override fun onClick(entry: Entry) {
         (listViewModel as NewsViewModel).onEntryClick(entry)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mainViewModel.setCurrentScreen(Screens.NEWS_SCREEN)
     }
 
     override fun download(entry: Entry) {}
