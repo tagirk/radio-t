@@ -1,9 +1,11 @@
 package su.tagir.apps.radiot.model.db
 
-import android.arch.lifecycle.LiveData
 import android.arch.paging.DataSource
 import android.arch.persistence.room.*
 import android.database.Cursor
+import io.reactivex.Flowable
+import io.reactivex.Maybe
+import io.reactivex.Single
 import su.tagir.apps.radiot.model.entries.*
 import su.tagir.apps.radiot.utils.timeOfDay
 import timber.log.Timber
@@ -22,12 +24,10 @@ abstract class EntryDao {
             "${Entry.DATE} = :date, " +
             "${Entry.IMAGE} = :image, " +
             "${Entry.SHOWNOTES} = :showNotes, " +
-            "${Entry.FILE_NAME} = :fileName, " +
-            "${Entry.CATEGORIES} = :categories " +
+            "${Entry.FILE_NAME} = :fileName " +
             "WHERE ${Entry.URL} = :url")
     abstract fun updateEntry(url: String, title: String, audioUrl: String?, body: String?,
-                             date: Date, image: String?, showNotes: String?, fileName: String?,
-                             categories: List<String>?)
+                             date: Date, image: String?, showNotes: String?, fileName: String?)
 
     @Query("SELECT ${Entry.URL} FROM ${Entry.TABLE_NAME} WHERE ${Entry.URL} = :url")
     abstract fun findUrl(url: String): String?
@@ -41,10 +41,13 @@ abstract class EntryDao {
     }
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.URL} = :url LIMIT 1")
-    abstract fun getEntry(url: String?): LiveData<Entry?>
+    abstract fun getEntry(url: String?): Maybe<Entry?>
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.CATEGORIES} IN (:categories) ORDER BY ${Entry.DATE} DESC")
     abstract fun getEntries(categories: Array<out String>): DataSource.Factory<Int, Entry>
+
+    @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.CATEGORIES} IN (:categories) AND ${Entry.FILE} != '' ORDER BY ${Entry.DATE} DESC")
+    abstract fun getDownloadedEntries(categories: Array<out String>): DataSource.Factory<Int, Entry>
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.STATE} = :state WHERE ${Entry.STATE} != :state")
     abstract fun resetStates(state: Int): Int
@@ -72,7 +75,7 @@ abstract class EntryDao {
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} " +
             "WHERE state = ${EntryState.PAUSED} OR state = ${EntryState.PLAYING} LIMIT 1")
-    abstract fun getCurrentEntryLive(): LiveData<Entry>
+    abstract fun getCurrentEntryLive(): Flowable<Entry>
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.STATE} = ${EntryState.PAUSED} OR ${Entry.STATE} = ${EntryState.PLAYING} LIMIT 1")
     abstract fun getCurrentEntryCursor(): Cursor
@@ -140,23 +143,32 @@ abstract class EntryDao {
 
     @Query("SELECT * FROM ${TimeLabel.TABLE_NAME} " +
             "WHERE ${TimeLabel.PODCAST_TIME} = :podcastTime ORDER BY ${TimeLabel.TIME} DESC")
-    abstract fun getTimeLabels(podcastTime: Date?): LiveData<List<TimeLabel>>
+    abstract fun getTimeLabels(podcastTime: Date?): Flowable<List<TimeLabel>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertSearchResult(searchResult: SearchResult?)
 
     @Query("SELECT * FROM ${SearchResult.TABLE_NAME} WHERE ${SearchResult.QUERY} = :query")
-    abstract fun findSearchResult(query: String): SearchResult?
+    abstract fun findSearchResult(query: String?): SearchResult?
 
     @Query("SELECT * FROM ${SearchResult.TABLE_NAME} WHERE ${SearchResult.QUERY} = :query")
-    abstract fun findSearchResultLive(query: String): LiveData<SearchResult>
+    abstract fun findSearchResultLive(query: String): Flowable<SearchResult>
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.URL} IN (:ids) ORDER BY ${Entry.DATE} DESC")
-    abstract fun loadById(ids: List<String>): LiveData<List<Entry>>
+    abstract fun loadById(ids: List<String>): Single<List<Entry>>
 
     @Transaction
     open fun saveSearchResult(searchResult: SearchResult?, entries: List<RTEntry>) {
         insertSearchResult(searchResult)
+        saveEntries(entries)
+    }
+
+    @Transaction
+    open fun mergeAndsaveSearchResult(query: String,  entries: List<RTEntry>) {
+        val current = findSearchResult(query)?: SearchResult(query, emptyList())
+        val merged = current.ids.toMutableList()
+        merged.addAll(entries.map { it.url })
+        insertSearchResult(SearchResult(query, merged))
         saveEntries(entries)
     }
 
@@ -172,7 +184,7 @@ abstract class EntryDao {
                 insertEntry(Entry(entry))
             } else {
                 updateEntry(entry.url, entry.title, entry.audioUrl, entry.body, entry.date,
-                        entry.image, entry.showNotes, entry.fileName, entry.categories)
+                        entry.image, entry.showNotes, entry.fileName)
             }
             entry
                     .timeLabels

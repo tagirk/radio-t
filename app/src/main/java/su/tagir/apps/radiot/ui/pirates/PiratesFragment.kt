@@ -10,16 +10,15 @@ import android.widget.Toast
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.ListFragment
+import su.tagir.apps.radiot.ui.common.PagedListFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import javax.inject.Inject
 
 @RuntimePermissions
-class PiratesFragment :ListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
+class PiratesFragment :PagedListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -44,7 +43,7 @@ class PiratesFragment :ListFragment<Entry>(), Injectable, EntriesAdapter.Callbac
         (listViewModel as PiratesViewModel).stopStatusTimer()
     }
 
-    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(PiratesViewModel::class.java)
+    override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(PiratesViewModel::class.java)
 
     override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this), this)
 
@@ -81,8 +80,6 @@ class PiratesFragment :ListFragment<Entry>(), Injectable, EntriesAdapter.Callbac
 //        (listViewModel as PodcastsViewModel).openChatLog(entry)
     }
 
-    override fun onBackPressed() {
-    }
 
     @SuppressLint("NeedOnRequestPermissionsResult")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -91,11 +88,11 @@ class PiratesFragment :ListFragment<Entry>(), Injectable, EntriesAdapter.Callbac
 
     private fun observeViewModel() {
         (listViewModel as PiratesViewModel)
-                .error
+                .getDownloadError()
                 .observe(getViewLifecycleOwner()!!,
                         Observer {
                             if (it != null) {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                showToast(it)
                             }
                         })
     }

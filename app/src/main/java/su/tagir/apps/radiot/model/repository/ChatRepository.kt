@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.model.repository
 
+import android.arch.paging.RxPagedListBuilder
 import com.google.gson.Gson
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
@@ -14,6 +15,7 @@ import su.tagir.apps.radiot.model.db.GitterDao
 import su.tagir.apps.radiot.model.entries.Event
 import su.tagir.apps.radiot.model.entries.GitterMessage
 import su.tagir.apps.radiot.model.entries.Token
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,7 +26,8 @@ class ChatRepository @Inject constructor(private val authClient: GitterAuthClien
                                          private val gitterClient: GitterClient,
                                          private val gitterDao: GitterDao,
                                          private val authHolder: Prefs,
-                                         private val gson: Gson) {
+                                         private val gson: Gson,
+                                         private val scheduler: BaseSchedulerProvider) {
 
     private val roomId = "5738c079c43b8c6019730ee3"
 //    private val roomId = "5a832dffd73408ce4f8d0021"
@@ -50,36 +53,31 @@ class ChatRepository @Inject constructor(private val authClient: GitterAuthClien
 
     fun getMessageStream(): Flowable<GitterMessage?> {
         return streamClient.getRoomMessagesStream(roomId)
-                .flatMap { responseBody ->
-                    events(responseBody.source())
-                }
+                .flatMap { responseBody -> events(responseBody.source()) }
                 .filter { checkIfValidMessageJson(it) }
                 .map {gson.fromJson(it, GitterMessage::class.java) }
+                .observeOn(scheduler.diskIO())
                 .doOnNext { gitterDao.saveMessage(it) }
     }
 
     fun getEventsStream(): Flowable<Event?> {
         return streamClient.getRoomEventsStream(roomId)
-                .doOnNext { Timber.d("event: $it") }
                 .flatMap { responseBody -> events(responseBody.source()) }
                 .filter { checkIfValidMessageJson(it) }
-
                 .map { gson.fromJson(it, Event::class.java) }
     }
 
-    fun updateMessages(): Completable {
-        return gitterClient.getRoomMessages(roomId, 50, null)
-                .doOnSuccess { gitterDao.updateMessages(it) }
-                .toCompletable()
-    }
-
-    fun loadMessages(lastId: String?): Completable {
+    fun loadMessages(lastId: String?=null): Completable {
         return gitterClient.getRoomMessages(roomId, 50, lastId)
+                .observeOn(scheduler.diskIO())
                 .doOnSuccess { gitterDao.saveMessages(it) }
                 .toCompletable()
     }
 
-    fun getMessages() = gitterDao.getMessages()
+    fun getMessages() = RxPagedListBuilder(gitterDao.getMessages(), 50)
+            .setFetchScheduler(scheduler.diskIO())
+            .setNotifyScheduler(scheduler.ui())
+            .buildFlowable(BackpressureStrategy.BUFFER)
 
     private fun events(source: BufferedSource): Flowable<String?> {
         return Flowable.create({ emitter ->

@@ -25,7 +25,7 @@
         android:layout_marginTop="16dp"
         android:layout_toEndOf="@+id/avatar_image"
         android:layout_toStartOf="@+id/time_text"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/colorUrl"
         android:textStyle="bold"
         tools:text="Nickname" />
 

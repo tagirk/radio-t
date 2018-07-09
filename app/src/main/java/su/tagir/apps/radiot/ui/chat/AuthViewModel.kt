@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.ui.chat
 
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import io.reactivex.Single
 import ru.terrakok.cicerone.Router
@@ -8,7 +9,8 @@ import su.tagir.apps.radiot.model.repository.ChatRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.SingleLiveEvent
 import su.tagir.apps.radiot.ui.viewmodel.BaseViewModel
-import su.tagir.apps.radiot.ui.viewmodel.ViewModelState
+import su.tagir.apps.radiot.ui.viewmodel.State
+import su.tagir.apps.radiot.ui.viewmodel.Status
 import timber.log.Timber
 import java.net.URI
 import javax.inject.Inject
@@ -18,9 +20,8 @@ class AuthViewModel @Inject constructor(scheduler: BaseSchedulerProvider,
                                         private val router: Router) : BaseViewModel(scheduler) {
 
 
-    val authEvent = SingleLiveEvent<String>()
-    val message = SingleLiveEvent<String?>()
-    val state = MutableLiveData<ViewModelState>()
+    private val authEvent = SingleLiveEvent<String>()
+    private val state = MutableLiveData<State<Void>>()
 
     var authParams: AuthParams? = null
 
@@ -42,8 +43,11 @@ class AuthViewModel @Inject constructor(scheduler: BaseSchedulerProvider,
         router.exit()
     }
 
+    fun state(): LiveData<State<Void>> = state
+
+    fun authEvent(): LiveData<String> = authEvent
+
     private fun requestToken(redirectString: String?) {
-        state.value = ViewModelState.LOADING
         val disposable =
                 Single.fromCallable { getQueryParameterFromUri(redirectString, "code") }
                         .flatMap { code ->
@@ -54,16 +58,15 @@ class AuthViewModel @Inject constructor(scheduler: BaseSchedulerProvider,
                                             code,
                                             authParams?.redirectUrl)
                         }
-                        .subscribeOn(scheduler.io())
                         .observeOn(scheduler.ui())
+                        .doOnSubscribe {  state.value = State(Status.LOADING) }
                         .subscribe({
                             router.newRootScreen(Screens.CHAT_SCREEN)
-                            state.value = ViewModelState.COMPLETE
+                            state.value = State(Status.SUCCESS)
                         },
                                 {
                                     Timber.e(it)
-                                    message.value = it.message
-                                    state.value = ViewModelState.error(it.message)
+                                    state.value = State(Status.ERROR, errorMessage = it.message)
                                 })
 
         addDisposable(disposable)

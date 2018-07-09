@@ -7,11 +7,11 @@ import android.view.View
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Host
-import su.tagir.apps.radiot.ui.common.ListFragment
+import su.tagir.apps.radiot.ui.common.PagedListFragment
 import javax.inject.Inject
 
 
-class HostsFragment : ListFragment<Host>(), Injectable, HostsAdapter.Callback {
+class HostsFragment : PagedListFragment<Host>(), Injectable, HostsAdapter.Callback {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory

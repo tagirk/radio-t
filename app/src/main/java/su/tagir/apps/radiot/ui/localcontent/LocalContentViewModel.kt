@@ -2,44 +2,34 @@ package su.tagir.apps.radiot.ui.localcontent
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
-import android.arch.lifecycle.ViewModel
+import io.reactivex.rxkotlin.plusAssign
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.common.AbsentLiveData
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.viewmodel.BaseViewModel
+import timber.log.Timber
 import javax.inject.Inject
 
 class LocalContentViewModel
 @Inject constructor(private val entryRepository: EntryRepository,
-                    private val router: Router) : ViewModel() {
+                    private val router: Router,
+                    scheduler: BaseSchedulerProvider) : BaseViewModel(scheduler) {
 
-    private val entryId = MutableLiveData<String?>()
-    private val entry: LiveData<Entry?>
+    private val entry = MutableLiveData<Entry>()
 
-
-    init {
-        entry = Transformations.switchMap(entryId, { id ->
-            if (id == null) {
-                AbsentLiveData()
-            } else {
-                entryRepository.getEntry(id)
-            }
-        })
-    }
 
     fun setId(id: String?) {
-        entryId.value = id
+        disposable += entryRepository.getEntry(id)
+                .subscribe({
+                    entry.postValue(it)
+                }, { Timber.e(it) })
     }
 
-    fun getEntry() = entry
+    fun getEntry(): LiveData<Entry> = entry
 
     fun openInBrowser() {
         router.navigateTo(Screens.WEB_SCREEN, entry.value?.url)
-    }
-
-    fun onBackPressed() {
-        router.exit()
     }
 }

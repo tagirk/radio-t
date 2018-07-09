@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.NavigationView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_view"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:fitsSystemWindows="true"
+    app:itemIconTint="@color/colorPrimaryText"
+    app:itemTextColor="@color/colorPrimaryText">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/stream_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/header"
+            layout="@layout/nav_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@id/time_left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/header">
+
+            <LinearLayout
+                android:id="@+id/nav_items"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_podcats"
+                    android:text="@string/podcasts"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center_vertical"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimaryText"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_radio_24dp" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_news"
+                    android:text="@string/news"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorPrimaryText"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_rss_feed_24dp" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_pirates"
+                    android:text="@string/pirates"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/colorPrimaryText"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_pirates" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_chat"
+                    android:text="@string/chat"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@color/colorPrimaryText"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_chat_black_24dp" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_settings"
+                    android:text="@string/settings"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@color/colorPrimaryText"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_settings_24dp" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/nav_about"
+                    android:text="@string/about"
+                    android:button="@null"
+                    android:drawablePadding="32dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@color/colorPrimaryText"
+                    android:textStyle="bold"
+                    android:gravity="center_vertical"
+                    android:background="?selectableItemBackground"
+                    android:drawableStart="@drawable/ic_info_24dp" />
+
+            </LinearLayout>
+        </ScrollView>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/colorDivider"
+            app:layout_constraintBottom_toTopOf="@+id/time_left"/>
+        <TextView
+            android:id="@+id/time_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:textColor="@color/colorPrimaryText"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/play"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/play"
+            style="?borderlessButtonStyle"
+            android:layout_width="56dp"
+            android:layout_height="0dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_play_circle_filled_48dp"
+            app:layout_constraintBottom_toBottomOf="@id/time_left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/time_left"
+            app:layout_constraintTop_toTopOf="@+id/time_left"
+            tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/pause"
+            style="?borderlessButtonStyle"
+            android:layout_width="56dp"
+            android:layout_height="0dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_pause_circle_filled_48dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/time_left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/time_left"
+            app:layout_constraintTop_toTopOf="@+id/time_left"
+            tools:ignore="ContentDescription" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.design.widget.NavigationView>

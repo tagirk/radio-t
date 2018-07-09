@@ -6,16 +6,19 @@ import dagger.Binds
 import dagger.MapKey
 import dagger.Module
 import dagger.multibindings.IntoMap
+import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.chat.AuthViewModel
 import su.tagir.apps.radiot.ui.chat.ChatViewModel
 import su.tagir.apps.radiot.ui.hosts.HostsViewModel
 import su.tagir.apps.radiot.ui.localcontent.LocalContentViewModel
+import su.tagir.apps.radiot.ui.news.ArticlesViewModel
 import su.tagir.apps.radiot.ui.news.NewsViewModel
 import su.tagir.apps.radiot.ui.pirates.PiratesViewModel
+import su.tagir.apps.radiot.ui.pirates.downloaded.DownloadedPiratesViewModel
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastsViewModel
+import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsViewModel
 import su.tagir.apps.radiot.ui.search.SearchViewModel
-import su.tagir.apps.radiot.ui.stream.StreamViewModel
 import su.tagir.apps.radiot.ui.viewmodel.ViewModelFactory
 import kotlin.reflect.KClass
 
@@ -24,8 +27,23 @@ abstract class ViewModelModule {
 
     @Binds
     @IntoMap
+    @ViewModelKey(MainViewModel::class)
+    abstract fun bindMainViewModel(mainViewModel: MainViewModel): ViewModel
+
+    @Binds
+    @IntoMap
     @ViewModelKey(PodcastsViewModel::class)
     abstract fun bindPodcastsViewModel(podcastsViewModel: PodcastsViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(DownloadedPodcastsViewModel::class)
+    abstract fun bindDownloadedPodcastsViewModel(downloadedPodcastsViewModel: DownloadedPodcastsViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(DownloadedPiratesViewModel::class)
+    abstract fun bindDownloadedPiratesViewModel(downloadedPiratesViewModel: DownloadedPiratesViewModel): ViewModel
 
     @Binds
     @IntoMap
@@ -54,8 +72,8 @@ abstract class ViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(StreamViewModel::class)
-    abstract fun streamViewModel(streamViewModel: StreamViewModel): ViewModel
+    @ViewModelKey(ArticlesViewModel::class)
+    abstract fun streamViewModel(articlesViewModel: ArticlesViewModel): ViewModel
 
     @Binds
     @IntoMap

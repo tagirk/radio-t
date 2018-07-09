@@ -65,8 +65,6 @@ abstract class BaseFragment : Fragment() {
 
     abstract fun createView(inflater: LayoutInflater, container: ViewGroup?): View
 
-    open fun onBackPressed(){}
-
     protected fun showToast(message:String){
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }

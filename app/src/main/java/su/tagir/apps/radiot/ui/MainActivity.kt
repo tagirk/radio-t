@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.ui
 
+import android.animation.ValueAnimator
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
@@ -11,16 +12,30 @@ import android.content.ServiceConnection
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteException
 import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.BottomSheetBehavior
-import android.support.design.widget.CoordinatorLayout
+import android.support.design.widget.NavigationView
+import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
+import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.graphics.drawable.DrawerArrowDrawable
+import android.support.v7.widget.Toolbar
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import butterknife.BindColor
 import butterknife.BindDimen
 import butterknife.BindView
@@ -34,26 +49,36 @@ import ru.terrakok.cicerone.commands.Forward
 import saschpe.android.customtabs.CustomTabsHelper
 import saschpe.android.customtabs.WebViewFallback
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
-import su.tagir.apps.radiot.model.entries.EntryState
+import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.service.IAudioService
 import su.tagir.apps.radiot.service.IAudioServiceCallback
 import su.tagir.apps.radiot.ui.chat.ChatActivity
-import su.tagir.apps.radiot.ui.common.BaseFragment
+import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
+import su.tagir.apps.radiot.ui.news.NewsFragment
+import su.tagir.apps.radiot.ui.news.NewsTabsFragment
+import su.tagir.apps.radiot.ui.pirates.PiratesFragment
+import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
+import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
+import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
-import su.tagir.apps.radiot.ui.settings.SettingsActivity
+import su.tagir.apps.radiot.ui.settings.AboutFragment
+import su.tagir.apps.radiot.ui.settings.CreditsFragment
+import su.tagir.apps.radiot.ui.settings.SettingsFragment
 import su.tagir.apps.radiot.utils.visibleGone
+import su.tagir.apps.radiot.utils.visibleInvisible
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
-        HasSupportFragmentInjector, ServiceConnection {
+        HasSupportFragmentInjector, ServiceConnection, View.OnClickListener {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
@@ -70,6 +95,20 @@ class MainActivity : AppCompatActivity(),
     @BindView(R.id.fragment_container)
     lateinit var fragmentContainer: FrameLayout
 
+    @BindView(R.id.drawer_layout)
+    lateinit var drawerLayout: DrawerLayout
+
+    @BindView(R.id.nav_view)
+    lateinit var navigationView: NavigationView
+
+    @BindView(R.id.toolbar)
+    lateinit var toolbar: Toolbar
+
+    private lateinit var timeLeft: TextView
+    private lateinit var playStream: ImageButton
+    private lateinit var pauseStream: ImageButton
+    private lateinit var homeDrawable: DrawerArrowDrawable
+
     @JvmField
     @BindColor(R.color.colorPrimary)
     var primaryColor: Int = 0
@@ -84,24 +123,68 @@ class MainActivity : AppCompatActivity(),
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     private lateinit var playerViewModel: PlayerViewModel
+    private lateinit var mainViewModel: MainViewModel
 
     private val serviceCallback = AudioServiceCallback(this)
 
     private var audioService: IAudioService? = null
 
+    private val handler = Handler()
+
     private val currentFragment
-        get() = supportFragmentManager.findFragmentById(R.id.fragment_container) as BaseFragment?
+        get() = supportFragmentManager.findFragmentById(R.id.fragment_container)
+
+    private var isHomeAsUp = false
+        set(value) {
+            if (field != value) {
+                field = value
+                val anim = if (value) ValueAnimator.ofFloat(0f, 1f) else ValueAnimator.ofFloat(1f, 0f)
+                anim.addUpdateListener { valueAnimator ->
+                    val slideOffset = valueAnimator.animatedValue as Float
+                    homeDrawable.progress = slideOffset
+                }
+                anim.interpolator = DecelerateInterpolator()
+
+                anim.duration = 300
+                anim.start()
+            }
+            drawerLayout.setDrawerLockMode(if (value) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         ButterKnife.bind(this)
+        setSupportActionBar(toolbar)
+
+        homeDrawable = DrawerArrowDrawable(toolbar.context)
+        toolbar.navigationIcon = homeDrawable
+        toolbar.setNavigationOnClickListener {
+            when {
+                drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
+                isHomeAsUp -> onBackPressed()
+                else -> drawerLayout.openDrawer(GravityCompat.START)
+            }
+        }
+
+        val navItems = navigationView.findViewById<LinearLayout>(R.id.nav_items)
+
+        for (i in 0 until navItems.childCount) {
+            navItems.getChildAt(i).setOnClickListener(this)
+        }
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.setBottomSheetCallback(BottomSheetCallback())
 
+        timeLeft = findViewById(R.id.time_left)
+        playStream = findViewById(R.id.play)
+        playStream.setOnClickListener { playerViewModel.onPlayStreamClick() }
+        pauseStream = findViewById(R.id.pause)
+        pauseStream.setOnClickListener { playerViewModel.onPauseClick() }
+
         playerViewModel = getViewModel(PlayerViewModel::class.java)
+        mainViewModel = getViewModel(MainViewModel::class.java)
 
         observe()
 
@@ -112,6 +195,20 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater?.inflate(R.menu.menu_main, menu)
+        menu?.findItem(R.id.search)?.isVisible = currentFragment is PodcastTabsFragment
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.search -> mainViewModel.navigateToSearch()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         outState?.putInt("state", bottomSheetBehavior.state)
@@ -120,10 +217,11 @@ class MainActivity : AppCompatActivity(),
     override fun onStart() {
         super.onStart()
         bindService()
+        mainViewModel.start()
     }
 
     override fun onStop() {
-        super.onStop()
+        handler.removeCallbacksAndMessages(null)
         try {
             audioService?.unregisterCallback(serviceCallback)
             audioService?.onActivityStopped()
@@ -131,6 +229,8 @@ class MainActivity : AppCompatActivity(),
             Timber.e(e)
         }
         unbindService(this)
+        mainViewModel.stop()
+        super.onStop()
     }
 
     override fun onResumeFragments() {
@@ -144,14 +244,43 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        } else {
-            currentFragment?.onBackPressed() ?: super.onBackPressed()
+        when {
+            bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED -> bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
+            currentFragment is BackClickHandler -> (currentFragment as BackClickHandler).onBackClick()
+            else -> super.onBackPressed()
         }
     }
 
     override fun supportFragmentInjector() = dispatchingAndroidInjector
+
+    override fun onClick(v: View?) {
+        drawerLayout.closeDrawer(GravityCompat.START)
+        when (v?.id) {
+            R.id.nav_podcats -> {
+                if (currentFragment !is PodcastsFragment) {
+                    mainViewModel.navigateToPodcasts()
+                }
+            }
+            R.id.nav_news -> {
+                if (currentFragment !is NewsFragment) {
+                    mainViewModel.navigateToNews()
+                }
+            }
+            R.id.nav_settings -> mainViewModel.navigateToSettings()
+            R.id.nav_chat -> mainViewModel.navigateToChat()
+            R.id.nav_pirates -> {
+                if (currentFragment !is PiratesFragment) {
+                    mainViewModel.navigateToPirates()
+                }
+            }
+            R.id.nav_about -> {
+                if (currentFragment !is AboutFragment) {
+                    mainViewModel.navigateToAbout()
+                }
+            }
+        }
+    }
 
     override fun onServiceDisconnected(name: ComponentName?) {
         try {
@@ -179,9 +308,9 @@ class MainActivity : AppCompatActivity(),
                         Observer { entry ->
                             bottomSheet.visibleGone(entry != null)
                             setBottomMargin(if (entry != null) peekHeight else 0)
-
+                            showHideBtnStream(entry?.url == STREAM_URL && entry.state == PLAYING)
                             when (entry?.state) {
-                                EntryState.PLAYING -> {
+                                PLAYING -> {
                                     if (audioService == null) {
                                         bindService()
                                     }
@@ -192,7 +321,7 @@ class MainActivity : AppCompatActivity(),
                         })
 
         playerViewModel
-                .seekEvent
+                .seekEvent()
                 .observe(this,
                         Observer {
                             if (it != null) {
@@ -205,24 +334,76 @@ class MainActivity : AppCompatActivity(),
                         })
 
         playerViewModel
-                .requestProgressEvent
+                .requestProgressEvent()
                 .observe(this,
                         Observer {
                             val progress = Progress()
                             try {
                                 audioService?.getProgress(progress)
-                                playerViewModel.progress.postValue(progress)
+                                playerViewModel.setProgress(progress)
                             } catch (e: RemoteException) {
                                 Timber.e(e)
                             }
                         })
 
         playerViewModel
-                .expandEvent
+                .expandEvent()
                 .observe(this, Observer {
-                    Timber.d("expand")
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 })
+
+        mainViewModel
+                .getCurrentScreen()
+                .observe(this, Observer {
+                    dismissKeyboard(fragmentContainer.windowToken)
+                    when (it) {
+                        Screens.SETTINGS_SCREEN -> {
+                            isHomeAsUp = true
+                            toolbar.setTitle(R.string.settings)
+                        }
+                        Screens.PODCASTS_SCREEN -> {
+                            isHomeAsUp = false
+                            toolbar.setTitle(R.string.podcasts)
+                        }
+                        Screens.NEWS_SCREEN -> {
+                            isHomeAsUp = false
+                            toolbar.setTitle(R.string.news)
+                        }
+                        Screens.PIRATES_SCREEN -> {
+                            isHomeAsUp = false
+                            toolbar.setTitle(R.string.pirates)
+                        }
+                        Screens.SEARCH_SCREEN -> {
+                            isHomeAsUp = true
+                            toolbar.title = null
+                        }
+                        Screens.ABOUT_SCREEN ->{
+                            isHomeAsUp = true
+                            toolbar.setTitle(R.string.about)
+                        }
+                        Screens.CREDITS_SCREEN ->{
+                            isHomeAsUp = true
+                            toolbar.setTitle(R.string.credits)
+                        }
+                        else -> {
+                            isHomeAsUp = true
+                            toolbar.title = it
+
+                        }
+                    }
+                    invalidateOptionsMenu()
+                })
+
+        mainViewModel.getTimer()
+                .observe(this, Observer {
+                    timeLeft.text = it
+                })
+
+    }
+
+    private fun showHideBtnStream(playing: Boolean) {
+        playStream.visibleInvisible(!playing)
+        pauseStream.visibleInvisible(playing)
     }
 
     private fun initBottomSheet() {
@@ -241,25 +422,36 @@ class MainActivity : AppCompatActivity(),
         if (currentFragment == null) {
             supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_container, MainFragment())
+                    .replace(R.id.fragment_container, PodcastTabsFragment())
                     .commitNowAllowingStateLoss()
         }
     }
 
     private fun <T : ViewModel> getViewModel(clazz: Class<T>): T = ViewModelProviders.of(this, viewModelFactory).get(clazz)
 
+    private fun dismissKeyboard(windowToken: IBinder?) {
+        val imm = getSystemService(
+                Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
+
+    }
+
     private val navigator = object : SupportAppNavigator(this, R.id.fragment_container) {
 
         override fun createActivityIntent(context: Context?, screenKey: String?, data: Any?): Intent? = when (screenKey) {
-            Screens.SETTINGS_SCREEN -> Intent(this@MainActivity, SettingsActivity::class.java)
             Screens.CHAT_ACTIVITY -> Intent(this@MainActivity, ChatActivity::class.java)
             else -> null
         }
 
         override fun createFragment(screenKey: String?, data: Any?): Fragment? = when (screenKey) {
-            Screens.MAIN_SCREEN -> MainFragment()
+            Screens.PODCASTS_SCREEN -> PodcastTabsFragment()
+            Screens.NEWS_SCREEN -> NewsTabsFragment()
             Screens.SEARCH_SCREEN -> SearchFragment()
             Screens.CONTENT_SCREEN -> LocalContentFragment.newInstance(data as String)
+            Screens.SETTINGS_SCREEN -> SettingsFragment()
+            Screens.PIRATES_SCREEN -> PiratesTabsFragment()
+            Screens.CREDITS_SCREEN -> CreditsFragment()
+            Screens.ABOUT_SCREEN -> AboutFragment()
             else -> null
         }
 
@@ -271,6 +463,15 @@ class MainActivity : AppCompatActivity(),
             } else {
                 super.applyCommand(command)
             }
+        }
+
+        override fun setupFragmentTransactionAnimation(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
+            fragmentTransaction?.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+        }
+
+        override fun createStartActivityOptions(command: Command?, activityIntent: Intent?): Bundle? {
+            val options = ActivityOptionsCompat.makeCustomAnimation(this@MainActivity, R.anim.fade_in, R.anim.fade_out)
+            return options.toBundle()
         }
 
         private fun openWithResolveActivity(url: String) {
@@ -299,16 +500,16 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun setBottomMargin(margin: Int) {
-        val params = fragmentContainer.layoutParams as CoordinatorLayout.LayoutParams
-        params.bottomMargin = margin
-        fragmentContainer.requestLayout()
+        fragmentContainer.setPadding(0, 0, 0, margin)
     }
+
 
     private fun bindService() {
         val intent = Intent(application, AudioService::class.java)
         intent.action = IAudioService::class.java.name
         bindService(intent, this, Context.BIND_AUTO_CREATE)
     }
+
 
     inner class BottomSheetCallback : BottomSheetBehavior.BottomSheetCallback() {
 
@@ -326,13 +527,13 @@ class MainActivity : AppCompatActivity(),
         private val weakRef = WeakReference(mainActivity)
 
         override fun onStateChanged(loading: Boolean, state: Int) {
-            if (weakRef.get()?.playerViewModel?.loading?.value != loading) {
-                weakRef.get()?.playerViewModel?.loading?.postValue(loading)
+            if (weakRef.get()?.playerViewModel?.isLoading()?.value != loading) {
+                weakRef.get()?.playerViewModel?.setLoading(loading)
             }
         }
 
         override fun onError(error: String?) {
-            weakRef.get()?.playerViewModel?.error?.postValue(error)
+            weakRef.get()?.playerViewModel?.setError(error)
         }
     }
 }

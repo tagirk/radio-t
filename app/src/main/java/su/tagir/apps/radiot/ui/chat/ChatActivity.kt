@@ -8,7 +8,9 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
+import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
 import butterknife.BindColor
 import butterknife.ButterKnife
@@ -104,6 +106,15 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
             } else {
                 super.applyCommand(command)
             }
+        }
+
+        override fun setupFragmentTransactionAnimation(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
+            fragmentTransaction?.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+        }
+
+        override fun createStartActivityOptions(command: Command?, activityIntent: Intent?): Bundle? {
+            val options = ActivityOptionsCompat.makeCustomAnimation(this@ChatActivity, R.anim.fade_in, R.anim.fade_out)
+            return options.toBundle()
         }
 
         private fun openWebPage(url: String) {

@@ -29,7 +29,7 @@ interface GitterClient {
     @GET("v1/rooms/{roomId}/chatMessages")
     fun getRoomMessages(@Path("roomId") roomId: String,
                         @Query("limit") limit: Int?,
-                        @Query("beforeId") before: String?): Single<List<GitterMessage>>
+                        @Query("beforeId") before: String? = null): Single<List<GitterMessage>>
 
     @GET("v1/rooms/{roomId}/chatMessages/{messageId}")
     fun getRoomMessageById(@Path("roomId") roomId: String,

@@ -4,15 +4,17 @@
     <color name="colorPrimaryDark">#1976D2</color>
     <color name="colorAccent">#FF5252</color>
     <color name="colorDivider">#BDBDBD</color>
-    <color name="colorPrimaryLight">#BBDEFB</color>
     <color name="colorPrimaryText">#212121</color>
     <color name="colorSecondaryText">#757575</color>
     <color name="colorIcons">#FFFFFF</color>
     <color name="colorBackground">#ffffff</color>
+    <color name="colorSplashBackground">#ffffff</color>
     <color name="colorPlayerBackground">#eeeeee</color>
+    <color name="colorTimeLabels">#aaffffff</color>
     <color name="colorActiveArticle">#1EFF5252</color>
-    <color name="colorLightGrey">#aaaaaa</color>
-
     <color name="ic_launcher_background">#2196F3</color>
+    <color name="colorUrl">#1976D2</color>
+    <color name="colorBlur">#ccffffff</color>
+    <color name="colorTabTextColor">#99FFFFFF</color>
 
 </resources>
