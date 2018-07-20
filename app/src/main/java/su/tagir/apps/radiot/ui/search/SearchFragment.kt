@@ -124,7 +124,9 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
         mainViewModel.openWebSite(entry.chatUrl)
     }
 
-
+    override fun onCommentsClick(entry: Entry) {
+        mainViewModel.showComments(entry)
+    }
     override fun removeQuery(position: Int) {
         if (recentQueriesAdapter.currentList != null) {
             viewModel.removeQuery(recentQueriesAdapter.currentList!![position])

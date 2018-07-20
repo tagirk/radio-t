@@ -4,6 +4,7 @@ import android.app.Application
 import android.arch.paging.PagedList
 import android.arch.paging.RxPagedListBuilder
 import io.reactivex.*
+import su.tagir.apps.radiot.model.api.RemarkClient
 import su.tagir.apps.radiot.model.api.RestClient
 import su.tagir.apps.radiot.model.db.EntryDao
 import su.tagir.apps.radiot.model.entries.Entry
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 
 @Singleton
 class EntryRepository @Inject constructor(private val restClient: RestClient,
+                                          private val remarkClient: RemarkClient,
                                           private val entryDao: EntryDao,
                                           private val downloadManager: DownloadManager,
                                           private val application: Application,
@@ -41,6 +43,10 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
                     .getPosts(PAGE_SIZE, "podcast")
                     .observeOn(scheduler.diskIO())
                     .doOnSuccess { entryDao.saveRadioTEntries(it) }
+                    .map { entries -> entries.map { it.url } }
+                    .flatMap { remarkClient.getCommentsCount(urls = it) }
+                    .observeOn(scheduler.diskIO())
+                    .doOnSuccess { entryDao.updateEntriesCommentsCount(it) }
                     .toCompletable()
 
     fun refreshPirates(): Completable {

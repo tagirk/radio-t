@@ -40,4 +40,8 @@ class NewsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.Call
 
     override fun openChatLog(entry: Entry) {
     }
+
+    override fun onCommentsClick(entry: Entry) {
+        mainViewModel.showComments(entry)
+    }
 }

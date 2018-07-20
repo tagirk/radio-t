@@ -36,7 +36,8 @@ data class Entry(
         val state: Int = EntryState.IDLE,
         val file: String? = null,
         val downloadId: Long = -1L,
-        val downloadProgress: Int = -1) {
+        val downloadProgress: Int = -1,
+        val commentsCount: Int = 0) {
 
     @Ignore
     constructor(cv: ContentValues) :
@@ -52,7 +53,8 @@ data class Entry(
                     progress = cv.getAsLong(Entry.PROGRESS),
                     state = cv.getAsInteger("state") ?: EntryState.IDLE,
                     file = cv.getAsString("file") ?: null,
-                    downloadProgress = cv.getAsInteger(Entry.DOWNLOAD_PROGRESS))
+                    downloadProgress = cv.getAsInteger(Entry.DOWNLOAD_PROGRESS),
+                    commentsCount = cv.getAsInteger("commentsCount"))
 
     @Ignore
     constructor(c: Cursor) :
@@ -68,7 +70,8 @@ data class Entry(
                     progress = c.getLong(c.getColumnIndexOrThrow(Entry.PROGRESS)),
                     state = c.getInt(c.getColumnIndexOrThrow("state")),
                     file = c.getString(c.getColumnIndexOrThrow("file")),
-                    downloadProgress = c.getColumnIndexOrThrow(Entry.DOWNLOAD_PROGRESS))
+                    downloadProgress = c.getInt(c.getColumnIndexOrThrow(Entry.DOWNLOAD_PROGRESS)),
+                    commentsCount = c.getInt(c.getColumnIndexOrThrow("commentsCount")))
 
     @Ignore
     constructor(rtEntry: RTEntry) :
@@ -85,7 +88,8 @@ data class Entry(
                     state = EntryState.IDLE,
                     file = null,
                     downloadId = -1,
-                    downloadProgress = -1)
+                    downloadProgress = -1,
+                    commentsCount =  0)
 
     val chatUrl
         get() = "https://chat.radio-t.com/logs/radio-t-${title?.substring(8)}.html"

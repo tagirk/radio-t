@@ -49,6 +49,8 @@ class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, p
         fun openWebSite(entry: Entry)
 
         fun openChatLog(entry: Entry)
+
+        fun onCommentsClick(entry: Entry)
     }
 
     companion object {

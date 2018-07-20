@@ -4,6 +4,8 @@ apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
+apply plugin: "io.mironov.smuggler"
+
 android {
     buildToolsVersion buildToolsProjectVersion
     compileSdkVersion compileSdkProjectVersion

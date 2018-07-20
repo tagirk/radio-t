@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.ui.common
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
@@ -20,6 +21,7 @@ import butterknife.*
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
@@ -28,7 +30,7 @@ import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 
 
-class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) :  DataBoundViewHolder<Entry>(view) {
+class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view) {
 
     @BindView(R.id.title)
     lateinit var title: TextView
@@ -59,7 +61,7 @@ class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
 }
 
 class PodcastViewHolder(view: View,
-                        private val type:Int,
+                        private val type: Int,
                         private val glide: GlideRequests?,
                         private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view), MenuItem.OnMenuItemClickListener {
 
@@ -87,6 +89,9 @@ class PodcastViewHolder(view: View,
     @BindView(R.id.show_notes)
     lateinit var showNotes: TextView
 
+    @BindView(R.id.comments)
+    lateinit var comments: TextView
+
     @JvmField
     @BindDimen(R.dimen.item_image_corner_radius)
     var cornerRadius: Int = 0
@@ -105,6 +110,7 @@ class PodcastViewHolder(view: View,
         ButterKnife.bind(this, view)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun bind(t: Entry?) {
         if (t == null) {
             return
@@ -151,11 +157,12 @@ class PodcastViewHolder(view: View,
             } else {
                 menu?.add(Menu.NONE, ITEM_DELETE, 1, R.string.delete)?.setOnMenuItemClickListener(this)
             }
-            if(type== EntriesAdapter.TYPE_PODCAST) {
+            if (type == EntriesAdapter.TYPE_PODCAST) {
                 menu?.add(Menu.NONE, ITEM_WEB, 2, R.string.web)?.setOnMenuItemClickListener(this)
                 menu?.add(Menu.NONE, ITEM_CHAT, 3, R.string.chat_log)?.setOnMenuItemClickListener(this)
             }
         }
+        comments.text = "${t.commentsCount} COMMENTS"
     }
 
     @OnClick(R.id.root)
@@ -172,10 +179,15 @@ class PodcastViewHolder(view: View,
     fun onRemoveClick() {
         AlertDialog.Builder(itemView.context)
                 .setMessage("Удалить файл?")
-                .setPositiveButton("Да", { _, _ -> callback.remove(podcast) })
+                .setPositiveButton("Да") { _, _ -> callback.remove(podcast) }
                 .setNegativeButton("Нет", null)
                 .create()
                 .show()
+    }
+
+    @OnClick(R.id.comments)
+    fun showComments(){
+        callback.onCommentsClick(podcast)
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean {
@@ -213,7 +225,7 @@ class PodcastViewHolder(view: View,
     }
 }
 
-class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) :  DataBoundViewHolder<Entry>(view) {
+class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view) {
 
     @BindView(R.id.title)
     lateinit var title: TextView

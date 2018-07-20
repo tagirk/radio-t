@@ -51,12 +51,14 @@ import saschpe.android.customtabs.WebViewFallback
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
+import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.service.IAudioService
 import su.tagir.apps.radiot.service.IAudioServiceCallback
 import su.tagir.apps.radiot.ui.chat.ChatActivity
+import su.tagir.apps.radiot.ui.comments.CommentsFragment
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
@@ -452,6 +454,7 @@ class MainActivity : AppCompatActivity(),
             Screens.PIRATES_SCREEN -> PiratesTabsFragment()
             Screens.CREDITS_SCREEN -> CreditsFragment()
             Screens.ABOUT_SCREEN -> AboutFragment()
+            Screens.COMMENTS_SCREEN -> CommentsFragment.newInstance(data as Entry)
             else -> null
         }
 

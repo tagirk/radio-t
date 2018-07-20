@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import su.tagir.apps.radiot.ui.chat.AuthFragment
 import su.tagir.apps.radiot.ui.chat.ChatFragment
+import su.tagir.apps.radiot.ui.comments.CommentsFragment
 import su.tagir.apps.radiot.ui.hosts.HostsFragment
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.news.ArticlesFragment
@@ -77,4 +78,7 @@ abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
     abstract fun creditsFragment(): CreditsFragment
+
+    @ContributesAndroidInjector
+    abstract fun commentsFragment(): CommentsFragment
 }

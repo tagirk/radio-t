@@ -9,6 +9,7 @@ import dagger.multibindings.IntoMap
 import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.chat.AuthViewModel
 import su.tagir.apps.radiot.ui.chat.ChatViewModel
+import su.tagir.apps.radiot.ui.comments.CommentsViewModel
 import su.tagir.apps.radiot.ui.hosts.HostsViewModel
 import su.tagir.apps.radiot.ui.localcontent.LocalContentViewModel
 import su.tagir.apps.radiot.ui.news.ArticlesViewModel
@@ -89,6 +90,11 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(PiratesViewModel::class)
     abstract fun piratesViewModel(piratesViewModel: PiratesViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(CommentsViewModel::class)
+    abstract fun commentsViewModel(commentsViewModel: CommentsViewModel): ViewModel
 
     @Binds
     abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory

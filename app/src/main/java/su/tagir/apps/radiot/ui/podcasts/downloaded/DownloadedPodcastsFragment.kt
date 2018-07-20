@@ -48,6 +48,10 @@ class DownloadedPodcastsFragment: PagedListFragment<Entry>(), EntriesAdapter.Cal
         mainViewModel.openWebSite(entry.chatUrl)
     }
 
+    override fun onCommentsClick(entry: Entry) {
+        mainViewModel.showComments(entry)
+    }
+
     override fun remove(entry: Entry) {
         (listViewModel as DownloadedPodcastsViewModel).onRemoveClick(entry)
 

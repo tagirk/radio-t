@@ -4,10 +4,12 @@ import android.arch.persistence.room.TypeConverter
 import android.text.TextUtils
 import org.json.JSONArray
 import org.json.JSONObject
+import su.tagir.apps.radiot.model.entries.Edit
 import su.tagir.apps.radiot.model.entries.Mention
 import su.tagir.apps.radiot.model.entries.Url
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 object StringListConverter {
 
@@ -100,5 +102,67 @@ object MentionsListConverter {
         val json = JSONObject()
         json.put("list", objects)
         return json.toString()
+    }
+}
+
+object EditConverter {
+
+    @TypeConverter
+    @JvmStatic
+    fun fromJson(json: String?): Edit? {
+        if (json == null) {
+            return null
+        }
+        val jsonObject = JSONObject(json)
+        val time = jsonObject.getLong("time")
+        val summary = jsonObject.getString("summary")
+
+        return Edit(Date(time), summary)
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun toJson(edit: Edit?): String? {
+        if (edit == null) {
+            return null
+        }
+        val jsonObject = JSONObject()
+        jsonObject.put("time", edit.time.time)
+        jsonObject.put("summary", edit.summary)
+
+        return jsonObject.toString()
+    }
+}
+
+object VotesConverter {
+
+    @TypeConverter
+    @JvmStatic
+    fun fromJson(json: String?): Map<String, Boolean> {
+        if (json == null) {
+            return emptyMap()
+        }
+
+        val jsonObject = JSONObject(json)
+        val map = HashMap<String, Boolean>()
+        jsonObject
+                .keys()
+                .forEach {
+                    map[it] = jsonObject.getBoolean(it)
+                }
+        return map
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun toJson(votes: Map<String, Boolean>?): String? {
+        if (votes == null || votes.isEmpty()) {
+            return null
+        }
+        val jsonObject = JSONObject()
+        votes.entries.forEach {
+            jsonObject.put(it.key, it.value)
+        }
+        return jsonObject.toString()
     }
 }

@@ -29,7 +29,17 @@ abstract class EntryDao {
     abstract fun updateEntry(url: String, title: String, audioUrl: String?, body: String?,
                              date: Date, image: String?, showNotes: String?, fileName: String?)
 
-    @Query("SELECT ${Entry.URL} FROM ${Entry.TABLE_NAME} WHERE ${Entry.URL} = :url")
+    @Query("UPDATE entry SET commentsCount = :count WHERE url = :url")
+    abstract fun updateCommentsCount(url: String, count:Int)
+
+    @Transaction
+    open fun updateEntriesCommentsCount(infos:List<PostInfo>){
+        infos.forEach {
+            updateCommentsCount(it.url, it.count)
+        }
+    }
+
+    @Query("SELECT url FROM entry WHERE url = :url")
     abstract fun findUrl(url: String): String?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -18,5 +18,6 @@ object Screens {
     const val CHAT_START_SCREEN = "chat_start_screen"
     const val PIRATES_SCREEN = "pirates_screen"
     const val CREDITS_SCREEN = "credits_screen"
+    const val COMMENTS_SCREEN = "comments_screen"
 
 }

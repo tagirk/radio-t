@@ -44,10 +44,26 @@
         android:maxLines="1"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/show_notes"
-        app:layout_constraintEnd_toStartOf="@+id/btn_download"
+        app:layout_constraintEnd_toStartOf="@+id/comments"
         app:layout_constraintStart_toEndOf="@+id/image"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/comments"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:maxWidth="100dp"
+        android:layout_marginEnd="16dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="11sp"
+        android:gravity="bottom"
+        android:textColor="@color/colorAccent"
+        app:layout_constraintTop_toTopOf="@+id/title"
+        app:layout_constraintBottom_toBottomOf="@+id/title"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="SmallSp" />
 
     <TextView
         android:id="@+id/show_notes"
@@ -57,6 +73,7 @@
         android:layout_marginEnd="8dp"
         android:ellipsize="marquee"
         android:maxLines="3"
+        android:minLines="3"
         android:textSize="13sp"
         android:textColor="@color/colorSecondaryText"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -75,7 +92,7 @@
         android:src="@drawable/ic_cloud_download_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/comments"
         tools:ignore="ContentDescription" />
 
     <ImageButton
@@ -88,7 +105,7 @@
         android:src="@drawable/ic_delete_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/comments"
         tools:ignore="ContentDescription" />
 
     <ProgressBar
@@ -104,7 +121,7 @@
         android:progressDrawable="@drawable/circle_progress_bar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/comments" />
 
     <ImageView
         android:id="@+id/cancel"
@@ -112,7 +129,7 @@
         android:layout_height="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/comments"
         tools:ignore="ContentDescription"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="16dp"

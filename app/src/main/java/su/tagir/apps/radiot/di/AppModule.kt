@@ -51,6 +51,31 @@ class AppModule {
 
     @Singleton
     @Provides
+    fun provideRemarkClient(scheduler: BaseSchedulerProvider): RemarkClient {
+        val builder = Retrofit.Builder()
+                .baseUrl("https://remark42.radio-t.com/api/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
+
+        val dispatcher = Dispatcher()
+        dispatcher.maxRequests = 1
+        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
+
+        if (BuildConfig.DEBUG) {
+            val loggingInterceptor = HttpLoggingInterceptor()
+            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+
+            httpClient
+                    .addInterceptor(loggingInterceptor)
+
+        }
+        return builder.client(httpClient.build())
+                .build()
+                .create(RemarkClient::class.java)
+    }
+
+    @Singleton
+    @Provides
     fun provideNewsApiClient(scheduler: BaseSchedulerProvider): NewsRestClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://news.radio-t.com/api/v1/")

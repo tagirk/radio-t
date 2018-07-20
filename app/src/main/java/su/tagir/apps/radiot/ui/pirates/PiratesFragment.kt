@@ -10,6 +10,7 @@ import android.widget.Toast
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
+import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
@@ -78,6 +79,10 @@ class PiratesFragment :PagedListFragment<Entry>(), Injectable, EntriesAdapter.Ca
 
     override fun openChatLog(entry: Entry) {
 //        (listViewModel as PodcastsViewModel).openChatLog(entry)
+    }
+
+    override fun onCommentsClick(entry: Entry) {
+
     }
 
 

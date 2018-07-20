@@ -16,7 +16,7 @@ import su.tagir.apps.radiot.model.entries.*
     Article::class,
     User::class,
     Message::class],
-        version = 14,
+        version = 15,
         exportSchema = false)
 
 @TypeConverters(StringListConverter::class,

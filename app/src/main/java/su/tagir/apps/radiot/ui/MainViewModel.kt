@@ -6,6 +6,7 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
+import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.viewmodel.BaseViewModel
 import timber.log.Timber
@@ -64,6 +65,9 @@ class MainViewModel @Inject constructor(private val router: Router,
         router.navigateTo(Screens.CREDITS_SCREEN)
     }
 
+    fun showComments(entry: Entry) {
+        router.navigateTo(Screens.COMMENTS_SCREEN, entry)
+    }
 
     fun start() {
         timerDisposable = Observable.just(1)
@@ -122,6 +126,8 @@ class MainViewModel @Inject constructor(private val router: Router,
 
         return result
     }
+
+
 
 
 }

@@ -10,6 +10,7 @@ import android.widget.Toast
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
+import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.MainViewModel
@@ -65,6 +66,10 @@ class PodcastsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.
 
     override fun openChatLog(entry: Entry) {
         mainViewModel.openWebSite(entry.chatUrl)
+    }
+
+    override fun onCommentsClick(entry: Entry) {
+        mainViewModel.showComments(entry)
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)

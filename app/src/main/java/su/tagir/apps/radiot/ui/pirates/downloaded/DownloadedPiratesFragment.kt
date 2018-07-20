@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.widget.Toast
+import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.MainViewModel
@@ -43,6 +44,10 @@ class DownloadedPiratesFragment: PagedListFragment<Entry>(), EntriesAdapter.Call
 
     override fun openChatLog(entry: Entry) {
         mainViewModel.openWebSite(entry.chatUrl)
+    }
+
+    override fun onCommentsClick(entry: Entry) {
+        mainViewModel.showComments(entry)
     }
 
     override fun remove(entry: Entry) {
