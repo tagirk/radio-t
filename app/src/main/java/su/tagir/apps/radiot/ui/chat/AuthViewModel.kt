@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.ui.chat
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.Single
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
@@ -61,7 +61,7 @@ class AuthViewModel @Inject constructor(scheduler: BaseSchedulerProvider,
                         .observeOn(scheduler.ui())
                         .doOnSubscribe {  state.value = State(Status.LOADING) }
                         .subscribe({
-                            router.newRootScreen(Screens.CHAT_SCREEN)
+                            router.newRootScreen(Screens.ChatScreenFragment)
                             state.value = State(Status.SUCCESS)
                         },
                                 {

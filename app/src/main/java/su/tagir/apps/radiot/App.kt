@@ -7,8 +7,8 @@ import android.content.ContentProvider
 import android.content.SharedPreferences
 import android.os.Build
 import android.preference.PreferenceManager
-import android.support.v7.app.AppCompatDelegate
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
 import com.evernote.android.job.JobConfig

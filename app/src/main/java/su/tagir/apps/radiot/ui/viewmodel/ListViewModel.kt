@@ -1,9 +1,9 @@
 package su.tagir.apps.radiot.ui.viewmodel
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import android.support.annotation.MainThread
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.MainThread
+import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 
 abstract class ListViewModel<T>(scheduler: BaseSchedulerProvider) : BaseViewModel(scheduler) {

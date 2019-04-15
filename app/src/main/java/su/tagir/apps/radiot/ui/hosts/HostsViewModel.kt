@@ -1,6 +1,6 @@
 package su.tagir.apps.radiot.ui.hosts
 
-import android.arch.paging.RxPagedListBuilder
+import androidx.paging.RxPagedListBuilder
 import io.reactivex.BackpressureStrategy
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
@@ -62,6 +62,6 @@ class HostsViewModel
     }
 
     fun openSocialNet(url: String) {
-        router.navigateTo(Screens.RESOLVE_ACTIVITY, url)
+        router.navigateTo(Screens.ResolveActivityScreen(url))
     }
 }

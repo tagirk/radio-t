@@ -1,11 +1,11 @@
 package su.tagir.apps.radiot.ui.player
 
 import android.annotation.SuppressLint
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
 import su.tagir.apps.radiot.R

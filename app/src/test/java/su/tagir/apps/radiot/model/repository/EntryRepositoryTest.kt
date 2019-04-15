@@ -1,8 +1,8 @@
 package su.tagir.apps.radiot.model.repository
 
 import android.app.Application
-import android.arch.core.executor.testing.InstantTaskExecutorRule
-import android.arch.lifecycle.MutableLiveData
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.MutableLiveData
 import com.nhaarman.mockito_kotlin.*
 import io.reactivex.Single
 import org.hamcrest.CoreMatchers.`is`

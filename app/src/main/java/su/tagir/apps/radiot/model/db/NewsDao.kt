@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.model.db
 
-import android.arch.paging.DataSource
-import android.arch.persistence.room.*
+import androidx.paging.DataSource
+import androidx.room.*
 import su.tagir.apps.radiot.model.entries.Article
 
 @Dao

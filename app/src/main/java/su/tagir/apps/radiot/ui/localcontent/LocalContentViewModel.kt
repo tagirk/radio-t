@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.ui.localcontent
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.rxkotlin.plusAssign
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
@@ -30,6 +30,6 @@ class LocalContentViewModel
     fun getEntry(): LiveData<Entry> = entry
 
     fun openInBrowser() {
-        router.navigateTo(Screens.WEB_SCREEN, entry.value?.url)
+        router.navigateTo(Screens.WebScreen(entry.value!!.url))
     }
 }

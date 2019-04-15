@@ -1,10 +1,6 @@
 package su.tagir.apps.radiot.ui
 
 import android.animation.ValueAnimator
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -15,17 +11,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteException
-import android.support.customtabs.CustomTabsIntent
-import android.support.design.widget.BottomSheetBehavior
-import android.support.design.widget.NavigationView
-import android.support.v4.app.ActivityOptionsCompat
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
-import android.support.v4.view.GravityCompat
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.graphics.drawable.DrawerArrowDrawable
-import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -36,14 +21,29 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.appcompat.widget.Toolbar
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import butterknife.BindColor
 import butterknife.BindDimen
 import butterknife.BindView
 import butterknife.ButterKnife
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.navigation.NavigationView
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
 import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.android.SupportAppNavigator
+import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.commands.Command
 import ru.terrakok.cicerone.commands.Forward
 import saschpe.android.customtabs.CustomTabsHelper
@@ -51,28 +51,19 @@ import saschpe.android.customtabs.WebViewFallback
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
-import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.service.IAudioService
 import su.tagir.apps.radiot.service.IAudioServiceCallback
-import su.tagir.apps.radiot.ui.chat.ChatActivity
-import su.tagir.apps.radiot.ui.comments.CommentsFragment
 import su.tagir.apps.radiot.ui.common.BackClickHandler
-import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
-import su.tagir.apps.radiot.ui.news.NewsTabsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesFragment
-import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
 import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
-import su.tagir.apps.radiot.ui.search.SearchFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
-import su.tagir.apps.radiot.ui.settings.CreditsFragment
-import su.tagir.apps.radiot.ui.settings.SettingsFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import timber.log.Timber
@@ -211,7 +202,7 @@ class MainActivity : AppCompatActivity(),
     }
 
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState?.putInt("state", bottomSheetBehavior.state)
     }
@@ -392,6 +383,7 @@ class MainActivity : AppCompatActivity(),
                             toolbar.title = it
 
                         }
+
                     }
                     invalidateOptionsMenu()
                 })
@@ -440,35 +432,20 @@ class MainActivity : AppCompatActivity(),
 
     private val navigator = object : SupportAppNavigator(this, R.id.fragment_container) {
 
-        override fun createActivityIntent(context: Context?, screenKey: String?, data: Any?): Intent? = when (screenKey) {
-            Screens.CHAT_ACTIVITY -> Intent(this@MainActivity, ChatActivity::class.java)
-            else -> null
-        }
-
-        override fun createFragment(screenKey: String?, data: Any?): Fragment? = when (screenKey) {
-            Screens.PODCASTS_SCREEN -> PodcastTabsFragment()
-            Screens.NEWS_SCREEN -> NewsTabsFragment()
-            Screens.SEARCH_SCREEN -> SearchFragment()
-            Screens.CONTENT_SCREEN -> LocalContentFragment.newInstance(data as String)
-            Screens.SETTINGS_SCREEN -> SettingsFragment()
-            Screens.PIRATES_SCREEN -> PiratesTabsFragment()
-            Screens.CREDITS_SCREEN -> CreditsFragment()
-            Screens.ABOUT_SCREEN -> AboutFragment()
-            Screens.COMMENTS_SCREEN -> CommentsFragment.newInstance(data as Entry)
-            else -> null
-        }
 
         override fun applyCommand(command: Command?) {
-            if (command is Forward && command.screenKey == Screens.WEB_SCREEN) {
-                openWebPage(command.transitionData as String)
-            } else if (command is Forward && command.screenKey == Screens.RESOLVE_ACTIVITY) {
-                openWithResolveActivity(command.transitionData as String)
+            if (command is Forward && command.screen  is Screens.WebScreen) {
+                val screen = command.screen  as Screens.WebScreen
+                openWebPage(screen.url)
+            } else if (command is Forward && command.screen is Screens.ResolveActivityScreen) {
+                val screen = command.screen as Screens.ResolveActivityScreen
+                openWithResolveActivity(screen.url)
             } else {
                 super.applyCommand(command)
             }
         }
 
-        override fun setupFragmentTransactionAnimation(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
+        override fun setupFragmentTransaction(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
             fragmentTransaction?.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
         }
 

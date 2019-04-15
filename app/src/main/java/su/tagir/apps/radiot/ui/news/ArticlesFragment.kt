@@ -1,13 +1,7 @@
 package su.tagir.apps.radiot.ui.news
 
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
-import android.arch.paging.PagedListAdapter
 import android.graphics.Color
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -16,6 +10,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindColor
 import butterknife.BindDimen
 import butterknife.BindView

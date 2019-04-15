@@ -1,8 +1,8 @@
 package su.tagir.apps.radiot.model.db
 
-import android.arch.paging.DataSource
-import android.arch.persistence.room.*
 import android.database.Cursor
+import androidx.paging.DataSource
+import androidx.room.*
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Single

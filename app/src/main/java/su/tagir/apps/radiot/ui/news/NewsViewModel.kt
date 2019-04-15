@@ -62,7 +62,7 @@ class NewsViewModel
     }
 
     fun onEntryClick(entry: Entry) {
-        router.navigateTo(Screens.CONTENT_SCREEN, entry.url)
+        router.navigateTo(Screens.ContentScreen(entry.url))
     }
 
 }

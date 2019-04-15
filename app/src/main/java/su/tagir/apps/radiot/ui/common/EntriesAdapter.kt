@@ -1,15 +1,15 @@
 package su.tagir.apps.radiot.ui.common
 
-import android.arch.paging.PagedListAdapter
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import su.tagir.apps.radiot.GlideRequests
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.RequestManager
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 
-class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, private val callback: Callback) : PagedListAdapter<Entry, RecyclerView.ViewHolder>(diffCallback) {
+class EntriesAdapter(private val type: Int, private val glide: RequestManager?, private val callback: Callback) : PagedListAdapter<Entry, RecyclerView.ViewHolder>(diffCallback) {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
@@ -32,7 +32,7 @@ class EntriesAdapter(private val type: Int, private val glide: GlideRequests?, p
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                PodcastViewHolder(view, viewType, glide, callback)
+                PodcastViewHolder(view, viewType, glide!!, callback)
             }
         }
     }

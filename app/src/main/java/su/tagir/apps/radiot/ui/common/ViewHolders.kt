@@ -4,9 +4,6 @@ import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
-import android.support.v4.content.ContextCompat
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v7.app.AlertDialog
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
@@ -17,11 +14,14 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import butterknife.*
+import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import su.tagir.apps.radiot.GlideRequests
+import com.bumptech.glide.request.RequestOptions
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
@@ -62,7 +62,7 @@ class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
 
 class PodcastViewHolder(view: View,
                         private val type: Int,
-                        private val glide: GlideRequests?,
+                        private val glide: RequestManager,
                         private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view), MenuItem.OnMenuItemClickListener {
 
     @BindView(R.id.title)
@@ -139,12 +139,14 @@ class PodcastViewHolder(view: View,
         remove.visibleInvisible(t.file != null)
 
         glide
-                ?.load(t.image)
-                ?.diskCacheStrategy(DiskCacheStrategy.ALL)
-                ?.transforms(CenterCrop(), RoundedCorners(cornerRadius))
-                ?.placeholder(R.drawable.ic_notification_large)
-                ?.error(R.drawable.ic_notification_large)
-                ?.into(image)
+                .load(t.image)
+                .apply(RequestOptions()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .centerCrop()
+                        .transform(RoundedCorners(cornerRadius))
+                        .placeholder(R.drawable.ic_notification_large)
+                        .error(R.drawable.ic_notification_large))
+                .into(image)
 
         blur.visibleGone(t.state == EntryState.PLAYING || t.state == EntryState.PAUSED)
         blur.setImageDrawable(getImageByState(t.state))
@@ -186,7 +188,7 @@ class PodcastViewHolder(view: View,
     }
 
     @OnClick(R.id.comments)
-    fun showComments(){
+    fun showComments() {
         callback.onCommentsClick(podcast)
     }
 

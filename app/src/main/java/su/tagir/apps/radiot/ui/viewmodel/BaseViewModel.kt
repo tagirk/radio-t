@@ -1,6 +1,6 @@
 package su.tagir.apps.radiot.ui.viewmodel
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider

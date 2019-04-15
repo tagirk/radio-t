@@ -2,9 +2,9 @@ package su.tagir.apps.radiot.ui.common
 
 import android.annotation.SuppressLint
 import android.os.AsyncTask
-import android.support.annotation.MainThread
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.MainThread
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 
 abstract class DataBoundListAdapter<T> : RecyclerView.Adapter<DataBoundViewHolder<T>>() {
 

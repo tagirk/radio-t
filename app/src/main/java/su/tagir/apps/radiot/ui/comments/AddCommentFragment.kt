@@ -1,10 +1,10 @@
 package su.tagir.apps.radiot.ui.comments
 
 import android.os.Bundle
-import android.support.design.widget.BottomSheetDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Comment
 

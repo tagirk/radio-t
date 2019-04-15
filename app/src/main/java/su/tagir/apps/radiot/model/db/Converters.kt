@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.model.db
 
-import android.arch.persistence.room.TypeConverter
 import android.text.TextUtils
+import androidx.room.TypeConverter
 import org.json.JSONArray
 import org.json.JSONObject
 import su.tagir.apps.radiot.model.entries.Edit

@@ -1,18 +1,18 @@
 package su.tagir.apps.radiot.ui.pirates
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.viewpager.widget.ViewPager
 import butterknife.BindView
+import com.google.android.material.tabs.TabLayout
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
@@ -66,12 +66,11 @@ class PiratesTabsFragment: BaseFragment(), Injectable {
     private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
 
 
-        override fun getItem(position: Int): Fragment? {
-            when (position) {
-                0 -> return PiratesFragment()
-                1 -> return DownloadedPiratesFragment()
+        override fun getItem(position: Int): Fragment {
+            return when (position) {
+                0 -> PiratesFragment()
+                else -> DownloadedPiratesFragment()
             }
-            return null
         }
 
         override fun getCount() = 2

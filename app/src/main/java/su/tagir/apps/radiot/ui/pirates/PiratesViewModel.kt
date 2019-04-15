@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.ui.pirates
 
-import android.arch.lifecycle.LiveData
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.LiveData
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign

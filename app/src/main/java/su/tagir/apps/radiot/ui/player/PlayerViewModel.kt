@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.ui.player
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
@@ -75,19 +75,19 @@ class PlayerViewModel
         val entry = currentPodcast.value ?: return
 
         if (entry.url != STREAM_URL) {
-            router.navigateTo(Screens.WEB_SCREEN, entry.chatUrl)
+            router.navigateTo(Screens.WebScreen(entry.chatUrl))
         } else {
             showStreamChat()
         }
     }
 
     fun showStreamChat() {
-        router.navigateTo(Screens.CHAT_ACTIVITY)
+        router.navigateTo(Screens.ChatScreen)
     }
 
     fun openWebPage() {
         val entry = currentPodcast.value ?: return
-        router.navigateTo(Screens.WEB_SCREEN, entry.url)
+        router.navigateTo(Screens.WebScreen(entry.url))
     }
 
     internal fun seekTo(secs: Long) {
@@ -115,7 +115,10 @@ class PlayerViewModel
     }
 
     fun onArticleClick(article: Article?){
-        router.navigateTo(Screens.WEB_SCREEN, article?.link)
+        article?.link?.let{
+            router.navigateTo(Screens.WebScreen(article.link))
+        }
+
     }
 
     fun setProgress(progress: Progress){

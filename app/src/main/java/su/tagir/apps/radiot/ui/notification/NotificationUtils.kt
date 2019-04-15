@@ -8,7 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import com.bumptech.glide.request.target.Target
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R

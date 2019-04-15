@@ -2,13 +2,13 @@ package su.tagir.apps.radiot.ui.search
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import su.tagir.apps.radiot.GlideRequests
+import com.bumptech.glide.RequestManager
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.*
 
 
-class SearchAdapter(private val glide: GlideRequests?, private val callback: EntriesAdapter.Callback) : DataBoundListAdapter<Entry>() {
+class SearchAdapter(private val glide: RequestManager, private val callback: EntriesAdapter.Callback) : DataBoundListAdapter<Entry>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<Entry> {
         val inflater = LayoutInflater.from(parent.context)

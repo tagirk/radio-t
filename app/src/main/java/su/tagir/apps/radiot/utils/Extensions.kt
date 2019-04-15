@@ -2,10 +2,10 @@ package su.tagir.apps.radiot.utils
 
 
 import android.annotation.SuppressLint
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MediatorLiveData
-import android.arch.lifecycle.Observer
 import android.view.View
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
 import timber.log.Timber
 import java.text.DateFormat
 import java.text.SimpleDateFormat

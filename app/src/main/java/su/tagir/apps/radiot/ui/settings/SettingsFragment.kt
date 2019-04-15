@@ -1,12 +1,14 @@
 package su.tagir.apps.radiot.ui.settings
 
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.app.AppCompatDelegate
-import android.support.v7.app.AppCompatDelegate.*
-import android.support.v7.preference.PreferenceFragmentCompat
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.*
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.preference.ListPreference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import com.evernote.android.job.JobManager
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
@@ -40,16 +42,16 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
         val prefs = preferenceScreen.sharedPreferences
 
-        val streamNotif = findPreference(KEY_NOTIF_STREAM)
-        streamNotif.summary = if (prefs.getBoolean(KEY_NOTIF_STREAM, false)) getString(R.string.show) else getString(R.string.not_show)
+        val streamNotif: SwitchPreference? = findPreference(KEY_NOTIF_STREAM)
+        streamNotif?.summary = if (prefs.getBoolean(KEY_NOTIF_STREAM, false)) getString(R.string.show) else getString(R.string.not_show)
 
-        val crashNotif = findPreference(KEY_CRASH_REPORTS)
-        crashNotif.summary = if (prefs.getBoolean(KEY_CRASH_REPORTS, false)) getString(R.string.send) else getString(R.string.not_send)
+        val crashNotif: SwitchPreference? = findPreference(KEY_CRASH_REPORTS)
+        crashNotif?.summary = if (prefs.getBoolean(KEY_CRASH_REPORTS, false)) getString(R.string.send) else getString(R.string.not_send)
 
         val modes = resources.getStringArray(R.array.night_mode)
 
-        val nightMode = findPreference(KEY_NIGHT_MODE)
-        nightMode.summary = prefs.getString(KEY_NIGHT_MODE, modes[0])
+        val nightMode: ListPreference? = findPreference(KEY_NIGHT_MODE)
+        nightMode?.summary = prefs.getString(KEY_NIGHT_MODE, modes[0])
 
 
     }
@@ -69,20 +71,20 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         when (key) {
             KEY_NOTIF_STREAM -> {
                 val show = prefs.getBoolean(key, false)
-                val streamNotif = findPreference(key)
-                streamNotif.summary = if (show) getString(R.string.show) else getString(R.string.not_show)
+                val streamNotif: SwitchPreference? = findPreference(key)
+                streamNotif?.summary = if (show) getString(R.string.show) else getString(R.string.not_show)
                 scheduleOrRemoveNotifJob(show)
 
             }
             KEY_CRASH_REPORTS -> {
-                val crashNotif = findPreference(key)
-                crashNotif.summary = if (prefs.getBoolean(key, false)) getString(R.string.send) else getString(R.string.not_send)
+                val crashNotif: SwitchPreference? = findPreference(key)
+                crashNotif?.summary = if (prefs.getBoolean(key, false)) getString(R.string.send) else getString(R.string.not_send)
             }
             KEY_NIGHT_MODE -> {
                 val modes = resources.getStringArray(R.array.night_mode)
                 val mode = prefs.getString(key, modes[0])
-                val nightMode = findPreference(key)
-                nightMode.summary = mode
+                val nightMode: ListPreference? = findPreference(key)
+                nightMode?.summary = mode
                 when (mode) {
                     modes[2] -> AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_AUTO)
                     modes[1] -> AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)

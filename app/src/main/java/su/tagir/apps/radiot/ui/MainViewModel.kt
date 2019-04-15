@@ -1,7 +1,7 @@
 package su.tagir.apps.radiot.ui
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import ru.terrakok.cicerone.Router
@@ -30,43 +30,43 @@ class MainViewModel @Inject constructor(private val router: Router,
     fun getCurrentScreen(): LiveData<String> = currentScreen
 
     fun navigateToPodcasts() {
-        router.newRootScreen(Screens.PODCASTS_SCREEN)
+        router.newRootScreen(Screens.PdcastsScreen)
     }
 
     fun navigateToNews() {
-        router.newRootScreen(Screens.NEWS_SCREEN)
+        router.newRootScreen(Screens.NewsScreen)
     }
 
     fun navigateToSettings() {
-        router.navigateTo(Screens.SETTINGS_SCREEN)
+        router.navigateTo(Screens.SettingsScreen)
     }
 
     fun navigateToChat() {
-        router.navigateTo(Screens.CHAT_ACTIVITY)
+        router.navigateTo(Screens.ChatScreen)
     }
 
     fun openWebSite(url: String) {
-        router.navigateTo(Screens.WEB_SCREEN, url)
+        router.navigateTo(Screens.WebScreen(url))
     }
 
     fun navigateToPirates() {
-        router.navigateTo(Screens.PIRATES_SCREEN)
+        router.navigateTo(Screens.PiratesScreen)
     }
 
     fun navigateToSearch() {
-        router.navigateTo(Screens.SEARCH_SCREEN)
+        router.navigateTo(Screens.SearchScreen)
     }
 
     fun navigateToAbout() {
-        router.navigateTo(Screens.ABOUT_SCREEN)
+        router.navigateTo(Screens.AboutScreen)
     }
 
     fun navigateToCredits() {
-        router.navigateTo(Screens.CREDITS_SCREEN)
+        router.navigateTo(Screens.CreditsScreen)
     }
 
     fun showComments(entry: Entry) {
-        router.navigateTo(Screens.COMMENTS_SCREEN, entry)
+        router.navigateTo(Screens.CommentsScreen(entry))
     }
 
     fun start() {

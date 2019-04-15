@@ -1,16 +1,9 @@
 package su.tagir.apps.radiot.ui.chat
 
 import android.annotation.SuppressLint
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Bundle
 import android.os.IBinder
-import android.support.design.widget.FloatingActionButton
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,10 +11,17 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.OnClick
 import butterknife.OnEditorAction
 import butterknife.OnTextChanged
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
@@ -123,9 +123,9 @@ class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapt
     }
 
     private fun initMessages() {
-        list.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
+        list.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, true)
         list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val pos = (list.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
                 if (pos > 0) {
                     btnDownward.show()

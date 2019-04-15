@@ -1,24 +1,23 @@
 package su.tagir.apps.radiot.ui.chat
 
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.support.customtabs.CustomTabsIntent
-import android.support.v4.app.ActivityOptionsCompat
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.app.ActivityOptionsCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import butterknife.BindColor
 import butterknife.ButterKnife
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
 import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.android.SupportAppNavigator
+import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.commands.Command
 import ru.terrakok.cicerone.commands.Forward
 import saschpe.android.customtabs.CustomTabsHelper
@@ -89,26 +88,17 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
     }
 
     private val navigator = object : SupportAppNavigator(this, R.id.fragment_container) {
-        override fun createActivityIntent(context: Context?, screenKey: String?, data: Any?): Intent? {
-            return null
-        }
-
-        override fun createFragment(screenKey: String?, data: Any?): Fragment? =
-                when (screenKey) {
-                    Screens.CHAT_AUTH_SCREEN -> AuthFragment()
-                    Screens.CHAT_SCREEN -> ChatFragment()
-                    else -> null
-                }
 
         override fun applyCommand(command: Command?) {
-            if (command is Forward && command.screenKey == Screens.WEB_SCREEN) {
-                openWebPage(command.transitionData as String)
+            if (command is Forward && command.screen  is Screens.WebScreen) {
+                val screen = command.screen  as Screens.WebScreen
+                openWebPage(screen.url)
             } else {
                 super.applyCommand(command)
             }
         }
 
-        override fun setupFragmentTransactionAnimation(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
+        override fun setupFragmentTransaction(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
             fragmentTransaction?.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
         }
 

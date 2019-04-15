@@ -1,9 +1,9 @@
 package su.tagir.apps.radiot.ui.hosts
 
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Host

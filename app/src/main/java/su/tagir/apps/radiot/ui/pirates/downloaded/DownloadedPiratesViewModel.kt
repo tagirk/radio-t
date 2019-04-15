@@ -1,6 +1,6 @@
 package su.tagir.apps.radiot.ui.pirates.downloaded
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import io.reactivex.rxkotlin.plusAssign
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository

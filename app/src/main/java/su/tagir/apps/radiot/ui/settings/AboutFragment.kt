@@ -1,10 +1,11 @@
 package su.tagir.apps.radiot.ui.settings
 
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.v7.preference.PreferenceFragmentCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
@@ -42,10 +43,10 @@ class AboutFragment : PreferenceFragmentCompat(), Injectable {
         } catch (e: PackageManager.NameNotFoundException) {
             Timber.e(e)
         }
-        val version = findPreference(KEY_VERSION)
-        version.title = "Версия приложения $appVersion"
+        val version: Preference? = findPreference(KEY_VERSION)
+        version?.title = "Версия приложения $appVersion"
 
-        findPreference(KEY_CREDITS).setOnPreferenceClickListener {
+        findPreference<Preference>(KEY_CREDITS)?.setOnPreferenceClickListener {
             mainViewModel.navigateToCredits()
             return@setOnPreferenceClickListener true
         }

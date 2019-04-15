@@ -1,16 +1,16 @@
 package su.tagir.apps.radiot.ui.common
 
-import android.arch.lifecycle.Observer
-import android.arch.paging.PagedList
-import android.arch.paging.PagedListAdapter
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import androidx.lifecycle.Observer
+import androidx.paging.PagedList
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import butterknife.BindView
 import butterknife.OnClick
 import su.tagir.apps.radiot.R
@@ -61,7 +61,7 @@ abstract class PagedListFragment<T> : BaseFragment() {
         refreshLayout.setOnRefreshListener { listViewModel.update() }
 
         list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val layoutManager = recyclerView!!.layoutManager as LinearLayoutManager
                 val lastPosition = layoutManager.findLastVisibleItemPosition()
 

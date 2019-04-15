@@ -1,12 +1,12 @@
 package su.tagir.apps.radiot.ui.localcontent
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.view.*
 import android.webkit.WebView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import butterknife.BindView
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
@@ -60,13 +60,13 @@ class LocalContentFragment : BaseFragment(), Injectable {
         viewModel.setId(arguments?.getString(ARG_ID))
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.menu_content, menu)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_content, menu)
     }
 
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId){
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
             R.id.web -> viewModel.openInBrowser()
         }
         return false

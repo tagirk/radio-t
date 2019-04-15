@@ -1,8 +1,8 @@
 package su.tagir.apps.radiot.model.repository
 
 import android.app.Application
-import android.arch.paging.PagedList
-import android.arch.paging.RxPagedListBuilder
+import androidx.paging.PagedList
+import androidx.paging.RxPagedListBuilder
 import io.reactivex.*
 import su.tagir.apps.radiot.model.api.RemarkClient
 import su.tagir.apps.radiot.model.api.RestClient

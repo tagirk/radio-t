@@ -1,6 +1,6 @@
 package su.tagir.apps.radiot.ui.chat
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 import retrofit2.HttpException
@@ -88,7 +88,7 @@ class ChatViewModel @Inject constructor(
     }
 
     fun onSignInClick() {
-        router.navigateTo(Screens.CHAT_AUTH_SCREEN)
+        router.navigateTo(Screens.ChatAuthScreen)
     }
 
     fun signOut() {
@@ -97,15 +97,17 @@ class ChatViewModel @Inject constructor(
     }
 
     fun onWebVersionClick() {
-        router.navigateTo(Screens.WEB_SCREEN, "https://gitter.im/radio-t/chat")
+        router.navigateTo(Screens.WebScreen("https://gitter.im/radio-t/chat"))
     }
 
     fun onMentionClick(mention: String?) {
-        router.navigateTo(Screens.WEB_SCREEN, "https://github.com/$mention")
+        router.navigateTo(Screens.WebScreen("https://github.com/$mention"))
     }
 
     fun onUrlClick(url: String?) {
-        router.navigateTo(Screens.WEB_SCREEN, url)
+        url?.let {
+            router.navigateTo(Screens.WebScreen(url))
+        }
     }
 
     private fun subscribeStream() {

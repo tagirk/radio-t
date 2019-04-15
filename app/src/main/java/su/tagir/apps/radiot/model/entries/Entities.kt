@@ -1,11 +1,11 @@
 package su.tagir.apps.radiot.model.entries
 
-import android.arch.persistence.room.*
 import android.content.ContentValues
 import android.database.Cursor
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
+import androidx.room.*
 import com.google.gson.annotations.SerializedName
 import su.tagir.apps.radiot.model.db.StringListConverter
 import su.tagir.apps.radiot.model.entries.TimeLabel.Companion.PODCAST_TIME

@@ -1,6 +1,6 @@
 package su.tagir.apps.radiot.model.repository
 
-import android.arch.paging.RxPagedListBuilder
+import androidx.paging.RxPagedListBuilder
 import com.google.gson.Gson
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable

@@ -1,18 +1,18 @@
 package su.tagir.apps.radiot.ui.search
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
-import android.arch.paging.PagedList
 import android.os.Bundle
 import android.os.Handler
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SearchView
 import android.view.*
 import android.widget.ImageView
+import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedList
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
-import su.tagir.apps.radiot.GlideApp
+import com.bumptech.glide.Glide
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
@@ -55,7 +55,7 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
         recentQueriesAdapter = RecentQueriesAdapter(this)
         recentQueries.adapter = recentQueriesAdapter
         val itemTouchHelperCallback = ItemTouchHelper(this)
-        android.support.v7.widget.helper.ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recentQueries)
+        androidx.recyclerview.widget.ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recentQueries)
 
         refreshLayout.isEnabled = false
     }
@@ -72,7 +72,7 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
 
     override fun createViewModel(): ListViewModel<Entry> = ViewModelProviders.of(activity!!, viewModelFactory).get(SearchViewModel::class.java)
 
-    override fun createAdapter() = SearchAdapter(GlideApp.with(this), this)
+    override fun createAdapter() = SearchAdapter(Glide.with(this), this)
 
     override val layoutManager: RecyclerView.LayoutManager
         get() = LinearLayoutManager(context)
@@ -90,8 +90,8 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
         viewModel.onPause()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.menu_search, menu)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_search, menu)
         initSearchView(menu)
 
     }
@@ -143,7 +143,7 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
         searchView = menu?.findItem(R.id.search_view)?.actionView as SearchView?
         searchView?.setIconifiedByDefault(false)
         searchView?.maxWidth = Int.MAX_VALUE
-        val magImage = searchView?.findViewById(android.support.v7.appcompat.R.id.search_mag_icon) as ImageView?
+        val magImage = searchView?.findViewById(R.id.search_mag_icon) as ImageView?
         magImage?.visibility = View.GONE
         magImage?.setImageDrawable(null)
 
