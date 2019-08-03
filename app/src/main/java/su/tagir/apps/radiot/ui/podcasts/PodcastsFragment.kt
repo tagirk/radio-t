@@ -4,104 +4,103 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
-import androidx.lifecycle.Observer
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedList
+import io.reactivex.Observable
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.GlideApp
+import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.model.repository.EntryRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.PagedListFragment
-import su.tagir.apps.radiot.ui.player.PlayerViewModel
+import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
+import su.tagir.apps.radiot.ui.mvp.ViewState
 import javax.inject.Inject
 
 @RuntimePermissions
-class PodcastsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
+class PodcastsFragment : BaseMvpPagedListFragment<Entry, PodcastsContract.View, PodcastsContract.Presenter>(), PodcastsContract.View, Injectable {
+
+
+    @Inject
+    lateinit var entryRepository: EntryRepository
+
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
+
+    @Inject
+    lateinit var router: Router
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    private lateinit var playerViewModel: PlayerViewModel
     private lateinit var mainViewModel: MainViewModel
-
-    private var entryForDownload: Entry? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
         mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
-        observeViewModel()
     }
 
-    override fun onResume() {
-        super.onResume()
-        (listViewModel as PodcastsViewModel).startStatusTimer()
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this))
+
+    override fun createPresenter(): PodcastsContract.Presenter {
+        return PodcastsPresenter(entryRepository, scheduler, router)
     }
 
-    override fun onPause() {
-        super.onPause()
-        (listViewModel as PodcastsViewModel).stopStatusTimer()
+    override fun loadData(pullToRefresh: Boolean) {
+        presenter.update()
     }
 
-    override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(PodcastsViewModel::class.java)
-
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
-
-    override fun onClick(entry: Entry) {
-        playerViewModel.onPlayClick(entry)
-    }
-
-    override fun download(entry: Entry) {
-        entryForDownload = entry
-        startDownloadWithPermissionCheck()
-    }
-
-    override fun openWebSite(entry: Entry) {
-       mainViewModel.openWebSite(entry.url)
-    }
-
-    override fun openChatLog(entry: Entry) {
-        mainViewModel.openWebSite(entry.chatUrl)
-    }
-
-    override fun onCommentsClick(entry: Entry) {
-        mainViewModel.showComments(entry)
-    }
-
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    fun startDownload(){
-        if(entryForDownload!=null) {
-            (listViewModel as PodcastsViewModel).onDownloadClick(entryForDownload!!)
+    override fun updateState(viewState: ViewState<List<Entry>>) {
+        showHideViews(viewState)
+        viewState.data?.let { data ->
+            adapter.submitList(data as PagedList<Entry>)
         }
     }
 
-    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    fun showNeedPermission(){
-        Toast.makeText(context, "Для загрузки подкаста необходимо дать разрешение на запись.", Toast.LENGTH_SHORT).show()
+    override fun showDownloadError(error: String) {
+        context?.let { c ->
+            AlertDialog.Builder(c)
+                    .setTitle(R.string.error)
+                    .setMessage(error)
+                    .setPositiveButton("OK", null)
+                    .create()
+                    .show()
+        }
     }
 
-    override fun remove(entry: Entry) {
-        (listViewModel as PodcastsViewModel).onRemoveClick(entry)
+    override fun download() {
+        startDownloadWithPermissionCheck()
+    }
 
+    override fun entryClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).entryClicks()
+
+    override fun downloadClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).downloadClicks()
+
+    override fun removeClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).removeClicks()
+
+    override fun commentClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).commentClicks()
+
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    fun startDownload() {
+        presenter.download()
+
+    }
+
+    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    fun showNeedPermission() {
+        Toast.makeText(context, "Для загрузки подкаста необходимо дать разрешение на запись.", Toast.LENGTH_SHORT).show()
     }
 
     @SuppressLint("NeedOnRequestPermissionsResult")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         onRequestPermissionsResult(requestCode, grantResults)
-    }
-
-    private fun observeViewModel() {
-        (listViewModel as PodcastsViewModel)
-                .getDownloadError()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            if (it != null) {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                            }
-                        })
     }
 }

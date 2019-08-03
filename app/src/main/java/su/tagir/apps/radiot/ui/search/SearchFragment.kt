@@ -1,35 +1,58 @@
 package su.tagir.apps.radiot.ui.search
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
 import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import com.bumptech.glide.Glide
+import io.reactivex.Observable
+import permissions.dispatcher.NeedsPermission
+import permissions.dispatcher.OnPermissionDenied
+import permissions.dispatcher.RuntimePermissions
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.model.repository.EntryRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.MainViewModel
-import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.ListFragment
-import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
+import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
+import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
-class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQueriesAdapter.Callback,
-        Injectable, ItemTouchHelper.Callback{
+@RuntimePermissions
+class SearchFragment:
+        BaseMvpListFragment<Entry, SearchContract.View, SearchContract.Presenter>(),
+        SearchContract.View,
+        RecentQueriesAdapter.Callback,
+        Injectable,
+        ItemTouchHelper.Callback{
+
+
+    @Inject
+    lateinit var entryRepository: EntryRepository
+
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
+
+    @Inject
+    lateinit var router: Router
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-
 
     @BindView(R.id.recent_queries)
     lateinit var recentQueries: RecyclerView
@@ -37,7 +60,6 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
     @BindView(R.id.layout_entries)
     lateinit var layoutEntries: View
 
-    private lateinit var viewModel: SearchViewModel
     private lateinit var recentQueriesAdapter: RecentQueriesAdapter
     private val handler = Handler()
 
@@ -62,32 +84,20 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = listViewModel as SearchViewModel
         mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
-        observe()
     }
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_search, container, false)
 
-    override fun createViewModel(): ListViewModel<Entry> = ViewModelProviders.of(activity!!, viewModelFactory).get(SearchViewModel::class.java)
-
-    override fun createAdapter() = SearchAdapter(Glide.with(this), this)
-
-    override val layoutManager: RecyclerView.LayoutManager
-        get() = LinearLayoutManager(context)
-
-
     override fun onResume() {
         super.onResume()
         mainViewModel.setCurrentScreen(Screens.SEARCH_SCREEN)
-        viewModel.onResume()
     }
 
     override fun onPause() {
         super.onPause()
         handler.removeCallbacksAndMessages(null)
-        viewModel.onPause()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -96,48 +106,81 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
 
     }
 
-    override fun onClick(entry: Entry) {
-        if (entry.audioUrl != null) {
-            viewModel.onEntryClick(entry)
-        } else {
-            mainViewModel.openWebSite(entry.url)
+    override fun updateState(viewState: ViewState<List<Entry>>) {
+        showHideViews(viewState)
+        viewState.data?.let { data ->
+            adapter.replace(data)
         }
+    }
+
+    override fun loadData(pullToRefresh: Boolean) {
+        presenter.update()
+    }
+
+    override fun createAdapter(): DataBoundListAdapter<Entry> {
+        return SearchAdapter(Glide.with(this))
     }
 
     override fun onQueryClick(query: String?) {
        searchView?.setQuery(query, false)
     }
 
-    override fun download(entry: Entry) {
-        viewModel.onDownloadClick(entry)
-    }
-
-    override fun remove(entry: Entry) {
-        viewModel.onRemoveClick(entry)
-    }
-
-    override fun openWebSite(entry: Entry) {
-        mainViewModel.openWebSite(entry.url)
-    }
-
-    override fun openChatLog(entry: Entry) {
-        mainViewModel.openWebSite(entry.chatUrl)
-    }
-
-    override fun onCommentsClick(entry: Entry) {
-        mainViewModel.showComments(entry)
-    }
     override fun removeQuery(position: Int) {
-        if (recentQueriesAdapter.currentList != null) {
-            viewModel.removeQuery(recentQueriesAdapter.currentList!![position])
+        recentQueriesAdapter.currentList?.let { list ->
+
+            list[position]?.let { query ->
+                presenter.removeQuery(query)
+            }
         }
     }
 
-    private fun observe() {
-        viewModel.getRecentSearches().observe(getViewLifecycleOwner()!!,
-                Observer { queries -> recentQueriesAdapter.submitList(queries as PagedList<String>) })
+    override fun createPresenter(): SearchContract.Presenter {
+        return SearchPresenter(entryRepository, scheduler, router)
+    }
+
+    override fun showDownloadError(error: String) {
+        context?.let { c ->
+            AlertDialog.Builder(c)
+                    .setTitle(R.string.error)
+                    .setMessage(error)
+                    .setPositiveButton("OK", null)
+                    .create()
+                    .show()
+        }
+    }
+
+    override fun showRecentQueries(queries: List<String>) {
+        recentQueriesAdapter.submitList(queries as PagedList<String>)
+    }
+
+    override fun download() {
+        startDownloadWithPermissionCheck()
+    }
+
+    override fun entryClickRequests(): Observable<Entry> = (adapter as SearchAdapter).entryClicks()
+
+    override fun downloadClickRequests(): Observable<Entry> = (adapter as SearchAdapter).downloadClicks()
+
+    override fun removeClickRequests(): Observable<Entry> = (adapter as SearchAdapter).removeClicks()
+
+    override fun commentClickRequests(): Observable<Entry> = (adapter as SearchAdapter).commentClicks()
+
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    fun startDownload() {
+        presenter.download()
 
     }
+
+    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    fun showNeedPermission() {
+        Toast.makeText(context, "Для загрузки подкаста необходимо дать разрешение на запись.", Toast.LENGTH_SHORT).show()
+    }
+
+    @SuppressLint("NeedOnRequestPermissionsResult")
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        onRequestPermissionsResult(requestCode, grantResults)
+    }
+
 
     private fun initSearchView(menu: Menu?) {
         searchView = menu?.findItem(R.id.search_view)?.actionView as SearchView?
@@ -155,7 +198,7 @@ class SearchFragment : ListFragment<Entry>(), EntriesAdapter.Callback, RecentQue
             override fun onQueryTextChange(newText: String?): Boolean {
                 handler.removeCallbacksAndMessages(null)
                 handler.postDelayed({
-                    viewModel.search(newText ?: "")
+                    presenter.search(newText ?: "")
                     layoutEntries.visibleGone(!newText.isNullOrBlank())
                     recentQueries.visibleGone(newText.isNullOrBlank())
                 }, 1000)

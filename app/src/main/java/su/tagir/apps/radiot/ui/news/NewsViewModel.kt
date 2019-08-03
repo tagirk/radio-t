@@ -7,9 +7,9 @@ import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.mvp.Status
+import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
-import su.tagir.apps.radiot.ui.viewmodel.State
-import su.tagir.apps.radiot.ui.viewmodel.Status
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -36,7 +36,7 @@ class NewsViewModel
         loadDisposable?.dispose()
         loadDisposable = entryRepository.refreshNews()
                 .observeOn(scheduler.ui())
-                .doOnSubscribe { state.value = if (state.value == null) State(Status.LOADING) else state.value?.copy(Status.LOADING) }
+                .doOnSubscribe { state.value = if (state.value == null) ViewState(Status.LOADING) else state.value?.copy(Status.LOADING) }
                 .subscribe({ state.value = state.value?.copy(status = Status.SUCCESS) },
                         {
                             Timber.e(it)

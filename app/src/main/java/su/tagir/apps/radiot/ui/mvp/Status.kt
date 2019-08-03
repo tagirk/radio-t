@@ -1,4 +1,4 @@
-package su.tagir.apps.radiot.ui.viewmodel
+package su.tagir.apps.radiot.ui.mvp
 
 enum class Status {
     LOADING,

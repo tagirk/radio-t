@@ -1,9 +1,9 @@
-package su.tagir.apps.radiot.ui.viewmodel
+package su.tagir.apps.radiot.ui.mvp
 
-data class State<out T>(val status: Status,
-                    val data: T? = null,
-                    private val errorMessage: String? = null,
-                    val hasNextPage: Boolean = true) {
+data class ViewState<out T>(val status: Status,
+                            val data: T? = null,
+                            private val errorMessage: String? = null,
+                            val hasNextPage: Boolean = true) {
 
     private var errorHandled: Boolean = false
 

@@ -8,10 +8,6 @@ class ImmediateSchedulerProvider : BaseSchedulerProvider {
 
     override fun io() = Schedulers.trampoline()
 
-    override fun networkIO() = Schedulers.trampoline()
-
-    override fun diskIO() = Schedulers.trampoline()
-
     override fun ui() = Schedulers.trampoline()
 
 }

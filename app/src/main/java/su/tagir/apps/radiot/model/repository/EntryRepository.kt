@@ -32,27 +32,25 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
     }
 
     fun getCurrent(): Flowable<Entry> =
-            entryDao.getCurrentEntryLive().distinctUntilChanged().subscribeOn(scheduler.diskIO())
+            entryDao.getCurrentEntryLive().distinctUntilChanged().subscribeOn(scheduler.io())
 
     fun getTimeLabels(entry: Entry?): Flowable<List<TimeLabel>> =
-            entryDao.getTimeLabels(entry?.date).distinctUntilChanged().subscribeOn(scheduler.diskIO())
+            entryDao.getTimeLabels(entry?.date).distinctUntilChanged().subscribeOn(scheduler.io())
 
 
     fun refreshPodcasts(): Completable =
             restClient
                     .getPosts(PAGE_SIZE, "podcast")
-                    .observeOn(scheduler.diskIO())
                     .doOnSuccess { entryDao.saveRadioTEntries(it) }
                     .map { entries -> entries.map { it.url } }
                     .flatMap { remarkClient.getCommentsCount(urls = it) }
-                    .observeOn(scheduler.diskIO())
                     .doOnSuccess { entryDao.updateEntriesCommentsCount(it) }
-                    .toCompletable()
+                    .ignoreElement()
 
     fun refreshPirates(): Completable {
         return Single.create(SingleOnSubscribe<List<RTEntry>> { emitter ->
             try {
-                val connection = URL("http://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
+                val connection = URL("https://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
                 connection.addRequestProperty("Accept", "application/xml")
                 connection.doInput = true
@@ -67,21 +65,19 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
                 }
             }
         })
-                .subscribeOn(scheduler.networkIO())
-                .observeOn(scheduler.diskIO())
                 .doOnSuccess { entryDao.saveRadioTEntries(it) }
-                .toCompletable()
+                .ignoreElement()
     }
 
     fun getEntries(vararg categories: String) =
             RxPagedListBuilder(entryDao.getEntries(categories), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.diskIO())
+                    .setFetchScheduler(scheduler.io())
                     .setNotifyScheduler(scheduler.ui())
                     .buildFlowable(BackpressureStrategy.LATEST)
 
     fun getDownloadedEntries(vararg categories: String): Flowable<PagedList<Entry>> =
             RxPagedListBuilder(entryDao.getDownloadedEntries(categories), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.diskIO())
+                    .setFetchScheduler(scheduler.io())
                     .setNotifyScheduler(scheduler.ui())
                     .buildFlowable(BackpressureStrategy.LATEST)
                     .distinctUntilChanged()
@@ -89,22 +85,22 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
     fun refreshNews(): Completable =
             restClient
                     .getPosts(PAGE_SIZE, "news,info")
-                    .observeOn(scheduler.diskIO())
+                    .observeOn(scheduler.io())
                     .doOnSuccess { entryDao.saveRadioTEntries(it) }
-                    .toCompletable()
+                    .ignoreElement()
 
 
     fun search(query: String): Completable =
             restClient
                     .search(query, 0, PAGE_SIZE)
-                    .observeOn(scheduler.diskIO())
-                    .doOnSuccess { entryDao.saveSearchResult(SearchResult(query, it.map { it.url }), it) }
-                    .toCompletable()
+                    .observeOn(scheduler.io())
+                    .doOnSuccess {entries -> entryDao.saveSearchResult(SearchResult(query, entries.map { it.url }), entries) }
+                    .ignoreElement()
 
     fun searchNextPage(query: String, skip: Int): Single<Boolean> =
             restClient
                     .search(query, skip, PAGE_SIZE)
-                    .observeOn(scheduler.diskIO())
+                    .observeOn(scheduler.io())
                     .doOnSuccess {
                         if (it.isNotEmpty()) {
                             entryDao.mergeAndsaveSearchResult(query, it)
@@ -115,7 +111,7 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
 
     fun getRecentSearches() =
             RxPagedListBuilder(entryDao.findRecentSearches(), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.diskIO())
+                    .setFetchScheduler(scheduler.io())
                     .setNotifyScheduler(scheduler.ui())
                     .buildFlowable(BackpressureStrategy.LATEST)
 
@@ -123,11 +119,13 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
         return entryDao
                 .findSearchResultLive(query)
                 .flatMapSingle { entryDao.loadById(it.ids)}
-                .subscribeOn(scheduler.diskIO())
+                .subscribeOn(scheduler.io())
     }
 
     fun removeQuery(query: String?) {
-        entryDao.removeQuery(query)
+        scheduler.computation().createWorker().schedule {
+            entryDao.removeQuery(query)
+        }
     }
 
     fun startDownload(url: String?): Completable {

@@ -26,7 +26,6 @@ import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.PagedListFragment
-import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.utils.shortDateFormat
 import javax.inject.Inject
 
@@ -38,7 +37,6 @@ class ArticlesFragment : PagedListFragment<Article>(), Injectable {
     @Inject
     internal lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    private lateinit var playerViewModel: PlayerViewModel
     private lateinit var articlesViewModel: ArticlesViewModel
     private lateinit var mainViewModel: MainViewModel
 
@@ -49,7 +47,6 @@ class ArticlesFragment : PagedListFragment<Article>(), Injectable {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         articlesViewModel = listViewModel as ArticlesViewModel
-        playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
         mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
     }
 
@@ -57,7 +54,6 @@ class ArticlesFragment : PagedListFragment<Article>(), Injectable {
 
     override fun createAdapter() = ArticlesAdapter(object : ArticlesAdapter.Callback {
         override fun onArticleClick(article: Article?) {
-            playerViewModel.onArticleClick(article)
         }
     })
 

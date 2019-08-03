@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import butterknife.BindView
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.ui.mvp.Status
+import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
-import su.tagir.apps.radiot.ui.viewmodel.State
-import su.tagir.apps.radiot.ui.viewmodel.Status
 import su.tagir.apps.radiot.utils.visibleGone
 
 abstract class ListFragment<T> : BaseFragment() {
@@ -92,19 +92,19 @@ abstract class ListFragment<T> : BaseFragment() {
 
     abstract val layoutManager: RecyclerView.LayoutManager
 
-    private fun showHideViews(state: State<List<T>>?) {
-        if (state == null) {
+    private fun showHideViews(viewState: ViewState<List<T>>?) {
+        if (viewState == null) {
             return
         }
-        val isEmpty = (state.data?.size ?: 0) == 0
-        progress.visibleGone(state.loading && isEmpty)
-        emptyView.visibleGone(state.completed && isEmpty)
-        errorText.visibleGone(state.error && isEmpty)
-        btnRetry.visibleGone(state.error && isEmpty)
-        refreshLayout.isRefreshing = state.refreshing
-        loadMoreProgress.visibleGone(state.loadingMore)
+        val isEmpty = (viewState.data?.size ?: 0) == 0
+        progress.visibleGone(viewState.loading && isEmpty)
+        emptyView.visibleGone(viewState.completed && isEmpty)
+        errorText.visibleGone(viewState.error && isEmpty)
+        btnRetry.visibleGone(viewState.error && isEmpty)
+        refreshLayout.isRefreshing = viewState.refreshing
+        loadMoreProgress.visibleGone(viewState.loadingMore)
 
-        val message = state.getErrorIfNotHandled()
+        val message = viewState.getErrorIfNotHandled()
         if (message != null) {
             showToast(message)
         }

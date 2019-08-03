@@ -1,74 +1,77 @@
 package su.tagir.apps.radiot.ui.podcasts.downloaded
 
 import android.os.Bundle
-import android.widget.Toast
-import androidx.lifecycle.Observer
+import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import io.reactivex.Observable
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.GlideApp
+import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.model.repository.EntryRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.PagedListFragment
-import su.tagir.apps.radiot.ui.player.PlayerViewModel
+import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
 import javax.inject.Inject
 
-class DownloadedPodcastsFragment: PagedListFragment<Entry>(), EntriesAdapter.Callback, Injectable {
+class DownloadedPodcastsFragment: BaseMvpPagedListFragment<Entry, DownloadedPodcastsContract.View, DownloadedPodcastsContract.Presenter>(),
+        DownloadedPodcastsContract.View,
+        Injectable {
+
+    @Inject
+    lateinit var entryRepository: EntryRepository
+
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
+
+    @Inject
+    lateinit var router: Router
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    private lateinit var playerViewModel: PlayerViewModel
     private lateinit var mainViewModel: MainViewModel
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
+
         mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
-        observeViewModel()
     }
 
-    override fun createViewModel()=ViewModelProviders.of(this, viewModelFactory).get(DownloadedPodcastsViewModel::class.java)
-
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
-
-
-
-    override fun onClick(entry: Entry) {
-        playerViewModel.onPlayClick(entry)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        refreshLayout.isEnabled = false
     }
 
-
-    override fun openWebSite(entry: Entry) {
-        mainViewModel.openWebSite(entry.url)
+    override fun createPresenter(): DownloadedPodcastsContract.Presenter {
+        return DownloadedPodcastsPresenter(entryRepository, scheduler, router)
     }
 
-    override fun openChatLog(entry: Entry) {
-        mainViewModel.openWebSite(entry.chatUrl)
-    }
-
-    override fun onCommentsClick(entry: Entry) {
-        mainViewModel.showComments(entry)
-    }
-
-    override fun remove(entry: Entry) {
-        (listViewModel as DownloadedPodcastsViewModel).onRemoveClick(entry)
+    override fun loadData(pullToRefresh: Boolean) {
 
     }
 
-    override fun download(entry: Entry) {
+    override fun entryClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).entryClicks()
 
+    override fun removeClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).removeClicks()
+
+    override fun commentClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).commentClicks()
+
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this))
+
+    override fun showRemoveError(error: String) {
+        context?.let { c ->
+            AlertDialog.Builder(c)
+                    .setTitle(R.string.error)
+                    .setMessage(error)
+                    .setPositiveButton("OK", null)
+                    .create()
+                    .show()
+        }
     }
 
-    private fun observeViewModel() {
-        (listViewModel as DownloadedPodcastsViewModel)
-                .error()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            if (it != null) {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                            }
-                        })
-    }
 }

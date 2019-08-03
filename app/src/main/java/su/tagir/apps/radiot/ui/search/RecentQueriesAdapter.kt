@@ -18,7 +18,7 @@ class RecentQueriesAdapter(private val callback: Callback) : PagedListAdapter<St
     override fun onBindViewHolder(holder: QueryViewHolder, position: Int) {
        val item = getItem(position)
         holder.bind(item)
-        holder.itemView?.setOnClickListener { callback.onQueryClick(item) }
+        holder.itemView.setOnClickListener { callback.onQueryClick(item) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QueryViewHolder {

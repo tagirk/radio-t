@@ -56,7 +56,7 @@ class ChatRepository @Inject constructor(private val authClient: GitterAuthClien
                 .flatMap { responseBody -> events(responseBody.source()) }
                 .filter { checkIfValidMessageJson(it) }
                 .map {gson.fromJson(it, GitterMessage::class.java) }
-                .observeOn(scheduler.diskIO())
+                .observeOn(scheduler.io())
                 .doOnNext { gitterDao.saveMessage(it) }
     }
 
@@ -69,13 +69,13 @@ class ChatRepository @Inject constructor(private val authClient: GitterAuthClien
 
     fun loadMessages(lastId: String?=null): Completable {
         return gitterClient.getRoomMessages(roomId, 50, lastId)
-                .observeOn(scheduler.diskIO())
+                .observeOn(scheduler.io())
                 .doOnSuccess { gitterDao.saveMessages(it) }
                 .toCompletable()
     }
 
     fun getMessages() = RxPagedListBuilder(gitterDao.getMessages(), 50)
-            .setFetchScheduler(scheduler.diskIO())
+            .setFetchScheduler(scheduler.io())
             .setNotifyScheduler(scheduler.ui())
             .buildFlowable(BackpressureStrategy.BUFFER)
 

@@ -28,7 +28,7 @@ import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.common.PagedListFragment
-import su.tagir.apps.radiot.ui.viewmodel.State
+import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import javax.inject.Inject
@@ -152,8 +152,8 @@ class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapt
                 })
     }
 
-    override fun showHideViews(state: State<List<MessageFull>>?) {
-        super.showHideViews(state)
+    override fun showHideViews(viewState: ViewState<List<MessageFull>>?) {
+        super.showHideViews(viewState)
         loadMoreProgress.visibleGone(false)
     }
 

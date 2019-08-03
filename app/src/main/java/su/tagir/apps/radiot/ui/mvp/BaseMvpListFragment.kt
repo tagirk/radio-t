@@ -1,25 +1,20 @@
-package su.tagir.apps.radiot.ui.common
+package su.tagir.apps.radiot.ui.mvp
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import androidx.lifecycle.Observer
-import androidx.paging.PagedList
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import butterknife.BindView
 import butterknife.OnClick
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.ui.mvp.Status
-import su.tagir.apps.radiot.ui.mvp.ViewState
-import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
+import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.utils.visibleGone
 
-abstract class PagedListFragment<T> : BaseFragment() {
+abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : BaseMvpFragment<V, P>(), MvpListView<M>{
 
     @BindView(R.id.progress)
     lateinit var progress: View
@@ -42,71 +37,53 @@ abstract class PagedListFragment<T> : BaseFragment() {
     @BindView(R.id.load_more_progress)
     lateinit var loadMoreProgress: ProgressBar
 
-    protected lateinit var listViewModel: ListViewModel<T>
-
-    private lateinit var adapter: PagedListAdapter<T, out RecyclerView.ViewHolder>
+    protected lateinit var adapter: DataBoundListAdapter<M>
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_entry_list, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        listViewModel = createViewModel()
         initList()
     }
 
     private fun initList() {
         adapter = createAdapter()
         list.adapter = adapter
-        refreshLayout.setOnRefreshListener { listViewModel.update() }
+        refreshLayout.setOnRefreshListener { loadData(pullToRefresh =  true) }
 
         list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val layoutManager = recyclerView!!.layoutManager as LinearLayoutManager
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val lastPosition = layoutManager.findLastVisibleItemPosition()
 
-                val status = listViewModel.state().value?.status
-
-                if (lastPosition == adapter.itemCount - 1
-                        && status != Status.LOADING
-                        && status != Status.LOADING_MORE
-                        && status != Status.REFRESHING
-                        && listViewModel.state().value?.hasNextPage == true) {
-
-                    listViewModel.loadMore()
+                if (lastPosition == adapter.itemCount - 1) {
+                    loadMore(lastIndex = lastPosition)
                 }
             }
         })
-
-        listViewModel
-                .state()
-                .observe(getViewLifecycleOwner()!!, Observer { t ->
-                    if (t != null) {
-                        showHideViews(t)
-                    }
-                })
-
-        listViewModel
-                .state()
-                .observe(getViewLifecycleOwner()!!, Observer { t ->
-                    showHideViews(t)
-                    adapter.submitList(t?.data as PagedList<T>?)
-                })
     }
 
     @OnClick(R.id.btn_retry)
     fun retry() {
-        listViewModel.update()
+        loadData(pullToRefresh = false)
     }
 
-    abstract fun createViewModel(): ListViewModel<T>
-
-    abstract fun createAdapter(): PagedListAdapter<T, out RecyclerView.ViewHolder>
-
-    protected open fun showHideViews(viewState: ViewState<List<T>>?) {
-        if (viewState == null) {
-            return
+    override fun updateState(viewState: ViewState<List<M>>) {
+        showHideViews(viewState)
+        viewState.data?.let { data ->
+            adapter.replace(data)
         }
+    }
+
+
+    abstract fun createAdapter(): DataBoundListAdapter<M>
+
+    override fun loadMore(lastIndex: Int){
+
+    }
+
+    protected open fun showHideViews(viewState: ViewState<List<M>>) {
         val isEmpty = (viewState.data?.size ?: 0) == 0
 
         progress.visibleGone(viewState.loading && isEmpty)

@@ -7,17 +7,17 @@ import android.graphics.drawable.Drawable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import butterknife.*
+import butterknife.BindColor
+import butterknife.BindDimen
+import butterknife.BindView
+import butterknife.ButterKnife
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -30,7 +30,7 @@ import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 
 
-class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view) {
+class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
     @BindView(R.id.title)
     lateinit var title: TextView
@@ -52,18 +52,10 @@ class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
         date.text = t.date?.longDateFormat()
         podcast = t
     }
-
-    @OnClick(R.id.root)
-    fun onPlayClick() {
-        callback.onClick(podcast)
-    }
-
 }
 
 class PodcastViewHolder(view: View,
-                        private val type: Int,
-                        private val glide: RequestManager,
-                        private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view), MenuItem.OnMenuItemClickListener {
+                        private val glide: RequestManager) : DataBoundViewHolder<Entry>(view){
 
     @BindView(R.id.title)
     lateinit var title: TextView
@@ -117,11 +109,11 @@ class PodcastViewHolder(view: View,
         }
         title.text = t.title
         val date = t.date?.longDateFormat()
-        val notes = if (t.showNotes.isNullOrBlank()) "" else t.showNotes?.replace("\n", "")
+        val notes = if (t.showNotes.isNullOrBlank()) "" else t.showNotes.replace("\n", "")
         val sb = SpannableStringBuilder()
                 .append(date)
 
-        if (!notes.isNullOrBlank()) {
+        if (!notes.isBlank()) {
             sb.append(" - ").append(notes)
         }
 
@@ -152,55 +144,7 @@ class PodcastViewHolder(view: View,
         blur.setImageDrawable(getImageByState(t.state))
         this.podcast = t
 
-        itemView.setOnCreateContextMenuListener { menu, _, _ ->
-            menu?.add(Menu.NONE, ITEM_LISTEN, 0, R.string.listen)?.setOnMenuItemClickListener(this)
-            if (progress < 0 && t.file == null) {
-                menu?.add(Menu.NONE, ITEM_DOWNLOAD, 1, R.string.download)?.setOnMenuItemClickListener(this)
-            } else {
-                menu?.add(Menu.NONE, ITEM_DELETE, 1, R.string.delete)?.setOnMenuItemClickListener(this)
-            }
-            if (type == EntriesAdapter.TYPE_PODCAST) {
-                menu?.add(Menu.NONE, ITEM_WEB, 2, R.string.web)?.setOnMenuItemClickListener(this)
-                menu?.add(Menu.NONE, ITEM_CHAT, 3, R.string.chat_log)?.setOnMenuItemClickListener(this)
-            }
-        }
         comments.text = "${t.commentsCount} COMMENTS"
-    }
-
-    @OnClick(R.id.root)
-    fun onPlayClick() {
-        callback.onClick(podcast)
-    }
-
-    @OnClick(R.id.btn_download)
-    fun onDownloadClick() {
-        callback.download(podcast)
-    }
-
-    @OnClick(R.id.btn_remove, R.id.cancel)
-    fun onRemoveClick() {
-        AlertDialog.Builder(itemView.context)
-                .setMessage("Удалить файл?")
-                .setPositiveButton("Да") { _, _ -> callback.remove(podcast) }
-                .setNegativeButton("Нет", null)
-                .create()
-                .show()
-    }
-
-    @OnClick(R.id.comments)
-    fun showComments() {
-        callback.onCommentsClick(podcast)
-    }
-
-    override fun onMenuItemClick(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            ITEM_LISTEN -> onPlayClick()
-            ITEM_DOWNLOAD -> onDownloadClick()
-            ITEM_DELETE -> onRemoveClick()
-            ITEM_WEB -> callback.openWebSite(podcast)
-            ITEM_CHAT -> callback.openChatLog(podcast)
-        }
-        return false
     }
 
     private fun getImageByState(state: Int): Drawable? {
@@ -216,18 +160,9 @@ class PodcastViewHolder(view: View,
             else -> null
         }
     }
-
-    companion object {
-
-        const val ITEM_LISTEN = 0
-        const val ITEM_DOWNLOAD = 1
-        const val ITEM_DELETE = 2
-        const val ITEM_WEB = 3
-        const val ITEM_CHAT = 4
-    }
 }
 
-class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view) {
+class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
     @BindView(R.id.title)
     lateinit var title: TextView
@@ -286,10 +221,4 @@ class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
         this.entry = t
 
     }
-
-    @OnClick(R.id.root)
-    fun onPlayClick() {
-        callback.onClick(entry)
-    }
-
 }

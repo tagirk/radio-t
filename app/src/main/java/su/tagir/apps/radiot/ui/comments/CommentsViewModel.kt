@@ -5,9 +5,9 @@ import io.reactivex.rxkotlin.plusAssign
 import su.tagir.apps.radiot.model.entries.Node
 import su.tagir.apps.radiot.model.repository.CommentsRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.mvp.Status
+import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
-import su.tagir.apps.radiot.ui.viewmodel.State
-import su.tagir.apps.radiot.ui.viewmodel.Status
 import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
@@ -38,7 +38,7 @@ class CommentsViewModel @Inject constructor(
         loadDisposable?.dispose()
         loadDisposable = commentsRepository.getComments(postUrl ?: "")
                 .observeOn(scheduler.ui())
-                .doOnSubscribe { state.value = if (state.value == null) State(Status.LOADING) else state.value?.copy(Status.LOADING) }
+                .doOnSubscribe { state.value = if (state.value == null) ViewState(Status.LOADING) else state.value?.copy(Status.LOADING) }
                 .subscribe({
                     comments.clear()
                     comments.addAll(it.comments)

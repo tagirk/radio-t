@@ -10,7 +10,7 @@ import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.common.PagedListFragment
 import javax.inject.Inject
 
-class NewsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
+class NewsFragment : PagedListFragment<Entry>(), Injectable{
 
 
     @Inject
@@ -25,23 +25,14 @@ class NewsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.Call
 
     override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(NewsViewModel::class.java)
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_NEWS, null, this)
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_NEWS, null)
 
-    override fun onClick(entry: Entry) {
-        (listViewModel as NewsViewModel).onEntryClick(entry)
-    }
-
-    override fun download(entry: Entry) {}
-
-    override fun remove(entry: Entry) {}
-
-    override fun openWebSite(entry: Entry) {
-    }
-
-    override fun openChatLog(entry: Entry) {
-    }
-
-    override fun onCommentsClick(entry: Entry) {
-        mainViewModel.showComments(entry)
-    }
+//    override fun onClick(entry: Entry) {
+//        (listViewModel as NewsViewModel).onEntryClick(entry)
+//    }
+//
+//
+//    override fun onCommentsClick(entry: Entry) {
+//        mainViewModel.showComments(entry)
+//    }
 }

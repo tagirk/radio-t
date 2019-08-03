@@ -6,14 +6,31 @@ import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
+import com.jakewharton.rxrelay2.PublishRelay
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 
-class EntriesAdapter(private val type: Int, private val glide: RequestManager?, private val callback: Callback) : PagedListAdapter<Entry, RecyclerView.ViewHolder>(diffCallback) {
+class EntriesAdapter(private val type: Int, private val glide: RequestManager?) :
+        PagedListAdapter<Entry, RecyclerView.ViewHolder>(diffCallback) {
+
+    private val selection = PublishRelay.create<Entry>()
+    private val download = PublishRelay.create<Entry>()
+    private val remove = PublishRelay.create<Entry>()
+    private val comments = PublishRelay.create<Entry>()
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+
+        holder.itemView.setOnClickListener { selection.accept(getItem(position)) }
+
+
         when (holder) {
-            is PodcastViewHolder -> holder.bind(getItem(position))
+            is PodcastViewHolder -> {
+                holder.bind(getItem(position))
+                holder.remove.setOnClickListener { remove.accept(getItem(holder.adapterPosition)) }
+                holder.cancel.setOnClickListener { remove.accept(getItem(holder.adapterPosition)) }
+                holder.download.setOnClickListener { download.accept(getItem(holder.adapterPosition)) }
+                holder.comments.setOnClickListener { comments.accept(getItem(holder.adapterPosition)) }
+            }
             is PrepViewHolder -> holder.bind(getItem(position))
             is NewsViewHolder -> holder.bind(getItem(position))
         }
@@ -24,34 +41,26 @@ class EntriesAdapter(private val type: Int, private val glide: RequestManager?, 
         return when (viewType) {
             TYPE_NEWS -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                NewsViewHolder(view, callback)
+                NewsViewHolder(view)
             }
             TYPE_PREP -> {
                 val view = inflater.inflate(R.layout.item_entry, parent, false)
-                PrepViewHolder(view, callback)
+                PrepViewHolder(view)
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                PodcastViewHolder(view, viewType, glide!!, callback)
+                PodcastViewHolder(view, glide!!)
             }
         }
     }
 
     override fun getItemViewType(position: Int) = type
 
-    interface Callback {
-        fun onClick(entry: Entry)
+    fun entryClicks() = selection
+    fun downloadClicks() = download
+    fun removeClicks() = remove
+    fun commentClicks() = comments
 
-        fun download(entry: Entry)
-
-        fun remove(entry: Entry)
-
-        fun openWebSite(entry: Entry)
-
-        fun openChatLog(entry: Entry)
-
-        fun onCommentsClick(entry: Entry)
-    }
 
     companion object {
 

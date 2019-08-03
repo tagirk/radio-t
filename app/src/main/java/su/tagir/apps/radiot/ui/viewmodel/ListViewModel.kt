@@ -5,10 +5,11 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.mvp.ViewState
 
 abstract class ListViewModel<T>(scheduler: BaseSchedulerProvider) : BaseViewModel(scheduler) {
 
-    protected val state = MutableLiveData<State<List<T>>>()
+    protected val state = MutableLiveData<ViewState<List<T>>>()
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var firstLaunch = true
@@ -30,5 +31,5 @@ abstract class ListViewModel<T>(scheduler: BaseSchedulerProvider) : BaseViewMode
     }
 
     @MainThread
-    fun state(): LiveData<State<List<T>>> = state
+    fun state(): LiveData<ViewState<List<T>>> = state
 }

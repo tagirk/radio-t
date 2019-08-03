@@ -10,10 +10,6 @@ class SchedulerProvider : BaseSchedulerProvider {
 
     override fun io() = Schedulers.io()
 
-    override fun networkIO() = Schedulers.from(AppExecutors.networkIOExecutors)
-
-    override fun diskIO() = Schedulers.from(AppExecutors.diskIOExecutor)
-
     override fun ui(): Scheduler = AndroidSchedulers.mainThread()
 
 }

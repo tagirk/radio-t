@@ -2,12 +2,13 @@ package su.tagir.apps.radiot.ui.mvp
 
 import android.os.Bundle
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 
 abstract class BasePresenter<V: MvpView>: MvpPresenter<V> {
 
-    private var view: V? = null
+    protected var view: V? = null
 
-    private val disposables = CompositeDisposable()
+    val disposables = CompositeDisposable()
 
     override fun attachView(view: V) {
         this.view = view
@@ -28,15 +29,15 @@ abstract class BasePresenter<V: MvpView>: MvpPresenter<V> {
 
     }
 
-    protected fun doOnAttach(view: V){
+    protected open fun doOnAttach(view: V){
 
     }
 
-    protected fun doOnDetach(){
+    protected open fun doOnDetach(){
 
     }
 
-    fun addDisposable(disposable: CompositeDisposable){
+    fun addDisposable(disposable: Disposable){
         disposables.add(disposable)
     }
 

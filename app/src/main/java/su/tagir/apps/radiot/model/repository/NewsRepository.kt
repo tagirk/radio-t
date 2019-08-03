@@ -19,7 +19,7 @@ class NewsRepository @Inject constructor(private val newsRestClient: NewsRestCli
                                          prefs: Prefs) {
 
     fun getArticles() = RxPagedListBuilder(newsDao.getArticles(), PAGE_SIZE)
-            .setFetchScheduler(scheduler.diskIO())
+            .setFetchScheduler(scheduler.io())
             .setNotifyScheduler(scheduler.ui())
             .buildFlowable(BackpressureStrategy.BUFFER)
 

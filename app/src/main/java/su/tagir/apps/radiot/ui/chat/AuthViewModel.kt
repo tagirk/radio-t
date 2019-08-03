@@ -8,9 +8,9 @@ import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.repository.ChatRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.SingleLiveEvent
+import su.tagir.apps.radiot.ui.mvp.Status
+import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.ui.viewmodel.BaseViewModel
-import su.tagir.apps.radiot.ui.viewmodel.State
-import su.tagir.apps.radiot.ui.viewmodel.Status
 import timber.log.Timber
 import java.net.URI
 import javax.inject.Inject
@@ -21,7 +21,7 @@ class AuthViewModel @Inject constructor(scheduler: BaseSchedulerProvider,
 
 
     private val authEvent = SingleLiveEvent<String>()
-    private val state = MutableLiveData<State<Void>>()
+    private val state = MutableLiveData<ViewState<Void>>()
 
     var authParams: AuthParams? = null
 
@@ -43,7 +43,7 @@ class AuthViewModel @Inject constructor(scheduler: BaseSchedulerProvider,
         router.exit()
     }
 
-    fun state(): LiveData<State<Void>> = state
+    fun state(): LiveData<ViewState<Void>> = state
 
     fun authEvent(): LiveData<String> = authEvent
 
@@ -59,14 +59,14 @@ class AuthViewModel @Inject constructor(scheduler: BaseSchedulerProvider,
                                             authParams?.redirectUrl)
                         }
                         .observeOn(scheduler.ui())
-                        .doOnSubscribe {  state.value = State(Status.LOADING) }
+                        .doOnSubscribe {  state.value = ViewState(Status.LOADING) }
                         .subscribe({
                             router.newRootScreen(Screens.ChatScreenFragment)
-                            state.value = State(Status.SUCCESS)
+                            state.value = ViewState(Status.SUCCESS)
                         },
                                 {
                                     Timber.e(it)
-                                    state.value = State(Status.ERROR, errorMessage = it.message)
+                                    state.value = ViewState(Status.ERROR, errorMessage = it.message)
                                 })
 
         addDisposable(disposable)

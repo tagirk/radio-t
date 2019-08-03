@@ -30,7 +30,7 @@ class AppModule {
         val builder = Retrofit.Builder()
                 .baseUrl("https://radio-t.com/site-api/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
         val dispatcher = Dispatcher()
         dispatcher.maxRequests = 1
@@ -55,7 +55,7 @@ class AppModule {
         val builder = Retrofit.Builder()
                 .baseUrl("https://remark42.radio-t.com/api/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
         val dispatcher = Dispatcher()
         dispatcher.maxRequests = 1
@@ -80,7 +80,7 @@ class AppModule {
         val builder = Retrofit.Builder()
                 .baseUrl("https://news.radio-t.com/api/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
         val dispatcher = Dispatcher()
         dispatcher.maxRequests = 1
@@ -104,7 +104,7 @@ class AppModule {
         val builder = Retrofit.Builder()
                 .baseUrl("https://radiot-4ac4a.firebaseio.com/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
 
         val dispatcher = Dispatcher()
@@ -129,7 +129,7 @@ class AppModule {
         val builder = Retrofit.Builder()
                 .baseUrl("https://gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
 
         val dispatcher = Dispatcher()
@@ -155,7 +155,7 @@ class AppModule {
         val builder = Retrofit.Builder()
                 .baseUrl("https://api.gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
 
         val dispatcher = Dispatcher()
@@ -181,7 +181,7 @@ class AppModule {
         val builder = Retrofit.Builder()
                 .baseUrl("https://stream.gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.networkIO()))
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
 
         val httpClient = OkHttpClient.Builder()

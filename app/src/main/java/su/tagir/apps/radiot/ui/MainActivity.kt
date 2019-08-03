@@ -1,16 +1,13 @@
 package su.tagir.apps.radiot.ui
 
 import android.animation.ValueAnimator
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
-import android.os.RemoteException
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -51,27 +48,23 @@ import saschpe.android.customtabs.WebViewFallback
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
+import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
-import su.tagir.apps.radiot.model.entries.Progress
-import su.tagir.apps.radiot.service.AudioService
-import su.tagir.apps.radiot.service.IAudioService
-import su.tagir.apps.radiot.service.IAudioServiceCallback
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.news.NewsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesFragment
+import su.tagir.apps.radiot.ui.player.PlayerContract
 import su.tagir.apps.radiot.ui.player.PlayerFragment
-import su.tagir.apps.radiot.ui.player.PlayerViewModel
 import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
-import timber.log.Timber
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
-        HasSupportFragmentInjector, ServiceConnection, View.OnClickListener {
+        HasSupportFragmentInjector,
+        View.OnClickListener, PlayerContract.Presenter.InteractionListener {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
@@ -115,12 +108,8 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
-    private lateinit var playerViewModel: PlayerViewModel
     private lateinit var mainViewModel: MainViewModel
 
-    private val serviceCallback = AudioServiceCallback(this)
-
-    private var audioService: IAudioService? = null
 
     private val handler = Handler()
 
@@ -172,11 +161,10 @@ class MainActivity : AppCompatActivity(),
 
         timeLeft = findViewById(R.id.time_left)
         playStream = findViewById(R.id.play)
-        playStream.setOnClickListener { playerViewModel.onPlayStreamClick() }
+//        playStream.setOnClickListener { playerViewModel.onPlayStreamClick() }
         pauseStream = findViewById(R.id.pause)
-        pauseStream.setOnClickListener { playerViewModel.onPauseClick() }
+//        pauseStream.setOnClickListener { playerViewModel.onPauseClick() }
 
-        playerViewModel = getViewModel(PlayerViewModel::class.java)
         mainViewModel = getViewModel(MainViewModel::class.java)
 
         observe()
@@ -189,7 +177,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater?.inflate(R.menu.menu_main, menu)
+        menuInflater.inflate(R.menu.menu_main, menu)
         menu?.findItem(R.id.search)?.isVisible = currentFragment is PodcastTabsFragment
         return super.onCreateOptionsMenu(menu)
     }
@@ -204,24 +192,17 @@ class MainActivity : AppCompatActivity(),
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState?.putInt("state", bottomSheetBehavior.state)
+        outState.putInt("state", bottomSheetBehavior.state)
     }
 
     override fun onStart() {
         super.onStart()
-        bindService()
         mainViewModel.start()
     }
 
     override fun onStop() {
         handler.removeCallbacksAndMessages(null)
-        try {
-            audioService?.unregisterCallback(serviceCallback)
-            audioService?.onActivityStopped()
-        } catch (e: RemoteException) {
-            Timber.e(e)
-        }
-        unbindService(this)
+
         mainViewModel.stop()
         super.onStop()
     }
@@ -275,76 +256,17 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onServiceDisconnected(name: ComponentName?) {
-        try {
-            audioService?.unregisterCallback(serviceCallback)
-        } catch (e: RemoteException) {
-            Timber.e(e)
-        }
-        audioService = null
+    override fun onExpand() {
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        audioService = IAudioService.Stub.asInterface(service)
-        try {
-            audioService?.registerCallback(serviceCallback)
-            audioService?.onActivityStarted()
-        } catch (e: RemoteException) {
-            Timber.e(e)
-        }
+    override fun showCurrent(podcast: Entry?) {
+        bottomSheet.visibleGone(podcast != null)
+        setBottomMargin(if (podcast != null) peekHeight else 0)
+        showHideBtnStream(podcast?.url == STREAM_URL && podcast.state == PLAYING)
     }
 
     private fun observe() {
-        playerViewModel
-                .getCurrentPodcast()
-                .observe(this,
-                        Observer { entry ->
-                            bottomSheet.visibleGone(entry != null)
-                            setBottomMargin(if (entry != null) peekHeight else 0)
-                            showHideBtnStream(entry?.url == STREAM_URL && entry.state == PLAYING)
-                            when (entry?.state) {
-                                PLAYING -> {
-                                    if (audioService == null) {
-                                        bindService()
-                                    }
-                                    playerViewModel.startUpdateProgress()
-                                }
-                                else -> playerViewModel.stopUpdateProgress()
-                            }
-                        })
-
-        playerViewModel
-                .seekEvent()
-                .observe(this,
-                        Observer {
-                            if (it != null) {
-                                try {
-                                    audioService?.seekTo(it)
-                                } catch (e: RemoteException) {
-                                    Timber.e(e)
-                                }
-                            }
-                        })
-
-        playerViewModel
-                .requestProgressEvent()
-                .observe(this,
-                        Observer {
-                            val progress = Progress()
-                            try {
-                                audioService?.getProgress(progress)
-                                playerViewModel.setProgress(progress)
-                            } catch (e: RemoteException) {
-                                Timber.e(e)
-                            }
-                        })
-
-        playerViewModel
-                .expandEvent()
-                .observe(this, Observer {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                })
-
         mainViewModel
                 .getCurrentScreen()
                 .observe(this, Observer {
@@ -370,11 +292,11 @@ class MainActivity : AppCompatActivity(),
                             isHomeAsUp = true
                             toolbar.title = null
                         }
-                        Screens.ABOUT_SCREEN ->{
+                        Screens.ABOUT_SCREEN -> {
                             isHomeAsUp = true
                             toolbar.setTitle(R.string.about)
                         }
-                        Screens.CREDITS_SCREEN ->{
+                        Screens.CREDITS_SCREEN -> {
                             isHomeAsUp = true
                             toolbar.setTitle(R.string.credits)
                         }
@@ -434,8 +356,8 @@ class MainActivity : AppCompatActivity(),
 
 
         override fun applyCommand(command: Command?) {
-            if (command is Forward && command.screen  is Screens.WebScreen) {
-                val screen = command.screen  as Screens.WebScreen
+            if (command is Forward && command.screen is Screens.WebScreen) {
+                val screen = command.screen as Screens.WebScreen
                 openWebPage(screen.url)
             } else if (command is Forward && command.screen is Screens.ResolveActivityScreen) {
                 val screen = command.screen as Screens.ResolveActivityScreen
@@ -483,38 +405,18 @@ class MainActivity : AppCompatActivity(),
         fragmentContainer.setPadding(0, 0, 0, margin)
     }
 
-
-    private fun bindService() {
-        val intent = Intent(application, AudioService::class.java)
-        intent.action = IAudioService::class.java.name
-        bindService(intent, this, Context.BIND_AUTO_CREATE)
-    }
-
-
     inner class BottomSheetCallback : BottomSheetBehavior.BottomSheetCallback() {
 
         override fun onStateChanged(bottomSheet: View, newState: Int) {
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            playerViewModel.onSliding(slideOffset)
+            (supportFragmentManager
+                    .findFragmentById(R.id.bottom_sheet) as? PlayerFragment)?.onSlide(slideOffset)
+
             dim.alpha = slideOffset
         }
     }
 
-    class AudioServiceCallback(mainActivity: MainActivity) : IAudioServiceCallback.Stub() {
-
-        private val weakRef = WeakReference(mainActivity)
-
-        override fun onStateChanged(loading: Boolean, state: Int) {
-            if (weakRef.get()?.playerViewModel?.isLoading()?.value != loading) {
-                weakRef.get()?.playerViewModel?.setLoading(loading)
-            }
-        }
-
-        override fun onError(error: String?) {
-            weakRef.get()?.playerViewModel?.setError(error)
-        }
-    }
 }
 

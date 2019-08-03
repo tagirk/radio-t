@@ -8,19 +8,22 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
+import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.utils.convertMillis
 
-class TimeLabelsAdapter(private var items: List<TimeLabel>,
-                        private val callback:Callback) : RecyclerView.Adapter<TimeLabelViewHolder>() {
+class TimeLabelsAdapter(private var items: List<TimeLabel>) : RecyclerView.Adapter<TimeLabelViewHolder>() {
+
+    private val clicks = PublishRelay.create<TimeLabel>()
 
     override fun getItemCount() = items.size
 
     override fun onBindViewHolder(holder: TimeLabelViewHolder, position: Int) {
         val timeLabel = items[position]
         holder.bind(timeLabel)
-        holder.itemView?.setOnClickListener { callback.onItemClick(timeLabel) }
+        holder.itemView.setOnClickListener { clicks.accept(items[holder.adapterPosition]) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimeLabelViewHolder {
@@ -34,9 +37,7 @@ class TimeLabelsAdapter(private var items: List<TimeLabel>,
         notifyDataSetChanged()
     }
 
-    interface Callback {
-        fun onItemClick(item: TimeLabel)
-    }
+    fun labels(): Observable<TimeLabel> = clicks
 }
 
 class TimeLabelViewHolder(view: View) : RecyclerView.ViewHolder(view) {

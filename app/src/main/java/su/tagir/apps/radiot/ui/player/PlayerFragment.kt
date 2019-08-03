@@ -1,39 +1,64 @@
 package su.tagir.apps.radiot.ui.player
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
+import android.os.RemoteException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindDimen
 import butterknife.BindView
 import butterknife.OnClick
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import io.reactivex.Observable
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.model.entries.TimeLabel
-import su.tagir.apps.radiot.ui.common.BaseFragment
+import su.tagir.apps.radiot.model.repository.EntryRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.service.AudioService
+import su.tagir.apps.radiot.service.IAudioService
+import su.tagir.apps.radiot.service.IAudioServiceCallback
+import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 import su.tagir.apps.radiot.utils.convertSeconds
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
+import timber.log.Timber
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
-class PlayerFragment : BaseFragment(), Injectable {
+class PlayerFragment: BaseMvpFragment<PlayerContract.View,
+        PlayerContract.Presenter>(),
+        PlayerContract.View,
+        ServiceConnection,
+        Injectable {
+
+    @Inject
+    lateinit var entryRepository: EntryRepository
+
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
+
+    @Inject
+    lateinit var router: Router
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private lateinit var playerViewModel: PlayerViewModel
 
     @BindView(R.id.btn_play)
     lateinit var btnPlay: View
@@ -102,6 +127,10 @@ class PlayerFragment : BaseFragment(), Injectable {
 
     private var seeking = false
 
+    private var audioService: IAudioService? = null
+
+    private val serviceCallback = AudioServiceCallback(this)
+
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_player, container, false)
 
@@ -112,21 +141,9 @@ class PlayerFragment : BaseFragment(), Injectable {
                 .load(R.drawable.ic_radiot)
                 .into(logo)
 
-        timeLabelsAdapter = TimeLabelsAdapter(emptyList(), object : TimeLabelsAdapter.Callback {
-            override fun onItemClick(item: TimeLabel) {
-                if (item.time != null) {
-                    playerViewModel.seekTo(item.time / 1000)
-                }
-            }
-        })
+        timeLabelsAdapter = TimeLabelsAdapter(emptyList())
         timeLabels.adapter = timeLabelsAdapter
-        timeLabels.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, true)
-    }
-
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
+        timeLabels.layoutManager = LinearLayoutManager(view.context, RecyclerView.VERTICAL, true)
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -142,126 +159,160 @@ class PlayerFragment : BaseFragment(), Injectable {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                playerViewModel.seekTo(seekBar.progress.toLong())
+                seekTo(seekBar.progress.toLong())
                 seeking = false
             }
         })
+    }
 
-        observePlayerViewModel()
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        bindService(context)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.setListener(activity as PlayerContract.Presenter.InteractionListener)
+    }
+
+    override fun onDetach() {
+        try {
+            audioService?.unregisterCallback(serviceCallback)
+            audioService?.onActivityStopped()
+        } catch (e: RemoteException) {
+            Timber.e(e)
+        }
+        context!!.unbindService(this)
+        super.onDetach()
+    }
+
+    override fun onServiceDisconnected(name: ComponentName?) {
+        try {
+            audioService?.unregisterCallback(serviceCallback)
+        } catch (e: RemoteException) {
+            Timber.e(e)
+        }
+        audioService = null
+    }
+
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        audioService = IAudioService.Stub.asInterface(service)
+        try {
+            audioService?.registerCallback(serviceCallback)
+            audioService?.onActivityStarted()
+        } catch (e: RemoteException) {
+            Timber.e(e)
+        }
     }
 
     @OnClick(R.id.btn_pause, R.id.btn_pause_big)
     fun pause() {
-        playerViewModel.onPauseClick()
+       presenter.pause()
     }
 
     @OnClick(R.id.btn_play, R.id.btn_play_big)
     fun resume() {
-        playerViewModel.onResumeClick()
+        presenter.resume()
     }
 
     @OnClick(R.id.btn_chat)
     fun chat() {
-        playerViewModel.onChatClick()
+        presenter.onChatClick()
     }
 
     @OnClick(R.id.btn_web)
     fun openWebPage() {
-        playerViewModel.openWebPage()
+        presenter.openWebPage()
     }
 
     @OnClick(R.id.title, R.id.image)
     fun expand() {
-        playerViewModel.onExpandClick()
+        presenter.onTitleClick()
     }
 
     @OnClick(R.id.btn_forward)
     fun forward() {
-        playerViewModel.seekTo(seekBar.progress.toLong() + 30L)
+        seekTo(seekBar.progress.toLong() + 30L)
     }
 
     @OnClick(R.id.btn_replay)
     fun replay() {
-        playerViewModel.seekTo(Math.max(0L, seekBar.progress.toLong() - 30L))
+        seekTo(Math.max(0L, seekBar.progress.toLong() - 30L))
     }
 
-    private fun observePlayerViewModel() {
-        playerViewModel
-                .getCurrentPodcast()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { entry ->
-                            btnPause.visibleInvisible(entry?.state?.equals(EntryState.PLAYING)
-                                    ?: false)
-                            btnPlay.visibleInvisible(entry?.state?.equals(EntryState.PAUSED)
-                                    ?: false)
-                            btnPauseBig.visibleInvisible(entry?.state?.equals(EntryState.PLAYING)
-                                    ?: false)
-                            btnPlayBig.visibleInvisible(entry?.state?.equals(EntryState.PAUSED)
-                                    ?: false)
+    override fun createPresenter(): PlayerContract.Presenter =
+            PlayerPresenter(entryRepository, scheduler, router)
 
-                            GlideApp.with(this@PlayerFragment)
-                                    .load(entry?.image)
-                                    .placeholder(R.drawable.ic_notification_large)
-                                    .error(R.drawable.ic_notification_large)
-                                    .transform(RoundedCorners(cornerRadius))
-                                    .into(image)
+    override fun showCurrentPodcast(entry: Entry) {
+        btnPause.visibleInvisible(entry.state == EntryState.PLAYING)
+        btnPlay.visibleInvisible(entry.state == EntryState.PAUSED)
+        btnPauseBig.visibleInvisible(entry.state == EntryState.PLAYING)
+        btnPlayBig.visibleInvisible(entry.state == EntryState.PAUSED)
 
-                            title.text = entry?.title
-                            seekBar.isEnabled = entry?.url != STREAM_URL
-                            btnForward.visibleInvisible(entry?.url != STREAM_URL)
-                            btnReplay.visibleInvisible(entry?.url != STREAM_URL)
-                            leftTime.visibleInvisible(entry?.url != STREAM_URL)
-                            progressTime.visibleInvisible(entry?.url != STREAM_URL)
-                        })
+        GlideApp.with(this@PlayerFragment)
+                .load(entry.image)
+                .placeholder(R.drawable.ic_notification_large)
+                .error(R.drawable.ic_notification_large)
+                .transform(RoundedCorners(cornerRadius))
+                .into(image)
 
-        playerViewModel
-                .getError()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { error ->
-                            if (context != null) {
-                                AlertDialog.Builder(context!!)
-                                        .setTitle(R.string.error)
-                                        .setMessage(error)
-                                        .setPositiveButton("OK", null)
-                                        .create()
-                                        .show()
-                            }
-                        })
+        title.text = entry.title
+        seekBar.isEnabled = entry.url != STREAM_URL
+        btnForward.visibleInvisible(entry.url != STREAM_URL)
+        btnReplay.visibleInvisible(entry.url != STREAM_URL)
+        leftTime.visibleInvisible(entry.url != STREAM_URL)
+        progressTime.visibleInvisible(entry.url != STREAM_URL)
+    }
 
-        playerViewModel
-                .isLoading()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { loading ->
-                            btnForward.isEnabled = loading == false
-                            btnReplay.isEnabled = loading == false
-                            progress.visibleGone(loading ?: false)
-                            progressHorizontal.visibleInvisible(loading ?: false)
-                            seekBar.visibleInvisible(loading == null || loading == false)
-                            leftTime.visibleInvisible(loading == null || loading == false)
-                            progressTime.visibleInvisible(loading == null || loading == false)
-                        })
+    override fun showTimeLabels(timeLabels: List<TimeLabel>) {
+        timeLabelsAdapter.update(timeLabels)
+    }
 
-        playerViewModel
-                .getSlidingValue()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { slideOffset -> onSlide(slideOffset ?: 0f) })
+    override fun requestProgress() {
+        val progress = Progress()
+        audioService?.getProgress(progress)
+        showProgress(progress)
+    }
 
-        playerViewModel
-                .getProgress()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { progress -> showProgress(progress) })
+    override fun seekTo(seek: Long) {
+        try {
+            audioService?.seekTo(seek)
+        } catch (e: RemoteException) {
+            Timber.e(e)
+        }
+    }
 
-        playerViewModel
-                .getTimeLabels()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { timeLabels ->
-                            timeLabelsAdapter.update(timeLabels)
-                        })
+    override fun showLoading(loading: Boolean) {
+        btnForward.isEnabled = !loading
+        btnReplay.isEnabled = !loading
+        progress.visibleGone(loading)
+        progressHorizontal.visibleInvisible(loading)
+        seekBar.visibleInvisible(loading)
+        leftTime.visibleInvisible(loading)
+        progressTime.visibleInvisible(loading)
+    }
+
+    override fun timeLabelRequests(): Observable<TimeLabel> = timeLabelsAdapter.labels()
+
+    override fun showError(error: String) {
+        AlertDialog.Builder(context!!)
+                .setTitle(R.string.error)
+                .setMessage(error)
+                .setPositiveButton("OK", null)
+                .create()
+                .show()
+    }
+
+    private fun bindService(context: Context) {
+        val intent = Intent(context, AudioService::class.java)
+        intent.action = IAudioService::class.java.name
+        context.bindService(intent, this, Context.BIND_AUTO_CREATE)
     }
 
 
-    private fun onSlide(slideOffset: Float) {
-        val alpha = 1 - 5 * slideOffset
+    override fun onSlide(offset: Float) {
+        val alpha = 1 - 5 * offset
         btnPause.alpha = alpha
         btnPlay.alpha = alpha
         btnPlay.isEnabled = btnPlay.alpha > 0
@@ -287,4 +338,20 @@ class PlayerFragment : BaseFragment(), Injectable {
         val leftTime = progress?.duration?.minus(progress.progress) ?: 0
         this.leftTime.text = (if (leftTime >= 0) leftTime else 0).convertSeconds()
     }
+
+    class AudioServiceCallback(playerFragment: PlayerFragment) : IAudioServiceCallback.Stub() {
+
+        private val weakRef = WeakReference(playerFragment)
+
+        override fun onStateChanged(loading: Boolean, state: Int) {
+            weakRef.get()?.showLoading(loading)
+        }
+
+        override fun onError(error: String?) {
+            error?.let{
+                weakRef.get()?.showError(error)
+            }
+        }
+    }
+
 }
