@@ -4,11 +4,9 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import io.reactivex.Observable
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
@@ -35,9 +33,6 @@ class PiratesFragment:
         return PiratesPresenter(entryRepository, scheduler)
     }
 
-    override fun loadData(pullToRefresh: Boolean) {
-        presenter.update()
-    }
 
     override fun showDownloadError(error: String) {
         context?.let {c ->
@@ -50,13 +45,7 @@ class PiratesFragment:
         }
     }
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this))
-
-    override fun entryClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).entryClicks()
-
-    override fun downloadClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).downloadClicks()
-
-    override fun removeClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).removeClicks()
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this), presenter)
 
     override fun download() {
         startDownloadWithPermissionCheck()

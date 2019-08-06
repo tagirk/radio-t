@@ -14,7 +14,7 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.utils.visibleGone
 
-abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : BaseMvpFragment<V, P>(), MvpListView<M>{
+abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpListPresenter<M, V>> : BaseMvpFragment<V, P>(), MvpListView<M>{
 
     @BindView(R.id.progress)
     lateinit var progress: View
@@ -50,7 +50,7 @@ abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : B
     private fun initList() {
         adapter = createAdapter()
         list.adapter = adapter
-        refreshLayout.setOnRefreshListener { loadData(pullToRefresh =  true) }
+        refreshLayout.setOnRefreshListener { presenter.loadData(true) }
 
         list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -58,7 +58,7 @@ abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : B
                 val lastPosition = layoutManager.findLastVisibleItemPosition()
 
                 if (lastPosition == adapter.itemCount - 1) {
-                    loadMore(lastIndex = lastPosition)
+                    presenter.loadMore(lastIndex = lastPosition)
                 }
             }
         })
@@ -66,7 +66,7 @@ abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : B
 
     @OnClick(R.id.btn_retry)
     fun retry() {
-        loadData(pullToRefresh = false)
+        presenter.loadData(false)
     }
 
     override fun updateState(viewState: ViewState<List<M>>) {
@@ -76,12 +76,7 @@ abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : B
         }
     }
 
-
     abstract fun createAdapter(): DataBoundListAdapter<M>
-
-    override fun loadMore(lastIndex: Int){
-
-    }
 
     protected open fun showHideViews(viewState: ViewState<List<M>>) {
         val isEmpty = (viewState.data?.size ?: 0) == 0

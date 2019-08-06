@@ -51,7 +51,7 @@ abstract class EntryDao {
     }
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.URL} = :url LIMIT 1")
-    abstract fun getEntry(url: String?): Maybe<Entry?>
+    abstract fun getEntry(url: String?): Maybe<Entry>
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.CATEGORIES} IN (:categories) ORDER BY ${Entry.DATE} DESC")
     abstract fun getEntries(categories: Array<out String>): DataSource.Factory<Int, Entry>

@@ -10,10 +10,6 @@ import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.chat.AuthViewModel
 import su.tagir.apps.radiot.ui.chat.ChatViewModel
 import su.tagir.apps.radiot.ui.comments.CommentsViewModel
-import su.tagir.apps.radiot.ui.hosts.HostsViewModel
-import su.tagir.apps.radiot.ui.localcontent.LocalContentViewModel
-import su.tagir.apps.radiot.ui.news.ArticlesViewModel
-import su.tagir.apps.radiot.ui.news.NewsViewModel
 import su.tagir.apps.radiot.ui.viewmodel.ViewModelFactory
 import kotlin.reflect.KClass
 
@@ -24,26 +20,6 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(MainViewModel::class)
     abstract fun bindMainViewModel(mainViewModel: MainViewModel): ViewModel
-
-    @Binds
-    @IntoMap
-    @ViewModelKey(NewsViewModel::class)
-    abstract fun bindPodcastsNewsViewModel(newsViewModel: NewsViewModel): ViewModel
-
-    @Binds
-    @IntoMap
-    @ViewModelKey(HostsViewModel::class)
-    abstract fun bindHostsViewModel(hostsViewModel: HostsViewModel): ViewModel
-
-    @Binds
-    @IntoMap
-    @ViewModelKey(LocalContentViewModel::class)
-    abstract fun localContentViewModel(localContentViewModel: LocalContentViewModel): ViewModel
-
-    @Binds
-    @IntoMap
-    @ViewModelKey(ArticlesViewModel::class)
-    abstract fun streamViewModel(articlesViewModel: ArticlesViewModel): ViewModel
 
     @Binds
     @IntoMap

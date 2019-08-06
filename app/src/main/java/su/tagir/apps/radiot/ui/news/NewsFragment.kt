@@ -1,38 +1,33 @@
 package su.tagir.apps.radiot.ui.news
 
-import android.os.Bundle
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.ui.MainViewModel
+import su.tagir.apps.radiot.model.repository.EntryRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.PagedListFragment
+import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
 import javax.inject.Inject
 
-class NewsFragment : PagedListFragment<Entry>(), Injectable{
-
+class NewsFragment : BaseMvpPagedListFragment<Entry, NewsContract.View, NewsContract.Presenter>(), NewsContract.View, Injectable{
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var router: Router
 
-    private lateinit var mainViewModel: MainViewModel
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
-    }
+    @Inject
+    lateinit var entryRepository: EntryRepository
 
-    override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(NewsViewModel::class.java)
+    override fun createAdapter(): PagedListAdapter<Entry, out RecyclerView.ViewHolder> =
+            EntriesAdapter(EntriesAdapter.TYPE_NEWS, GlideApp.with(this), presenter)
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_NEWS, null)
 
-//    override fun onClick(entry: Entry) {
-//        (listViewModel as NewsViewModel).onEntryClick(entry)
-//    }
-//
-//
-//    override fun onCommentsClick(entry: Entry) {
-//        mainViewModel.showComments(entry)
-//    }
+    override fun createPresenter(): NewsContract.Presenter =
+            NewsPresenter(entryRepository, scheduler, router)
+
+
 }

@@ -4,27 +4,27 @@ import android.os.Bundle
 import android.view.*
 import android.webkit.WebView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
-import butterknife.BindView
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
-import su.tagir.apps.radiot.ui.MainViewModel
-import su.tagir.apps.radiot.ui.common.BaseFragment
+import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.model.repository.EntryRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 import javax.inject.Inject
 
 
-class LocalContentFragment : BaseFragment(), Injectable {
-
+class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalContentContract.Presenter>(), LocalContentContract.View, Injectable {
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var entryRepository: EntryRepository
 
-    private lateinit var viewModel: LocalContentViewModel
-    private lateinit var mainViewModel: MainViewModel
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
 
-    @BindView(R.id.web_view)
+    @Inject
+    lateinit var router: Router
+
     lateinit var webView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,28 +37,22 @@ class LocalContentFragment : BaseFragment(), Injectable {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        webView = view.findViewById(R.id.web_view)
         webView.setBackgroundColor(ContextCompat.getColor(view.context, R.color.colorBackground))
 
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(LocalContentViewModel::class.java)
-        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
+    override fun createPresenter(): LocalContentContract.Presenter =
+            LocalContentPresenter(arguments!!.getString("entry_id")!!, entryRepository, router, scheduler)
 
-        viewModel.getEntry()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { entry ->
-                            val sb = "<HTML><HEAD><LINK href=\"material.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>" +
-                                    entry?.body +
-                                    "</body></HTML>"
+    override fun showContent(entry: Entry) {
+        val sb = "<HTML><HEAD><LINK href=\"material.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>" +
+                entry.body +
+                "</body></HTML>"
 
-                            webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
-                            mainViewModel.setCurrentScreen(entry?.title?:"")
-                        })
-
-        viewModel.setId(arguments?.getString(ARG_ID))
+        webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_content, menu)
@@ -67,7 +61,7 @@ class LocalContentFragment : BaseFragment(), Injectable {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
-            R.id.web -> viewModel.openInBrowser()
+            R.id.web -> presenter.openInBrowser()
         }
         return false
     }
