@@ -180,5 +180,5 @@ class EntryRepository @Inject constructor(private val restClient: RestClient,
         entryDao.updateCurrentEntryStateAndProgress(state, progress)
     }
 
-    fun getEntry(id: String?): Maybe<Entry?> = entryDao.getEntry(id)
+    fun getEntry(id: String): Maybe<Entry> = entryDao.getEntry(id)
 }

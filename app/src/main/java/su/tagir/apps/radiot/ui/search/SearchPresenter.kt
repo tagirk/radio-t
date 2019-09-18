@@ -8,7 +8,7 @@ import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.ui.mvp.BasePresenter
+import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import timber.log.Timber
@@ -19,6 +19,9 @@ import javax.inject.Inject
 class SearchPresenter @Inject constructor(private val entryRepository: EntryRepository,
                                           private val scheduler: BaseSchedulerProvider,
                                           private val router: Router) : BasePresenter<SearchContract.View>(), SearchContract.Presenter {
+class SearchPresenter(private val entryRepository: EntryRepository,
+                      private val scheduler: BaseSchedulerProvider,
+                      private val router: Router) : BaseListPresenter<Entry, SearchContract.View>(), SearchContract.Presenter {
 
     private var searchDisposable: Disposable? = null
     private var dataDisposable: Disposable? = null
@@ -41,7 +44,6 @@ class SearchPresenter @Inject constructor(private val entryRepository: EntryRepo
         get() = state.data?.size ?: 0
 
     override fun doOnAttach(view: SearchContract.View) {
-        observeClickEvents(view)
 
         val recentSearchesDisposable = entryRepository.getRecentSearches()
                 .subscribe({
@@ -140,32 +142,30 @@ class SearchPresenter @Inject constructor(private val entryRepository: EntryRepo
         disposables += dataDisposable!!
     }
 
-    private fun observeClickEvents(v: SearchContract.View) {
-        disposables += v.entryClickRequests()
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .subscribe({ entry -> entryRepository.play(entry) },
-                        { e ->
-                            Timber.e(e)
-                        })
+    override fun loadData(refresh: Boolean) {
 
-        disposables += v.removeClickRequests()
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .flatMapCompletable { entry -> entryRepository.deleteFile(entry.downloadId) }
+    }
+
+    override fun onCommentClick(entry: Entry) {
+        router.navigateTo(Screens.CommentsScreen(entry = entry))
+    }
+
+    override fun onDownloadClick(entry: Entry) {
+        entryForDownload = entry
+        view?.download()
+    }
+
+    override fun onEntryClick(entry: Entry) {
+        entryRepository.play(entry)
+    }
+
+    override fun onRemoveClick(entry: Entry) {
+        disposables += entryRepository.deleteFile(entry.downloadId)
+                .observeOn(scheduler.ui())
                 .subscribe({}, { e ->
                     Timber.e(e)
                     view?.showDownloadError(e.localizedMessage)
                 })
-
-        disposables += v.commentClickRequests()
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .observeOn(scheduler.ui())
-                .subscribe { router.navigateTo(Screens.CommentsScreen(entry = it)) }
-
-        disposables += v.downloadClickRequests()
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .observeOn(scheduler.ui())
-                .subscribe { view?.download() }
-
-
     }
+
 }

@@ -1,8 +1,6 @@
 package su.tagir.apps.radiot.ui.pirates.downloaded
 
 import androidx.appcompat.app.AlertDialog
-import io.reactivex.Observable
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
@@ -23,7 +21,7 @@ class DownloadedPiratesFragment:
     @Inject
     lateinit var scheduler: BaseSchedulerProvider
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this))
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), presenter)
 
     override fun createPresenter(): DownloadedPiratesContract.Presenter {
         return DownloadedPiratesPresenter(entryRepository, scheduler)
@@ -39,13 +37,4 @@ class DownloadedPiratesFragment:
                     .show()
         }
     }
-
-    override fun loadData(pullToRefresh: Boolean) {
-
-    }
-
-    override fun entryClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).entryClicks()
-
-    override fun removeClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).removeClicks()
-
 }

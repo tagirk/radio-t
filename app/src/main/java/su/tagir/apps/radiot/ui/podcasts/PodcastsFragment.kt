@@ -8,12 +8,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
-import io.reactivex.Observable
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
 import ru.terrakok.cicerone.Router
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
@@ -54,10 +52,6 @@ class PodcastsFragment : BaseMvpPagedListFragment<Entry, PodcastsContract.View, 
         return PodcastsPresenter(entryRepository, scheduler, router)
     }
 
-    override fun loadData(pullToRefresh: Boolean) {
-        presenter.update()
-    }
-
     override fun updateState(viewState: ViewState<List<Entry>>) {
         showHideViews(viewState)
         viewState.data?.let { data ->
@@ -79,14 +73,6 @@ class PodcastsFragment : BaseMvpPagedListFragment<Entry, PodcastsContract.View, 
     override fun download() {
         startDownloadWithPermissionCheck()
     }
-
-    override fun entryClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).entryClicks()
-
-    override fun downloadClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).downloadClicks()
-
-    override fun removeClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).removeClicks()
-
-    override fun commentClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).commentClicks()
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun startDownload() {

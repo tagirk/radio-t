@@ -12,7 +12,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import io.reactivex.Observable
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
@@ -80,12 +79,8 @@ class SearchFragment:
         }
     }
 
-    override fun loadData(pullToRefresh: Boolean) {
-        presenter.update()
-    }
-
     override fun createAdapter(): DataBoundListAdapter<Entry> {
-        return SearchAdapter(Glide.with(this))
+        return SearchAdapter(Glide.with(this), presenter)
     }
 
     override fun onQueryClick(query: String?) {
@@ -124,13 +119,6 @@ class SearchFragment:
         startDownloadWithPermissionCheck()
     }
 
-    override fun entryClickRequests(): Observable<Entry> = (adapter as SearchAdapter).entryClicks()
-
-    override fun downloadClickRequests(): Observable<Entry> = (adapter as SearchAdapter).downloadClicks()
-
-    override fun removeClickRequests(): Observable<Entry> = (adapter as SearchAdapter).removeClicks()
-
-    override fun commentClickRequests(): Observable<Entry> = (adapter as SearchAdapter).commentClicks()
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun startDownload() {

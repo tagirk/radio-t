@@ -5,9 +5,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import io.reactivex.Observable
 import ru.terrakok.cicerone.Router
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
@@ -51,17 +49,8 @@ class DownloadedPodcastsFragment: BaseMvpPagedListFragment<Entry, DownloadedPodc
         return DownloadedPodcastsPresenter(entryRepository, scheduler, router)
     }
 
-    override fun loadData(pullToRefresh: Boolean) {
 
-    }
-
-    override fun entryClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).entryClicks()
-
-    override fun removeClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).removeClicks()
-
-    override fun commentClickRequests(): Observable<Entry> = (adapter as EntriesAdapter).commentClicks()
-
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this))
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), presenter)
 
     override fun showRemoveError(error: String) {
         context?.let { c ->
