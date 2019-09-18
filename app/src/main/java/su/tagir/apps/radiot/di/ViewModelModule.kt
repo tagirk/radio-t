@@ -7,8 +7,6 @@ import dagger.MapKey
 import dagger.Module
 import dagger.multibindings.IntoMap
 import su.tagir.apps.radiot.ui.MainViewModel
-import su.tagir.apps.radiot.ui.chat.AuthViewModel
-import su.tagir.apps.radiot.ui.chat.ChatViewModel
 import su.tagir.apps.radiot.ui.comments.CommentsViewModel
 import su.tagir.apps.radiot.ui.hosts.HostsViewModel
 import su.tagir.apps.radiot.ui.localcontent.LocalContentViewModel
@@ -44,16 +42,6 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(ArticlesViewModel::class)
     abstract fun streamViewModel(articlesViewModel: ArticlesViewModel): ViewModel
-
-    @Binds
-    @IntoMap
-    @ViewModelKey(AuthViewModel::class)
-    abstract fun authViewModel(authViewModel: AuthViewModel): ViewModel
-
-    @Binds
-    @IntoMap
-    @ViewModelKey(ChatViewModel::class)
-    abstract fun chatViewModel(chatViewModel: ChatViewModel): ViewModel
 
     @Binds
     @IntoMap

@@ -9,29 +9,20 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
 import com.bumptech.glide.Glide
 import io.reactivex.Observable
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
-import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
-import javax.inject.Inject
 
 @RuntimePermissions
 class SearchFragment:
@@ -41,29 +32,13 @@ class SearchFragment:
         Injectable,
         ItemTouchHelper.Callback{
 
+    private lateinit var recentQueries: RecyclerView
 
-    @Inject
-    lateinit var entryRepository: EntryRepository
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
-
-    @Inject
-    lateinit var router: Router
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    @BindView(R.id.recent_queries)
-    lateinit var recentQueries: RecyclerView
-
-    @BindView(R.id.layout_entries)
-    lateinit var layoutEntries: View
+    private lateinit var layoutEntries: View
 
     private lateinit var recentQueriesAdapter: RecentQueriesAdapter
     private val handler = Handler()
 
-    private lateinit var mainViewModel: MainViewModel
     private var searchView: SearchView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,6 +48,8 @@ class SearchFragment:
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        recentQueries = view.findViewById(R.id.recent_queries)
+        layoutEntries = view.findViewById(R.id.layout_entries)
 
         recentQueriesAdapter = RecentQueriesAdapter(this)
         recentQueries.adapter = recentQueriesAdapter
@@ -82,18 +59,8 @@ class SearchFragment:
         refreshLayout.isEnabled = false
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
-    }
-
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_search, container, false)
-
-    override fun onResume() {
-        super.onResume()
-        mainViewModel.setCurrentScreen(Screens.SEARCH_SCREEN)
-    }
 
     override fun onPause() {
         super.onPause()
@@ -135,7 +102,7 @@ class SearchFragment:
     }
 
     override fun createPresenter(): SearchContract.Presenter {
-        return SearchPresenter(entryRepository, scheduler, router)
+       throw UnsupportedOperationException()
     }
 
     override fun showDownloadError(error: String) {

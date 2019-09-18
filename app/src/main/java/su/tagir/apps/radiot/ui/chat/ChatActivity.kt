@@ -7,12 +7,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
-import butterknife.BindColor
-import butterknife.ButterKnife
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
@@ -34,17 +31,7 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    @Inject
     lateinit var navigatorHolder: NavigatorHolder
-
-    @JvmField
-    @BindColor(R.color.colorPrimary)
-    var primaryColor: Int = 0
-
-
-    private lateinit var chatViewModel: ChatViewModel
 
     private val currentFragment
         get() = supportFragmentManager.findFragmentById(R.id.fragment_container) as BaseFragment?
@@ -53,9 +40,6 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-        ButterKnife.bind(this)
-        chatViewModel = ViewModelProviders.of(this, viewModelFactory).get(ChatViewModel::class.java)
-
         initStartFragment()
 
     }
@@ -78,11 +62,11 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
     private fun initStartFragment() {
         if (currentFragment == null) {
 
-            val fragmemt: Fragment = if (chatViewModel.isSignedIn) ChatFragment() else AuthFragment()
+            val fragment: Fragment = ChatFragment()
 
             supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_container, fragmemt)
+                    .replace(R.id.fragment_container, fragment)
                     .commitNowAllowingStateLoss()
         }
     }
@@ -110,7 +94,7 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
         private fun openWebPage(url: String) {
             val customTabsIntent = CustomTabsIntent.Builder()
                     .addDefaultShareMenuItem()
-                    .setToolbarColor(primaryColor)
+                    .setToolbarColor(ContextCompat.getColor(this@ChatActivity, R.color.colorPrimary))
                     .setShowTitle(true)
                     .setCloseButtonIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_arrow_back_24dp))
                     .build()

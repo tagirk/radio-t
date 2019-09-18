@@ -8,39 +8,43 @@ import android.widget.ProgressBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import butterknife.BindView
-import butterknife.OnClick
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.utils.visibleGone
 
-abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : BaseMvpFragment<V, P>(), MvpListView<M>{
+abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpListPresenter<M, V>> : BaseMvpFragment<V, P>(), MvpListView<M>{
 
-    @BindView(R.id.progress)
     lateinit var progress: View
 
-    @BindView(R.id.btn_retry)
     lateinit var btnRetry: View
 
-    @BindView(R.id.text_error)
     lateinit var errorText: View
 
-    @BindView(R.id.text_empty)
     lateinit var emptyView: View
 
-    @BindView(R.id.list)
     lateinit var list: RecyclerView
 
-    @BindView(R.id.refresh_layout)
     lateinit var refreshLayout: SwipeRefreshLayout
 
-    @BindView(R.id.load_more_progress)
     lateinit var loadMoreProgress: ProgressBar
 
     protected lateinit var adapter: DataBoundListAdapter<M>
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_entry_list, container, false)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        progress = view.findViewById(R.id.progress)
+        btnRetry = view.findViewById(R.id.btn_retry)
+        errorText = view.findViewById(R.id.text_error)
+        emptyView = view.findViewById(R.id.text_empty)
+        list = view.findViewById(R.id.list)
+        refreshLayout = view.findViewById(R.id.refresh_layout)
+        loadMoreProgress = view.findViewById(R.id.load_more_progress)
+
+        btnRetry.setOnClickListener { presenter.loadData(false) }
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -50,7 +54,7 @@ abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : B
     private fun initList() {
         adapter = createAdapter()
         list.adapter = adapter
-        refreshLayout.setOnRefreshListener { loadData(pullToRefresh =  true) }
+        refreshLayout.setOnRefreshListener { presenter.loadData(pullToRefresh =  true) }
 
         list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -58,15 +62,10 @@ abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : B
                 val lastPosition = layoutManager.findLastVisibleItemPosition()
 
                 if (lastPosition == adapter.itemCount - 1) {
-                    loadMore(lastIndex = lastPosition)
+                    presenter.loadMore(lastIndex = lastPosition)
                 }
             }
         })
-    }
-
-    @OnClick(R.id.btn_retry)
-    fun retry() {
-        loadData(pullToRefresh = false)
     }
 
     override fun updateState(viewState: ViewState<List<M>>) {
@@ -78,10 +77,6 @@ abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpPresenter<V>> : B
 
 
     abstract fun createAdapter(): DataBoundListAdapter<M>
-
-    override fun loadMore(lastIndex: Int){
-
-    }
 
     protected open fun showHideViews(viewState: ViewState<List<M>>) {
         val isEmpty = (viewState.data?.size ?: 0) == 0

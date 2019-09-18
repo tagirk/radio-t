@@ -15,91 +15,110 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
-import butterknife.BindView
-import butterknife.OnClick
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.model.repository.ChatRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
-import su.tagir.apps.radiot.ui.common.BaseFragment
+import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
+import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
-
-class AuthFragment : BaseFragment(), Injectable, BackClickHandler {
-
-    @JvmField @BindView(R.id.web_view)
-    var webView: WebView? = null
-
-    @JvmField @BindView(R.id.progress)
-    var progress: ProgressBar? = null
-
-    @JvmField @BindView(R.id.toolbar)
-    var toolbar: Toolbar? = null
-
-    @JvmField @BindView(R.id.btn_retry)
-    var retry: Button? = null
-
-    @JvmField @BindView(R.id.error)
-    var error: LinearLayout? = null
+class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(), AuthContract.View, Injectable, BackClickHandler {
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var chatRepository: ChatRepository
 
-    private lateinit var viewModel: AuthViewModel
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
+
+    @Inject
+    lateinit var router: Router
+
+    private lateinit var webView: WebView
+
+    private lateinit var progress: ProgressBar
+
+    private lateinit var toolbar: Toolbar
+
+    private lateinit var retry: Button
+
+    private lateinit var error: LinearLayout
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_auth, container, false)
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        webView = view.findViewById(R.id.web_view)
+        progress = view.findViewById(R.id.progress)
+        toolbar = view.findViewById(R.id.progress)
+        retry = view.findViewById(R.id.btn_retry)
+        error = view.findViewById(R.id.error)
+
+        retry.setOnClickListener { presenter.startAuth() }
+
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(AuthViewModel::class.java)
-        toolbar?.setNavigationOnClickListener { onBackClick() }
-        viewModel.authParams = AuthParams(getString(R.string.oauth_key), getString(R.string.oauth_secret), getString(R.string.redirect_url), "code")
+        toolbar.setNavigationOnClickListener { onBackClick() }
         initWebView()
-        viewModel.startAuth()
     }
 
     override fun onResume() {
         super.onResume()
-        webView?.onResume()
-        webView?.resumeTimers()
+        webView.onResume()
+        webView.resumeTimers()
     }
 
     override fun onPause() {
-        webView?.pauseTimers()
-        webView?.onPause()
+        webView.pauseTimers()
+        webView.onPause()
         super.onPause()
     }
 
 
     override fun onBackClick() {
-        if (webView?.canGoBack() == true) {
-            webView?.goBack()
+        if (webView.canGoBack()) {
+            webView.goBack()
         } else {
-            viewModel.onBackClicked()
+            presenter.onBackClick()
         }
     }
 
-    @OnClick(R.id.btn_retry)
-    fun retry() {
-        viewModel.startAuth()
+    override fun createPresenter(): AuthContract.Presenter {
+        val authParams = AuthParams(getString(R.string.oauth_key), getString(R.string.oauth_secret), getString(R.string.redirect_url), "code")
+        return AuthPresenter(authParams, chatRepository, scheduler, router)
+    }
+
+    override fun auth(url: String) {
+        webView.loadUrl(url)
+    }
+
+    override fun updateState(state: ViewState<Boolean>) {
+        progress.visibleGone(state.loading)
+        error.visibleGone(state.error)
+
+        state.getErrorIfNotHandled()?.let { message ->
+            showToast(message)
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView() {
-        webView?.settings?.javaScriptEnabled = true
-        webView?.webViewClient = object : WebViewClient() {
+        webView.settings.javaScriptEnabled = true
+        webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                progress?.visibleGone(true)
+                progress.visibleGone(true)
                 super.onPageStarted(view, url, favicon)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                progress?.visibleGone(false)
+                progress.visibleGone(false)
             }
 
             @Suppress("OverridingDeprecatedMember")
@@ -113,24 +132,9 @@ class AuthFragment : BaseFragment(), Injectable, BackClickHandler {
             }
 
             private fun overrideUrlLoading(url: String): Boolean {
-                return viewModel.redirect(url)
+                presenter.requestToken(url)
+                return false
             }
         }
-        viewModel.authEvent()
-                .observe(getViewLifecycleOwner()!!, Observer {
-                    webView?.loadUrl(it)
-                })
-
-        viewModel.state()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            progress?.visibleGone(it?.loading == true)
-                            error?.visibleGone(it?.error == true)
-                            val message = it?.getErrorIfNotHandled()
-                            if (message != null) {
-                                showToast(message)
-                            }
-                        })
     }
-
 }

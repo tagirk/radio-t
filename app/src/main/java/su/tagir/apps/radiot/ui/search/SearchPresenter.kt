@@ -13,10 +13,12 @@ import su.tagir.apps.radiot.ui.mvp.Status
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class SearchPresenter(private val entryRepository: EntryRepository,
-                      private val scheduler: BaseSchedulerProvider,
-                      private val router: Router) : BasePresenter<SearchContract.View>(), SearchContract.Presenter {
+@SearchScope
+class SearchPresenter @Inject constructor(private val entryRepository: EntryRepository,
+                                          private val scheduler: BaseSchedulerProvider,
+                                          private val router: Router) : BasePresenter<SearchContract.View>(), SearchContract.Presenter {
 
     private var searchDisposable: Disposable? = null
     private var dataDisposable: Disposable? = null

@@ -7,7 +7,6 @@ import io.reactivex.rxkotlin.plusAssign
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Host
-import su.tagir.apps.radiot.model.repository.HostRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.Status
 import su.tagir.apps.radiot.ui.mvp.ViewState

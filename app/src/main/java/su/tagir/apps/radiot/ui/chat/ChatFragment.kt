@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.os.IBinder
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,114 +14,132 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
-import butterknife.OnClick
-import butterknife.OnEditorAction
-import butterknife.OnTextChanged
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.MessageFull
+import su.tagir.apps.radiot.model.repository.ChatRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
-import su.tagir.apps.radiot.ui.common.PagedListFragment
+import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import javax.inject.Inject
 
-class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapter.Callback, BackClickHandler {
-
-    @BindView(R.id.toolbar)
-    lateinit var toolbar: Toolbar
-
-    @BindView(R.id.btn_downward)
-    lateinit var btnDownward: FloatingActionButton
-
-    @BindView(R.id.send)
-    lateinit var btnSend: ImageButton
-
-    @BindView(R.id.send_progress)
-    lateinit var sendProgress: ProgressBar
-
-    @BindView(R.id.message)
-    lateinit var message: EditText
+class ChatFragment : BaseMvpPagedListFragment<MessageFull, ChatContract.View, ChatContract.Presenter>(), ChatContract.View,
+        Injectable,
+        MessagesAdapter.Callback,
+        BackClickHandler {
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var chatRepository: ChatRepository
 
-    private lateinit var chatViewModel: ChatViewModel
+    @Inject
+    lateinit var router: Router
+
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
+
+    private lateinit var toolbar: Toolbar
+
+    lateinit var btnDownward: FloatingActionButton
+
+    lateinit var btnSend: ImageButton
+
+    lateinit var sendProgress: ProgressBar
+
+    lateinit var message: EditText
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View {
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        toolbar = view.findViewById(R.id.toolbar)
+        btnDownward = view.findViewById(R.id.btn_downward)
+        btnSend = view.findViewById(R.id.btn_send)
+        sendProgress = view.findViewById(R.id.send_progress)
+        message = view.findViewById(R.id.message)
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        chatViewModel = listViewModel as ChatViewModel
         toolbar.setNavigationOnClickListener { onBackClick() }
         toolbar.inflateMenu(R.menu.menu_chat)
         toolbar.setOnMenuItemClickListener { item ->
             when(item?.itemId){
-                R.id.exit -> chatViewModel.signOut()
+                R.id.exit -> presenter.signOut()
             }
             false
         }
         initMessages()
-    }
 
-    override fun createViewModel() = ViewModelProviders.of(activity!!, viewModelFactory).get(ChatViewModel::class.java)
+        btnDownward.setOnClickListener { list.scrollToPosition(0) }
+        btnSend.setOnClickListener { sendMessage() }
+        message.setOnEditorActionListener { _, _, _ ->
+            sendMessage()
+            false
+        }
+
+        message.addTextChangedListener(object : TextWatcher{
+            override fun afterTextChanged(p0: Editable?) {btnSend.visibleInvisible(!p0.isNullOrBlank())}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+        })
+    }
 
     override fun createAdapter() = MessagesAdapter(GlideApp.with(this), this)
 
-    override fun onResume() {
-        super.onResume()
-        chatViewModel.loadData()
-    }
-
     override fun onBackClick() {
-        chatViewModel.onBackClicked()
+        presenter.onBackClicked()
     }
 
-    @OnClick(R.id.btn_downward)
-    fun scrollToBottom() {
-        list.scrollToPosition(0)
-    }
-
-    @OnClick(R.id.send)
-    fun sendMessage() {
-        chatViewModel.sendMessage(message.text.toString())
+    private fun sendMessage() {
+        presenter.sendMessage(message.text.toString())
         dismissKeyboard(view?.applicationWindowToken)
     }
 
-    @OnTextChanged(R.id.message)
-    fun onMessageChanged(message: CharSequence) {
-        btnSend.visibleInvisible(message.isNotBlank())
-    }
+    override fun createPresenter(): ChatContract.Presenter =
+            ChatPresenter(chatRepository, router, scheduler)
 
-    @OnEditorAction(R.id.message)
-    fun onAction(): Boolean {
-        sendMessage()
-        return false
+    override fun showSendState(state: ViewState<Void>) {
+        sendProgress.visibleInvisible(state.loading)
+        btnSend.visibleInvisible(state.loading)
+        val error = state.getErrorIfNotHandled()
+        if (error != null) {
+            showToast(error)
+        }
+        if(state.completed){
+            message.setText("")
+        }
     }
 
     override fun onMentionClick(mention: String?) {
-        chatViewModel.onMentionClick(mention)
+        presenter.onMentionClick(mention)
     }
 
     override fun onUrlClick(url: String?) {
-        chatViewModel.onUrlClick(url)
+        presenter.onUrlClick(url)
     }
 
     @SuppressLint("SetTextI18n")
     override fun onUserNameClick(mention: String?) {
         message.setText(if (message.text.isNullOrEmpty()) mention else "${message.text} $mention")
         message.setSelection(message.text.lastIndex)
+    }
+
+    override fun showHideViews(viewState: ViewState<List<MessageFull>>) {
+        super.showHideViews(viewState)
+        loadMoreProgress.visibleGone(false)
     }
 
     private fun initMessages() {
@@ -136,25 +156,6 @@ class ChatFragment : PagedListFragment<MessageFull>(), Injectable, MessagesAdapt
             }
         })
         refreshLayout.isEnabled = false
-
-        chatViewModel
-                .messageSendState
-                .observe(getViewLifecycleOwner()!!, Observer { t ->
-                    sendProgress.visibleInvisible(t?.loading == true)
-                    btnSend.visibleInvisible(t?.loading != true)
-                    val error = t?.getErrorIfNotHandled()
-                    if (error != null) {
-                        showToast(error)
-                    }
-                    if(t?.completed==true){
-                        message.setText("")
-                    }
-                })
-    }
-
-    override fun showHideViews(viewState: ViewState<List<MessageFull>>?) {
-        super.showHideViews(viewState)
-        loadMoreProgress.visibleGone(false)
     }
 
     private fun dismissKeyboard(windowToken: IBinder?) {

@@ -12,18 +12,6 @@ abstract class BaseMvpActivity<V: MvpView, P: MvpPresenter<V>>: AppCompatActivit
         presenter = createPresenter()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        presenter.saveState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        super.onRestoreInstanceState(savedInstanceState)
-        savedInstanceState?.let{
-            presenter.restoreState(savedInstanceState)
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         presenter.attachView(this as V)

@@ -9,10 +9,6 @@ import android.widget.TextView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindDimen
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
@@ -21,7 +17,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.model.entries.User
 import su.tagir.apps.radiot.utils.longDateTimeFormat
-
 
 class MessagesAdapter(private val glide: GlideRequests?,
                       private val callback: Callback) : PagedListAdapter<MessageFull, MessagesAdapter.MessageViewHolder>(MessagesDiffCallback()) {
@@ -40,27 +35,21 @@ class MessagesAdapter(private val glide: GlideRequests?,
                             private val glide: GlideRequests?,
                             private val callback: Callback) : RecyclerView.ViewHolder(itemView) {
 
-        @BindView(R.id.avatar_image)
-        lateinit var avatar: ImageView
+        val avatar: ImageView = itemView.findViewById(R.id.avatar_image)
 
+        val nicknameText: TextView = itemView.findViewById(R.id.nickname_text)
 
-        @BindView(R.id.nickname_text)
-        lateinit var nicknameText: TextView
+        val timeText: TextView = itemView.findViewById(R.id.time_text)
 
-        @BindView(R.id.time_text)
-        lateinit var timeText: TextView
+        val messageText: TextView = itemView.findViewById(R.id.message_text)
 
-        @BindView(R.id.message_text)
-        lateinit var messageText: TextView
-
-        @JvmField
-        @BindDimen(R.dimen.item_image_corner_radius)
-        var cornerRadius: Int = 0
+        private val cornerRadius = itemView.resources.getDimensionPixelSize(R.dimen.item_image_corner_radius)
 
         private var user: User? = null
 
         init {
-            ButterKnife.bind(this, itemView)
+            nicknameText.setOnClickListener { callback.onUserNameClick("@${user?.username}") }
+            avatar.setOnClickListener { callback.onMentionClick(user?.username) }
         }
 
         @SuppressLint("SetTextI18n")
@@ -82,16 +71,6 @@ class MessagesAdapter(private val glide: GlideRequests?,
 
 
             Markwon.setMarkdown(messageText, spannableConfiguration, message?.message?.html ?: "")
-        }
-
-        @OnClick(R.id.nickname_text)
-        fun onNickClick() {
-            callback.onUserNameClick("@${user?.username}")
-        }
-
-        @OnClick(R.id.avatar_image)
-        fun onAvatarClick() {
-            callback.onMentionClick(user?.username)
         }
     }
 

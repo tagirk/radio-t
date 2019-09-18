@@ -16,7 +16,6 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
-import su.tagir.apps.radiot.model.repository.HostRepository
 import su.tagir.apps.radiot.schedulers.ImmediateSchedulerProvider
 import java.util.concurrent.TimeUnit
 

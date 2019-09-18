@@ -1,6 +1,5 @@
 package su.tagir.apps.radiot.ui.mvp
 
-import android.os.Bundle
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 
@@ -19,14 +18,6 @@ abstract class BasePresenter<V: MvpView>: MvpPresenter<V> {
         this.doOnDetach()
         dispose()
         this.view = null
-    }
-
-    override fun saveState(bundle: Bundle) {
-
-    }
-
-    override fun restoreState(bundle: Bundle) {
-
     }
 
     protected open fun doOnAttach(view: V){
