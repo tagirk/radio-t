@@ -7,8 +7,6 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
-import su.tagir.apps.radiot.ui.mvp.Status
-import su.tagir.apps.radiot.ui.mvp.ViewState
 import timber.log.Timber
 
 class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
@@ -17,11 +15,6 @@ class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
         BaseListPresenter<Entry, DownloadedPodcastsContract.View>(),
         DownloadedPodcastsContract.Presenter {
 
-    private var state = ViewState<List<Entry>>(status = Status.SUCCESS)
-        set(value) {
-            field = value
-            view?.updateState(value)
-        }
 
     override fun doOnAttach(view: DownloadedPodcastsContract.View) {
         observePodcasts()
@@ -37,28 +30,25 @@ class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
 
     }
 
-    override fun loadData(refresh: Boolean) {
+    override fun loadData(pullToRefresh: Boolean) {
 
     }
 
-    override fun onEntryClick(entry: Entry) {
+    override fun select(entry: Entry) {
         entryRepository.play(entry)
     }
 
-    override fun onDownloadClick(entry: Entry) {
 
-    }
-
-    override fun onRemoveClick(entry: Entry) {
+    override fun remove(entry: Entry) {
         disposables += entryRepository.deleteFile(entry.downloadId)
                 .observeOn(scheduler.ui())
                 .subscribe({}, { e ->
                     Timber.e(e)
-                    view?.showRemoveError(e.localizedMessage)
+                    view?.showRemoveError(e.message)
                 })
     }
 
-    override fun onCommentClick(entry: Entry) {
+    override fun openComments(entry: Entry) {
         router.navigateTo(Screens.CommentsScreen(entry = entry))
     }
 }

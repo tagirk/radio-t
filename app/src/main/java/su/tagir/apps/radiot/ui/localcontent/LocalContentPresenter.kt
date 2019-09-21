@@ -36,4 +36,8 @@ class LocalContentPresenter(
             router.navigateTo(Screens.WebScreen(url))
         }
     }
+
+    override fun exit() {
+        router.exit()
+    }
 }

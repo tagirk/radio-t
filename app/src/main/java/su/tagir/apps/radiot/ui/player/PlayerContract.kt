@@ -1,6 +1,5 @@
 package su.tagir.apps.radiot.ui.player
 
-import io.reactivex.Observable
 import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.TimeLabel
@@ -16,8 +15,6 @@ interface PlayerContract {
         fun seekTo(seek: Long)
         fun showError(error: String)
         fun showLoading(loading: Boolean)
-
-        fun timeLabelRequests(): Observable<TimeLabel>
         fun onSlide(offset: Float)
     }
 
@@ -27,10 +24,11 @@ interface PlayerContract {
         fun pause()
         fun resume()
         fun onArticleClick(article: Article?)
-        fun onChatClick()
+        fun showChat()
         fun openWebPage()
         fun onTitleClick()
         fun setListener(listener: InteractionListener)
+        fun seekTo(timeLabel: TimeLabel)
 
         interface InteractionListener{
             fun onExpand()

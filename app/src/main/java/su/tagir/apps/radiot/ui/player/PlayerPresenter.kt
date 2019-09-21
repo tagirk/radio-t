@@ -7,6 +7,7 @@ import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
@@ -35,7 +36,6 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
 
     override fun doOnAttach(view: PlayerContract.View) {
         observeCurrent()
-        observeTimeLabels(view)
         startUpdateProgress()
     }
 
@@ -61,7 +61,7 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
         }
     }
 
-    override fun onChatClick() {
+    override fun showChat() {
         currentPodcast?.let { entry ->
 
             if (entry.url != STREAM_URL) {
@@ -82,6 +82,12 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
         listener?.onExpand()
     }
 
+    override fun seekTo(timeLabel: TimeLabel) {
+        timeLabel.time?.let{time ->
+            view?.seekTo(time)
+        }
+    }
+
     private fun observeCurrent() {
         disposables += entryRepository.getCurrent()
                 .observeOn(scheduler.ui())
@@ -92,18 +98,6 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
                     view?.showTimeLabels(labels)
                 }, {
                     Timber.e(it)
-                })
-    }
-
-    private fun observeTimeLabels(v: PlayerContract.View) {
-        disposables += v.timeLabelRequests()
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .subscribe({ label ->
-                    label?.time?.let {
-                        view?.seekTo(label.time)
-                    }
-                }, { e ->
-                    Timber.e(e)
                 })
     }
 

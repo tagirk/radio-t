@@ -2,39 +2,21 @@ package su.tagir.apps.radiot.ui.settings
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.*
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.evernote.android.job.JobManager
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.job.StreamNotificationJob
-import su.tagir.apps.radiot.ui.MainViewModel
-import javax.inject.Inject
-
 
 class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener, Injectable {
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private lateinit var mainViewModel: MainViewModel
-
 
     companion object {
         const val KEY_NOTIF_STREAM = "stream_notification"
         const val KEY_CRASH_REPORTS = "crash_reports"
         const val KEY_NIGHT_MODE = "night_mode"
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -58,7 +40,6 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     override fun onResume() {
         super.onResume()
-        mainViewModel.setCurrentScreen(Screens.SETTINGS_SCREEN)
         preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
@@ -86,9 +67,9 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 val nightMode: ListPreference? = findPreference(key)
                 nightMode?.summary = mode
                 when (mode) {
-                    modes[2] -> AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_AUTO)
-                    modes[1] -> AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)
-                    else -> AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO)
+                    modes[2] -> setDefaultNightMode(MODE_NIGHT_AUTO)
+                    modes[1] -> setDefaultNightMode(MODE_NIGHT_YES)
+                    else -> setDefaultNightMode(MODE_NIGHT_NO)
                 }
                 activity?.recreate()
             }

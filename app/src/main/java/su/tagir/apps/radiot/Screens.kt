@@ -52,9 +52,9 @@ object Screens {
         }
     }
 
-    data class ContentScreen(val url: String): SupportAppScreen(){
+    data class ContentScreen(val title: String?, val url: String): SupportAppScreen(){
         override fun getFragment(): Fragment {
-            return LocalContentFragment.newInstance(url)
+            return LocalContentFragment.newInstance(title, url)
         }
     }
 

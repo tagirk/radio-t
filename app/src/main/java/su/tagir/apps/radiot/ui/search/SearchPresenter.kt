@@ -10,34 +10,21 @@ import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
-import su.tagir.apps.radiot.ui.mvp.ViewState
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
-@SearchScope
-class SearchPresenter @Inject constructor(private val entryRepository: EntryRepository,
-                                          private val scheduler: BaseSchedulerProvider,
-                                          private val router: Router) : BasePresenter<SearchContract.View>(), SearchContract.Presenter {
 class SearchPresenter(private val entryRepository: EntryRepository,
                       private val scheduler: BaseSchedulerProvider,
                       private val router: Router) : BaseListPresenter<Entry, SearchContract.View>(), SearchContract.Presenter {
 
+
     private var searchDisposable: Disposable? = null
     private var dataDisposable: Disposable? = null
-
-    private var entryForDownload: Entry? = null
 
     private var query: String = ""
         set(value) {
             field = value
             observeSearchResults()
-        }
-
-    private var state = ViewState<List<Entry>>(status = Status.SUCCESS)
-        set(value) {
-            field = value
-            view?.updateState(value)
         }
 
     private val itemCount
@@ -118,17 +105,15 @@ class SearchPresenter(private val entryRepository: EntryRepository,
         entryRepository.removeQuery(query)
     }
 
-    override fun download() {
-        entryForDownload?.let { entry ->
+    override fun download(entry: Entry) {
             addDisposable(entryRepository
                     .startDownload(entry.audioUrl)
                     .subscribeOn(scheduler.io())
                     .observeOn(scheduler.ui())
                     .subscribe({}, { t ->
                         Timber.e(t)
-                        view?.showDownloadError(t.localizedMessage)
+                        view?.showDownloadError(t.message)
                     }))
-        }
     }
 
 
@@ -142,30 +127,30 @@ class SearchPresenter(private val entryRepository: EntryRepository,
         disposables += dataDisposable!!
     }
 
-    override fun loadData(refresh: Boolean) {
+    override fun loadData(pullToRefresh: Boolean) {
 
     }
 
-    override fun onCommentClick(entry: Entry) {
+    override fun openComments(entry: Entry){
         router.navigateTo(Screens.CommentsScreen(entry = entry))
     }
 
-    override fun onDownloadClick(entry: Entry) {
-        entryForDownload = entry
-        view?.download()
-    }
 
-    override fun onEntryClick(entry: Entry) {
+    override fun select(entry: Entry) {
         entryRepository.play(entry)
     }
 
-    override fun onRemoveClick(entry: Entry) {
+    override fun remove(entry: Entry) {
         disposables += entryRepository.deleteFile(entry.downloadId)
                 .observeOn(scheduler.ui())
                 .subscribe({}, { e ->
                     Timber.e(e)
                     view?.showDownloadError(e.localizedMessage)
                 })
+    }
+
+    override fun exit() {
+        router.exit()
     }
 
 }

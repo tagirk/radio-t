@@ -7,6 +7,7 @@ import androidx.appcompat.app.AlertDialog
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
+import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
@@ -20,8 +21,8 @@ import javax.inject.Inject
 class PiratesFragment:
         BaseMvpPagedListFragment<Entry, PiratesContract.View, PiratesContract.Presenter>(),
         PiratesContract.View,
-        Injectable {
-
+        Injectable,
+        EntriesAdapter.Callback{
 
     @Inject
     lateinit var entryRepository: EntryRepository
@@ -29,12 +30,20 @@ class PiratesFragment:
     @Inject
     lateinit var scheduler: BaseSchedulerProvider
 
+    private var entryForDownload: Entry? = null
+        set(value) {
+            field = value
+            value?.let {
+                startDownloadWithPermissionCheck()
+            }
+        }
+
     override fun createPresenter(): PiratesContract.Presenter {
         return PiratesPresenter(entryRepository, scheduler)
     }
 
 
-    override fun showDownloadError(error: String) {
+    override fun showDownloadError(error: String?) {
         context?.let {c ->
             AlertDialog.Builder(c)
                     .setTitle(R.string.error)
@@ -45,7 +54,7 @@ class PiratesFragment:
         }
     }
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this), presenter)
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this), this)
 
     override fun download() {
         startDownloadWithPermissionCheck()
@@ -53,7 +62,9 @@ class PiratesFragment:
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun startDownload(){
-        presenter.download()
+        entryForDownload?.let{entry ->
+            presenter.download(entry)
+        }
     }
 
     @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -65,5 +76,21 @@ class PiratesFragment:
     @SuppressLint("NeedOnRequestPermissionsResult")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         onRequestPermissionsResult(requestCode, grantResults)
+    }
+
+    override fun select(entry: Entry) {
+        presenter.select(entry)
+    }
+
+    override fun download(entry: Entry) {
+        entryForDownload = entry
+    }
+
+    override fun remove(entry: Entry) {
+        presenter.remove(entry)
+    }
+
+    override fun openComments(entry: Entry) {
+
     }
 }

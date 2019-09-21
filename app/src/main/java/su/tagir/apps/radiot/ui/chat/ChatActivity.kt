@@ -22,7 +22,6 @@ import saschpe.android.customtabs.WebViewFallback
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
-import su.tagir.apps.radiot.ui.common.BaseFragment
 import javax.inject.Inject
 
 class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable {
@@ -34,7 +33,7 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
     lateinit var navigatorHolder: NavigatorHolder
 
     private val currentFragment
-        get() = supportFragmentManager.findFragmentById(R.id.fragment_container) as BaseFragment?
+        get() = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

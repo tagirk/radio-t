@@ -12,14 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindDimen
-import butterknife.BindView
-import butterknife.OnClick
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import io.reactivex.Observable
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
@@ -41,12 +36,16 @@ import su.tagir.apps.radiot.utils.visibleInvisible
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlin.math.max
 
-class PlayerFragment: BaseMvpFragment<PlayerContract.View,
+class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         PlayerContract.Presenter>(),
         PlayerContract.View,
         ServiceConnection,
-        Injectable {
+        Injectable,
+        View.OnClickListener,
+        TimeLabelsAdapter.Callback {
+
 
     @Inject
     lateinit var entryRepository: EntryRepository
@@ -57,71 +56,23 @@ class PlayerFragment: BaseMvpFragment<PlayerContract.View,
     @Inject
     lateinit var router: Router
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    @BindView(R.id.btn_play)
-    lateinit var btnPlay: View
-
-    @BindView(R.id.btn_pause)
-    lateinit var btnPause: View
-
-    @BindView(R.id.btn_play_big)
-    lateinit var btnPlayBig: View
-
-    @BindView(R.id.btn_pause_big)
-    lateinit var btnPauseBig: View
-
-    @BindView(R.id.image)
-    lateinit var image: ImageView
-
-    @BindView(R.id.title)
-    lateinit var title: TextView
-
-    @BindView(R.id.progress)
-    lateinit var progress: ProgressBar
-
-    @BindView(R.id.progress_horizontal)
-    lateinit var progressHorizontal: ProgressBar
-
-    @BindView(R.id.seek_bar)
-    lateinit var seekBar: SeekBar
-
-    @BindView(R.id.progress_time)
-    lateinit var progressTime: TextView
-
-    @BindView(R.id.left_time)
-    lateinit var leftTime: TextView
-
-    @BindView(R.id.time_labels)
-    lateinit var timeLabels: RecyclerView
-
-    @BindView(R.id.btn_forward)
-    lateinit var btnForward: ImageButton
-
-    @BindView(R.id.btn_replay)
-    lateinit var btnReplay: ImageButton
-
-    @BindView(R.id.btn_chat)
-    lateinit var btnChat: ImageButton
-
-    @BindView(R.id.btn_web)
-    lateinit var btnWeb: ImageButton
-
-    @BindView(R.id.logo)
-    lateinit var logo: ImageView
-
-    @JvmField
-    @BindDimen(R.dimen.item_image_corner_radius)
-    var cornerRadius: Int = 0
-
-    @JvmField
-    @BindDimen(R.dimen.player_image_size)
-    var imageSize: Int = 0
-
-    @JvmField
-    @BindDimen(R.dimen.load_progress_padding)
-    var progressPad: Int = 0
+    private lateinit var btnPlay: View
+    private lateinit var btnPause: View
+    private lateinit var btnPlayBig: View
+    private lateinit var btnPauseBig: View
+    private lateinit var image: ImageView
+    private lateinit var title: TextView
+    private lateinit var progress: ProgressBar
+    private lateinit var progressHorizontal: ProgressBar
+    private lateinit var seekBar: SeekBar
+    private lateinit var progressTime: TextView
+    private lateinit var leftTime: TextView
+    private lateinit var timeLabels: RecyclerView
+    private lateinit var btnForward: ImageButton
+    private lateinit var btnReplay: ImageButton
+    private lateinit var btnChat: ImageButton
+    private lateinit var btnWeb: ImageButton
+    private lateinit var logo: ImageView
 
     private lateinit var timeLabelsAdapter: TimeLabelsAdapter
 
@@ -137,11 +88,40 @@ class PlayerFragment: BaseMvpFragment<PlayerContract.View,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        btnPlay = view.findViewById(R.id.btn_play)
+        btnPause = view.findViewById(R.id.btn_pause)
+        btnPlayBig = view.findViewById(R.id.btn_play_big)
+        btnPauseBig = view.findViewById(R.id.btn_pause_big)
+        image = view.findViewById(R.id.image)
+        title = view.findViewById(R.id.title)
+        progress = view.findViewById(R.id.progress)
+        progressHorizontal = view.findViewById(R.id.progress_horizontal)
+        seekBar = view.findViewById(R.id.seek_bar)
+        progressTime = view.findViewById(R.id.progress_time)
+        leftTime = view.findViewById(R.id.left_time)
+        timeLabels = view.findViewById(R.id.time_labels)
+        btnForward = view.findViewById(R.id.btn_forward)
+        btnReplay = view.findViewById(R.id.btn_replay)
+        btnChat = view.findViewById(R.id.btn_chat)
+        btnWeb = view.findViewById(R.id.btn_web)
+        logo = view.findViewById(R.id.logo)
+
+        btnPause.setOnClickListener(this)
+        btnPauseBig.setOnClickListener(this)
+        btnPlay.setOnClickListener(this)
+        btnPauseBig.setOnClickListener(this)
+        btnChat.setOnClickListener(this)
+        btnWeb.setOnClickListener(this)
+        title.setOnClickListener(this)
+        image.setOnClickListener(this)
+        btnForward.setOnClickListener(this)
+        btnReplay.setOnClickListener(this)
+
         GlideApp.with(this)
                 .load(R.drawable.ic_radiot)
                 .into(logo)
 
-        timeLabelsAdapter = TimeLabelsAdapter(emptyList())
+        timeLabelsAdapter = TimeLabelsAdapter(emptyList(), this)
         timeLabels.adapter = timeLabelsAdapter
         timeLabels.layoutManager = LinearLayoutManager(view.context, RecyclerView.VERTICAL, true)
 
@@ -206,39 +186,20 @@ class PlayerFragment: BaseMvpFragment<PlayerContract.View,
         }
     }
 
-    @OnClick(R.id.btn_pause, R.id.btn_pause_big)
-    fun pause() {
-       presenter.pause()
+    override fun onClick(p0: View?) {
+        when(p0?.id){
+            R.id.btn_pause, R.id.btn_pause_big -> presenter.pause()
+            R.id.btn_play, R.id.btn_play_big -> presenter.resume()
+            R.id.chat -> presenter.showChat()
+            R.id.btn_web -> presenter.openWebPage()
+            R.id.title, R.id.image -> presenter.onTitleClick()
+            R.id.btn_forward -> seekTo(seekBar.progress.toLong() + 30L)
+            R.id.btn_replay -> seekTo(max(0L, seekBar.progress.toLong() - 30L))
+        }
     }
 
-    @OnClick(R.id.btn_play, R.id.btn_play_big)
-    fun resume() {
-        presenter.resume()
-    }
-
-    @OnClick(R.id.btn_chat)
-    fun chat() {
-        presenter.onChatClick()
-    }
-
-    @OnClick(R.id.btn_web)
-    fun openWebPage() {
-        presenter.openWebPage()
-    }
-
-    @OnClick(R.id.title, R.id.image)
-    fun expand() {
-        presenter.onTitleClick()
-    }
-
-    @OnClick(R.id.btn_forward)
-    fun forward() {
-        seekTo(seekBar.progress.toLong() + 30L)
-    }
-
-    @OnClick(R.id.btn_replay)
-    fun replay() {
-        seekTo(Math.max(0L, seekBar.progress.toLong() - 30L))
+    override fun onTimeLabelClick(timeLabel: TimeLabel) {
+        presenter.seekTo(timeLabel)
     }
 
     override fun createPresenter(): PlayerContract.Presenter =
@@ -254,7 +215,7 @@ class PlayerFragment: BaseMvpFragment<PlayerContract.View,
                 .load(entry.image)
                 .placeholder(R.drawable.ic_notification_large)
                 .error(R.drawable.ic_notification_large)
-                .transform(RoundedCorners(cornerRadius))
+                .transform(RoundedCorners(resources.getDimensionPixelSize(R.dimen.item_image_corner_radius)))
                 .into(image)
 
         title.text = entry.title
@@ -292,8 +253,6 @@ class PlayerFragment: BaseMvpFragment<PlayerContract.View,
         leftTime.visibleInvisible(loading)
         progressTime.visibleInvisible(loading)
     }
-
-    override fun timeLabelRequests(): Observable<TimeLabel> = timeLabelsAdapter.labels()
 
     override fun showError(error: String) {
         AlertDialog.Builder(context!!)
@@ -348,7 +307,7 @@ class PlayerFragment: BaseMvpFragment<PlayerContract.View,
         }
 
         override fun onError(error: String?) {
-            error?.let{
+            error?.let {
                 weakRef.get()?.showError(error)
             }
         }

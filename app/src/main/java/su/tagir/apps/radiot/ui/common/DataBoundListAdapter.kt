@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 abstract class DataBoundListAdapter<T> : RecyclerView.Adapter<DataBoundViewHolder<T>>() {
 
-    private val differ = AsyncListDiffer<T>(this, object : DiffUtil.ItemCallback<T>(){
+    private val differ = AsyncListDiffer<T>(this, object : DiffUtil.ItemCallback<T>() {
         override fun areItemsTheSame(oldItem: T, newItem: T): Boolean = this@DataBoundListAdapter.areItemsTheSame(oldItem, newItem)
 
         override fun areContentsTheSame(oldItem: T, newItem: T): Boolean = this@DataBoundListAdapter.areContentsTheSame(oldItem, newItem)
@@ -30,4 +30,7 @@ abstract class DataBoundListAdapter<T> : RecyclerView.Adapter<DataBoundViewHolde
     fun replace(update: List<T>?) {
         differ.submitList(update)
     }
+
+    val items: List<T>
+        get() = differ.currentList
 }

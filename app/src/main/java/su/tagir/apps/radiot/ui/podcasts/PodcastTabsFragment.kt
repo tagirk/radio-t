@@ -2,54 +2,55 @@ package su.tagir.apps.radiot.ui.podcasts
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
-import butterknife.BindView
 import com.google.android.material.tabs.TabLayout
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
-import su.tagir.apps.radiot.ui.MainViewModel
-import su.tagir.apps.radiot.ui.common.BaseFragment
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsFragment
 import javax.inject.Inject
 
-class PodcastTabsFragment: BaseFragment(), Injectable {
+class PodcastTabsFragment: Fragment(),
+        Toolbar.OnMenuItemClickListener,
+        Injectable {
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var router: Router
 
-    @BindView(R.id.view_pager)
-    lateinit var viewPager: ViewPager
+    private lateinit var viewPager: ViewPager
 
-    @BindView(R.id.tabs)
-    lateinit var tabs: TabLayout
+    private lateinit var tabs: TabLayout
 
-    private lateinit var mainViewModel: MainViewModel
-
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View=
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_tabs, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.setTitle(R.string.podcasts)
+        toolbar.inflateMenu(R.menu.menu_main)
+        toolbar.setOnMenuItemClickListener(this)
+
+        viewPager = view.findViewById(R.id.view_pager)
+        tabs = view.findViewById(R.id.tabs)
+
         initFragments()
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = getViewModel(MainViewModel::class.java)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mainViewModel.setCurrentScreen(Screens.PODCASTS_SCREEN)
+    override fun onMenuItemClick(p0: MenuItem?): Boolean {
+        when(p0?.itemId){
+            R.id.search -> router.navigateTo(Screens.SearchScreen)
+        }
+        return false
     }
 
 
@@ -58,11 +59,6 @@ class PodcastTabsFragment: BaseFragment(), Injectable {
         viewPager.adapter = fragmentAdapter
         tabs.setupWithViewPager(viewPager)
     }
-
-    private fun <T : ViewModel> getViewModel(clazz: Class<T>): T {
-        return ViewModelProviders.of(activity!!, viewModelFactory).get(clazz)
-    }
-
 
     private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
 

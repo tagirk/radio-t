@@ -11,37 +11,42 @@ import su.tagir.apps.radiot.ui.common.*
 class SearchAdapter(private val glide: RequestManager, private val callback: EntriesAdapter.Callback) : DataBoundListAdapter<Entry>() {
 
 
+    override fun bind(viewHolder: DataBoundViewHolder<Entry>, position: Int) {
+        viewHolder.bind(items[position])
+    }
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<Entry> {
         val inflater = LayoutInflater.from(parent.context)
         val viewHolder: DataBoundViewHolder<Entry>
-        when (viewType) {
+        viewHolder = when (viewType) {
             EntriesAdapter.TYPE_NEWS -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                viewHolder = NewsViewHolder(view)
+                NewsViewHolder(view)
             }
             EntriesAdapter.TYPE_PREP -> {
                 val view = inflater.inflate(R.layout.item_entry, parent, false)
-                viewHolder = PrepViewHolder(view)
+                PrepViewHolder(view)
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                viewHolder = PodcastViewHolder(view, glide)
+                PodcastViewHolder(view, glide)
             }
         }
-        getItem(viewHolder.adapterPosition).let { entry ->
-            viewHolder.itemView.setOnClickListener { callback.onEntryClick(entry) }
+        items[viewHolder.adapterPosition].let { entry ->
+            viewHolder.itemView.setOnClickListener { callback.select(entry) }
             if(viewHolder is PodcastViewHolder){
-                viewHolder.remove.setOnClickListener { callback.onRemoveClick(entry) }
-                viewHolder.cancel.setOnClickListener { callback.onRemoveClick(entry) }
-                viewHolder.download.setOnClickListener { callback.onDownloadClick(entry) }
-                viewHolder.comments.setOnClickListener { callback.onCommentClick(entry) }
+                viewHolder.remove.setOnClickListener { callback.remove(entry) }
+                viewHolder.cancel.setOnClickListener { callback.remove(entry) }
+                viewHolder.download.setOnClickListener { callback.download(entry) }
+                viewHolder.comments.setOnClickListener { callback.openComments(entry) }
             }
         }
         return viewHolder
     }
 
     override fun getItemViewType(position: Int): Int {
-        val categories = getItem(position).categories
+        val categories = items[position].categories
         if (categories?.contains("podcast") == true) {
             return EntriesAdapter.TYPE_PODCAST
         } else if (categories?.contains("prep") == true) {

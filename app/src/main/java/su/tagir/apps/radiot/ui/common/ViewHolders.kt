@@ -14,10 +14,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import butterknife.BindColor
-import butterknife.BindDimen
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -32,17 +28,11 @@ import su.tagir.apps.radiot.utils.visibleInvisible
 
 class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
-    @BindView(R.id.title)
-    lateinit var title: TextView
+    private val title: TextView = itemView.findViewById(R.id.title)
 
-    @BindView(R.id.date)
-    lateinit var date: TextView
+    private val date: TextView = itemView.findViewById(R.id.date)
 
     private lateinit var podcast: Entry
-
-    init {
-        ButterKnife.bind(this, view)
-    }
 
     override fun bind(t: Entry?) {
         if (t == null) {
@@ -57,50 +47,17 @@ class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 class PodcastViewHolder(view: View,
                         private val glide: RequestManager) : DataBoundViewHolder<Entry>(view){
 
-    @BindView(R.id.title)
-    lateinit var title: TextView
-
-    @BindView(R.id.image)
-    lateinit var image: ImageView
-
-    @BindView(R.id.blur)
-    lateinit var blur: ImageView
-
-    @BindView(R.id.progress)
-    lateinit var progress: ProgressBar
-
-    @BindView(R.id.cancel)
-    lateinit var cancel: ImageView
-
-    @BindView(R.id.btn_download)
-    lateinit var download: ImageButton
-
-    @BindView(R.id.btn_remove)
-    lateinit var remove: ImageButton
-
-    @BindView(R.id.show_notes)
-    lateinit var showNotes: TextView
-
-    @BindView(R.id.comments)
-    lateinit var comments: TextView
-
-    @JvmField
-    @BindDimen(R.dimen.item_image_corner_radius)
-    var cornerRadius: Int = 0
-
-    @JvmField
-    @BindColor(R.color.colorPrimaryText)
-    var primaryTextColor: Int = 0
-
-    @JvmField
-    @BindColor(R.color.colorAccent)
-    var accentColor: Int = 0
+    private val title: TextView = itemView.findViewById(R.id.title)
+    private val image: ImageView = itemView.findViewById(R.id.image)
+    private val blur: ImageView = itemView.findViewById(R.id.blur)
+    private val progress: ProgressBar = itemView.findViewById(R.id.progress)
+    val cancel: ImageView = itemView.findViewById(R.id.cancel)
+    val download: ImageButton = itemView.findViewById(R.id.btn_download)
+    val remove: ImageButton = itemView.findViewById(R.id.btn_remove)
+    private val showNotes: TextView = itemView.findViewById(R.id.show_notes)
+    val comments: TextView = itemView.findViewById(R.id.comments)
 
     private lateinit var podcast: Entry
-
-    init {
-        ButterKnife.bind(this, view)
-    }
 
     @SuppressLint("SetTextI18n")
     override fun bind(t: Entry?) {
@@ -117,7 +74,7 @@ class PodcastViewHolder(view: View,
             sb.append(" - ").append(notes)
         }
 
-        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length
+        sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         showNotes.text = sb
@@ -135,7 +92,7 @@ class PodcastViewHolder(view: View,
                 .apply(RequestOptions()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .centerCrop()
-                        .transform(RoundedCorners(cornerRadius))
+                        .transform(RoundedCorners(itemView.resources.getDimensionPixelSize(R.dimen.item_image_corner_radius)))
                         .placeholder(R.drawable.ic_notification_large)
                         .error(R.drawable.ic_notification_large))
                 .into(image)
@@ -151,7 +108,7 @@ class PodcastViewHolder(view: View,
         return when (state) {
             EntryState.PLAYING -> {
                 val animation = ContextCompat.getDrawable(itemView.context, R.drawable.ic_equalizer_white_36dp) as AnimationDrawable?
-                DrawableCompat.setTintList(animation!!, ColorStateList.valueOf(accentColor))
+                DrawableCompat.setTintList(animation!!, ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.colorAccent)))
                 animation.start()
                 animation
             }
@@ -164,39 +121,16 @@ class PodcastViewHolder(view: View,
 
 class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
-    @BindView(R.id.title)
-    lateinit var title: TextView
-
-    @BindView(R.id.image)
-    lateinit var image: ImageView
-
-    @BindView(R.id.blur)
-    lateinit var blur: View
-
-    @BindView(R.id.progress)
-    lateinit var progress: ProgressBar
-
-    @BindView(R.id.cancel)
-    lateinit var cancel: ImageView
-
-    @BindView(R.id.btn_download)
-    lateinit var download: ImageButton
-
-    @BindView(R.id.btn_remove)
-    lateinit var remove: ImageButton
-
-    @BindView(R.id.show_notes)
-    lateinit var showNotes: TextView
-
-    @JvmField
-    @BindColor(R.color.colorPrimaryText)
-    var primaryTextColor: Int = 0
+    private val title: TextView = itemView.findViewById(R.id.title)
+    private val image: ImageView = itemView.findViewById(R.id.image)
+    private val blur: ImageView = itemView.findViewById(R.id.blur)
+    private val progress: ProgressBar = itemView.findViewById(R.id.progress)
+    private val cancel: ImageView = itemView.findViewById(R.id.cancel)
+    private val download: ImageButton = itemView.findViewById(R.id.btn_download)
+    private val remove: ImageButton = itemView.findViewById(R.id.btn_remove)
+    private val showNotes: TextView = itemView.findViewById(R.id.show_notes)
 
     private lateinit var entry: Entry
-
-    init {
-        ButterKnife.bind(this, view)
-    }
 
     override fun bind(t: Entry?) {
         if (t == null) {
@@ -208,7 +142,7 @@ class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
                 .append(date)
                 .append(" - ")
                 .append(t.showNotes?.replace("\n", ""))
-        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length?.plus(3)
+        sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length?.plus(3)
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         showNotes.text = sb
 

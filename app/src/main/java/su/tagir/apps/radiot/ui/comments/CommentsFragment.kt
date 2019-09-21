@@ -7,39 +7,32 @@ import android.text.format.DateUtils
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindColor
-import butterknife.BindDimen
-import butterknife.BindView
-import butterknife.ButterKnife
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.Node
-import su.tagir.apps.radiot.ui.MainViewModel
+import su.tagir.apps.radiot.model.repository.CommentsRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
-import su.tagir.apps.radiot.ui.common.ListFragment
-import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
-class CommentsFragment : ListFragment<Node>(), Injectable {
+class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(), CommentsContract.View,
+        Injectable {
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var commentsRepository: CommentsRepository
 
-    private lateinit var mainViewModel: MainViewModel
-    private lateinit var commentsViewModel: CommentsViewModel
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,38 +44,29 @@ class CommentsFragment : ListFragment<Node>(), Injectable {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
+        when (item.itemId) {
             R.id.add -> AddCommentFragment.newInstance(null).show(childFragmentManager, "add_comment")
         }
         return super.onOptionsItemSelected(item)
     }
 
 
-    override fun onResume() {
-        super.onResume()
-        mainViewModel.setCurrentScreen(arguments?.getString("title") ?: Screens.COMMENTS_SCREEN)
+    override fun createPresenter(): CommentsContract.Presenter {
+        val postUrl = arguments!!.getString("url")!!
+        return CommentsPresenter(postUrl, commentsRepository, scheduler)
     }
 
-    override fun createViewModel(): ListViewModel<Node> {
-        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
-        commentsViewModel = ViewModelProviders.of(this, viewModelFactory).get(CommentsViewModel::class.java)
-        commentsViewModel.setUrl(arguments?.getString("url"))
-        return commentsViewModel
-    }
 
     override fun createAdapter(): DataBoundListAdapter<Node> =
             CommentsAdapter(GlideApp.with(this), object : CommentsAdapter.Callback {
                 override fun expand(position: Int, node: Node) {
-                    commentsViewModel.showReplies(position, node)
+                    presenter.showReplies(position, node)
                 }
 
                 override fun hide(position: Int, node: Node) {
-                    commentsViewModel.hideReplies(position, node)
+                    presenter.hideReplies(position, node)
                 }
             })
-
-    override val layoutManager: RecyclerView.LayoutManager
-        get() = LinearLayoutManager(context)
 
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_entry_list, container, false)
@@ -102,9 +86,9 @@ class CommentsFragment : ListFragment<Node>(), Injectable {
     class CommentsAdapter(private val glideRequests: GlideRequests?,
                           private val callback: Callback) : DataBoundListAdapter<Node>() {
         override fun bind(viewHolder: DataBoundViewHolder<Node>, position: Int) {
-            viewHolder.bind(items?.get(position))
+            viewHolder.bind(items[position])
             (viewHolder as CommentViewHolder).itemView.setOnClickListener {
-                val node = items?.get(viewHolder.adapterPosition) ?: return@setOnClickListener
+                val node = items[viewHolder.adapterPosition]
                 if (node.expanded) {
                     callback.hide(viewHolder.adapterPosition, node)
                     return@setOnClickListener
@@ -135,43 +119,20 @@ class CommentsFragment : ListFragment<Node>(), Injectable {
     class CommentViewHolder(view: View,
                             private val glideRequests: GlideRequests?) : DataBoundViewHolder<Node>(view) {
 
-        @BindView(R.id.avatar)
-        lateinit var avatar: ImageView
+        private val avatar: ImageView = itemView.findViewById(R.id.avatar)
 
-        @BindView(R.id.name)
-        lateinit var name: TextView
+        private val name: TextView = itemView.findViewById(R.id.name)
 
-        @BindView(R.id.date)
-        lateinit var date: TextView
+        private val date: TextView = itemView.findViewById(R.id.date)
 
-        @BindView(R.id.comment)
-        lateinit var comment: TextView
+        private val comment: TextView = itemView.findViewById(R.id.date)
 
-        @BindView(R.id.expand)
-        lateinit var expand: TextView
+        private val expand: TextView = itemView.findViewById(R.id.expand)
 
-        @BindView(R.id.votes)
-        lateinit var votes: TextView
+        private val votes: TextView = itemView.findViewById(R.id.votes)
 
-        @JvmField
-        @BindDimen(R.dimen.item_image_corner_radius)
-        var cornerRadius: Int = 0
+        private val padding: Int = itemView.resources.getDimensionPixelSize(R.dimen.comment_padding)
 
-        @JvmField
-        @BindDimen(R.dimen.comment_padding)
-        var padding: Int = 0
-
-        @JvmField
-        @BindColor(R.color.colorPositiveComment)
-        var colorPositiveComment: Int = 0
-
-        @JvmField
-        @BindColor(R.color.colorSecondaryText)
-        var colorSecondaryText: Int = 0
-
-        init {
-            ButterKnife.bind(this, itemView)
-        }
 
         @SuppressLint("SetTextI18n")
         override fun bind(t: Node?) {
@@ -182,7 +143,7 @@ class CommentsFragment : ListFragment<Node>(), Injectable {
                     ?: 0})----------"
             glideRequests
                     ?.load(t?.comment?.user?.picture)
-                    ?.transform(RoundedCorners(cornerRadius))
+                    ?.transform(RoundedCorners(itemView.resources.getDimensionPixelSize(R.dimen.item_image_corner_radius)))
                     ?.placeholder(R.drawable.ic_account_box_24dp)
                     ?.error(R.drawable.ic_account_box_24dp)
                     ?.into(avatar)
@@ -193,10 +154,10 @@ class CommentsFragment : ListFragment<Node>(), Injectable {
 
             val score = t?.comment?.score ?: 0
             votes.text = if (score > 0) "+$score" else "$score"
-            when{
-                score>0->votes.setTextColor(colorPositiveComment)
-                score<0-> votes.setTextColor(Color.RED)
-                else -> votes.setTextColor(colorSecondaryText)
+            when {
+                score > 0 -> votes.setTextColor(ContextCompat.getColor(itemView.context, R.color.colorPositiveComment))
+                score < 0 -> votes.setTextColor(Color.RED)
+                else -> votes.setTextColor(ContextCompat.getColor(itemView.context, R.color.colorSecondaryText))
             }
 
             val spannableConfiguration = SpannableConfiguration.builder(itemView.context)

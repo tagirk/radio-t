@@ -13,5 +13,6 @@ interface LocalContentContract {
     interface Presenter: MvpPresenter<View>{
         fun loadContent(id: String)
         fun openInBrowser()
+        fun exit()
     }
 }

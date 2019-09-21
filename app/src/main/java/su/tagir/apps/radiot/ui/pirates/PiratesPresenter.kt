@@ -8,7 +8,6 @@ import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
-import su.tagir.apps.radiot.ui.mvp.ViewState
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -16,19 +15,11 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
                        private val scheduler: BaseSchedulerProvider) : BaseListPresenter<Entry, PiratesContract.View>(), PiratesContract.Presenter {
 
     private var loadDisposable: Disposable? = null
-    private var entryForDownload: Entry? = null
-
-    private var state = ViewState<List<Entry>>(status = Status.SUCCESS)
-        set(value) {
-            field = value
-            view?.updateState(value)
-        }
 
     override fun doOnAttach(view: PiratesContract.View) {
         observePodcasts()
         startStatusTimer()
     }
-
 
     private fun observePodcasts() {
         disposables += entryRepository
@@ -38,7 +29,7 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
                 }, { Timber.e(it) })
     }
 
-    override fun loadData(refresh: Boolean) {
+    override fun loadData(pullToRefresh: Boolean) {
         loadDisposable?.dispose()
         loadDisposable = entryRepository.refreshPirates()
                 .observeOn(scheduler.ui())
@@ -62,38 +53,27 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
     }
 
 
-    override fun download() {
-        entryForDownload?.let { entry ->
+    override fun download(entry: Entry) {
             addDisposable(entryRepository
                     .startDownload(entry.audioUrl)
                     .subscribeOn(scheduler.io())
                     .observeOn(scheduler.ui())
                     .subscribe({}, { t ->
                         Timber.e(t)
-                        view?.showDownloadError(t.localizedMessage)
+                        view?.showDownloadError(t.message)
                     }))
-        }
     }
 
-    override fun onEntryClick(entry: Entry) {
+    override fun select(entry: Entry) {
         entryRepository.play(entry)
     }
 
-    override fun onDownloadClick(entry: Entry) {
-        entryForDownload = entry
-        view?.download()
-    }
-
-    override fun onRemoveClick(entry: Entry) {
+    override fun remove(entry: Entry) {
         disposables +=  entryRepository.deleteFile(entry.downloadId)
                 .observeOn(scheduler.ui())
                 .subscribe({}, { e ->
                     Timber.e(e)
                     view?.showDownloadError(e.localizedMessage)
                 })
-    }
-
-    override fun onCommentClick(entry: Entry) {
-
     }
 }

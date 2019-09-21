@@ -32,29 +32,29 @@ class EntryContentProvider : ContentProvider() {
         return false
     }
 
-    override fun insert(p0: Uri?, p1: ContentValues): Uri {
+    override fun insert(p0: Uri, p1: ContentValues?): Uri {
         throw UnsupportedOperationException("insert not implemented")
     }
 
-    override fun query(p0: Uri?, p1: Array<out String>?, p2: String?, p3: Array<out String>?, p4: String?): Cursor {
+    override fun query(p0: Uri, p1: Array<out String>?, p2: String?, p3: Array<out String>?, p4: String?): Cursor {
         AndroidInjection.inject(this)
         val cursor = when (uriMatcher.match(p0)) {
             CURRENT_ENTRY -> entryDao.getCurrentEntryCursor()
 
             else -> throw IllegalArgumentException("Unknown uri: " + p0)
         }
-        cursor.setNotificationUri(context.contentResolver, p0 )
+        cursor.setNotificationUri(context?.contentResolver, p0 )
         return cursor
     }
 
-    override fun update(p0: Uri?, p1: ContentValues, p2: String?, p3: Array<out String>?): Int {
+    override fun update(p0: Uri, p1: ContentValues?, p2: String?, p3: Array<out String>?): Int {
        throw UnsupportedOperationException("update not implemented")
     }
 
-    override fun delete(p0: Uri?, p1: String?, p2: Array<out String>?): Int {
+    override fun delete(p0: Uri, p1: String?, p2: Array<out String>?): Int {
         throw UnsupportedOperationException("Delete not implemented")
     }
 
-    override fun getType(p0: Uri?): String? = null
+    override fun getType(p0: Uri): String? = null
 
 }

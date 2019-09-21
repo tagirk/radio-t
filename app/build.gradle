@@ -68,9 +68,6 @@ dependencies {
 
     implementation 'saschpe.android:customtabs:1.1.2'
 
-    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
-    kapt "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"
-
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-rxjava2:$roomVersion"
@@ -102,8 +99,6 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     kapt "com.github.bumptech.glide:compiler:$glideVersion"
 
-    implementation "com.jakewharton:butterknife:$butterKnifeVersion"
-    kapt "com.jakewharton:butterknife-compiler:$butterKnifeVersion"
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
     implementation 'ru.terrakok.cicerone:cicerone:5.0.0'
@@ -123,14 +118,13 @@ dependencies {
     }
     kapt "com.github.hotchemi:permissionsdispatcher-processor:$permissionsDispatcherVersion"
 
-
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
     testImplementation "junit:junit:$junitVersion"
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
-    testCompile "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
-    testCompile "org.hamcrest:hamcrest-all:$hamcrestVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
+    testImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"
     testImplementation 'org.json:json:20140107'
     testImplementation "com.squareup.okhttp3:mockwebserver:3.9.1"
     testImplementation "androidx.arch.core:core-testing:$archVersion"

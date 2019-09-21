@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 abstract class BaseMvpActivity<V: MvpView, P: MvpPresenter<V>>: AppCompatActivity(), MvpView {
 
-    private lateinit var presenter: P
+    protected lateinit var presenter: P
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

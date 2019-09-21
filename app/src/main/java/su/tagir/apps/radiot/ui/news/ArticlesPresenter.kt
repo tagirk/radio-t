@@ -10,7 +10,6 @@ import su.tagir.apps.radiot.model.repository.NewsRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
-import su.tagir.apps.radiot.ui.mvp.ViewState
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -21,12 +20,6 @@ class ArticlesPresenter(private val newsRepository: NewsRepository,
     private var loadDisposable: Disposable? = null
 
     private var activeThemeDisposable: Disposable? = null
-
-    private var state = ViewState<List<Article>>(status = Status.SUCCESS)
-        set(value) {
-            field = value
-            view?.updateState(value)
-        }
 
     override fun doOnAttach(view: ArticlesContract.View) {
         super.doOnAttach(view)

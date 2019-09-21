@@ -1,45 +1,29 @@
 package su.tagir.apps.radiot.ui
 
-import android.animation.ValueAnimator
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.os.IBinder
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
-import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.appcompat.widget.Toolbar
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
-import butterknife.BindColor
-import butterknife.BindDimen
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.support.HasSupportFragmentInjector
 import ru.terrakok.cicerone.NavigatorHolder
+import ru.terrakok.cicerone.Router
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.commands.Command
 import ru.terrakok.cicerone.commands.Forward
@@ -48,9 +32,12 @@ import saschpe.android.customtabs.WebViewFallback
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
+import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
+import su.tagir.apps.radiot.ui.mvp.BaseMvpActivity
 import su.tagir.apps.radiot.ui.news.NewsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesFragment
 import su.tagir.apps.radiot.ui.player.PlayerContract
@@ -62,93 +49,54 @@ import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(),
+class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View,
         HasSupportFragmentInjector,
-        View.OnClickListener, PlayerContract.Presenter.InteractionListener {
+        View.OnClickListener,
+        PlayerContract.Presenter.InteractionListener,
+        Injectable {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    @Inject
     lateinit var navigatorHolder: NavigatorHolder
 
-    @BindView(R.id.bottom_sheet)
-    lateinit var bottomSheet: ViewGroup
+    @Inject
+    lateinit var router: Router
 
-    @BindView(R.id.fragment_container)
-    lateinit var fragmentContainer: FrameLayout
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
 
-    @BindView(R.id.drawer_layout)
-    lateinit var drawerLayout: DrawerLayout
-
-    @BindView(R.id.nav_view)
-    lateinit var navigationView: NavigationView
-
-    @BindView(R.id.toolbar)
-    lateinit var toolbar: Toolbar
-
+    private lateinit var bottomSheet: ViewGroup
+    private lateinit var fragmentContainer: FrameLayout
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navigationView: NavigationView
+    private lateinit var dim: View
     private lateinit var timeLeft: TextView
     private lateinit var playStream: ImageButton
     private lateinit var pauseStream: ImageButton
-    private lateinit var homeDrawable: DrawerArrowDrawable
-
-    @JvmField
-    @BindColor(R.color.colorPrimary)
-    var primaryColor: Int = 0
-
-    @JvmField
-    @BindDimen(R.dimen.player_peek_height)
-    var peekHeight: Int = 0
-
-    @BindView(R.id.dim)
-    lateinit var dim: View
-
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-
-    private lateinit var mainViewModel: MainViewModel
-
 
     private val handler = Handler()
 
     private val currentFragment
         get() = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
-    private var isHomeAsUp = false
-        set(value) {
-            if (field != value) {
-                field = value
-                val anim = if (value) ValueAnimator.ofFloat(0f, 1f) else ValueAnimator.ofFloat(1f, 0f)
-                anim.addUpdateListener { valueAnimator ->
-                    val slideOffset = valueAnimator.animatedValue as Float
-                    homeDrawable.progress = slideOffset
-                }
-                anim.interpolator = DecelerateInterpolator()
-
-                anim.duration = 300
-                anim.start()
-            }
-            drawerLayout.setDrawerLockMode(if (value) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        ButterKnife.bind(this)
-        setSupportActionBar(toolbar)
 
-        homeDrawable = DrawerArrowDrawable(toolbar.context)
-        toolbar.navigationIcon = homeDrawable
-        toolbar.setNavigationOnClickListener {
-            when {
-                drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
-                isHomeAsUp -> onBackPressed()
-                else -> drawerLayout.openDrawer(GravityCompat.START)
-            }
-        }
+        bottomSheet = findViewById(R.id.bottom_sheet)
+        fragmentContainer = findViewById(R.id.fragment_container)
+        drawerLayout = findViewById(R.id.drawer_layout)
+        navigationView = findViewById(R.id.nav_view)
+        dim = findViewById(R.id.dim)
+        timeLeft = findViewById(R.id.time_left)
+        playStream = findViewById(R.id.play)
+//        playStream.setOnClickListener { playerViewModel.onPlayStreamClick() }
+        pauseStream = findViewById(R.id.pause)
+//        pauseStream.setOnClickListener { playerViewModel.onPauseClick() }
 
         val navItems = navigationView.findViewById<LinearLayout>(R.id.nav_items)
 
@@ -159,16 +107,6 @@ class MainActivity : AppCompatActivity(),
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.setBottomSheetCallback(BottomSheetCallback())
 
-        timeLeft = findViewById(R.id.time_left)
-        playStream = findViewById(R.id.play)
-//        playStream.setOnClickListener { playerViewModel.onPlayStreamClick() }
-        pauseStream = findViewById(R.id.pause)
-//        pauseStream.setOnClickListener { playerViewModel.onPauseClick() }
-
-        mainViewModel = getViewModel(MainViewModel::class.java)
-
-        observe()
-
         initMainScreen()
         initBottomSheet()
         if (savedInstanceState != null) {
@@ -176,34 +114,14 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        menu?.findItem(R.id.search)?.isVisible = currentFragment is PodcastTabsFragment
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            R.id.search -> mainViewModel.navigateToSearch()
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("state", bottomSheetBehavior.state)
     }
 
-    override fun onStart() {
-        super.onStart()
-        mainViewModel.start()
-    }
 
     override fun onStop() {
         handler.removeCallbacksAndMessages(null)
-
-        mainViewModel.stop()
         super.onStop()
     }
 
@@ -233,24 +151,24 @@ class MainActivity : AppCompatActivity(),
         when (v?.id) {
             R.id.nav_podcats -> {
                 if (currentFragment !is PodcastsFragment) {
-                    mainViewModel.navigateToPodcasts()
+                    presenter.navigateToPodcasts()
                 }
             }
             R.id.nav_news -> {
                 if (currentFragment !is NewsFragment) {
-                    mainViewModel.navigateToNews()
+                    presenter.navigateToNews()
                 }
             }
-            R.id.nav_settings -> mainViewModel.navigateToSettings()
-            R.id.nav_chat -> mainViewModel.navigateToChat()
+            R.id.nav_settings -> presenter.navigateToSettings()
+            R.id.nav_chat -> presenter.navigateToChat()
             R.id.nav_pirates -> {
                 if (currentFragment !is PiratesFragment) {
-                    mainViewModel.navigateToPirates()
+                    presenter.navigateToPirates()
                 }
             }
             R.id.nav_about -> {
                 if (currentFragment !is AboutFragment) {
-                    mainViewModel.navigateToAbout()
+                    presenter.navigateToAbout()
                 }
             }
         }
@@ -262,59 +180,15 @@ class MainActivity : AppCompatActivity(),
 
     override fun showCurrent(podcast: Entry?) {
         bottomSheet.visibleGone(podcast != null)
-        setBottomMargin(if (podcast != null) peekHeight else 0)
+        setBottomMargin(if (podcast != null) resources.getDimensionPixelSize(R.dimen.player_peek_height) else 0)
         showHideBtnStream(podcast?.url == STREAM_URL && podcast.state == PLAYING)
     }
 
-    private fun observe() {
-        mainViewModel
-                .getCurrentScreen()
-                .observe(this, Observer {
-                    dismissKeyboard(fragmentContainer.windowToken)
-                    when (it) {
-                        Screens.SETTINGS_SCREEN -> {
-                            isHomeAsUp = true
-                            toolbar.setTitle(R.string.settings)
-                        }
-                        Screens.PODCASTS_SCREEN -> {
-                            isHomeAsUp = false
-                            toolbar.setTitle(R.string.podcasts)
-                        }
-                        Screens.NEWS_SCREEN -> {
-                            isHomeAsUp = false
-                            toolbar.setTitle(R.string.news)
-                        }
-                        Screens.PIRATES_SCREEN -> {
-                            isHomeAsUp = false
-                            toolbar.setTitle(R.string.pirates)
-                        }
-                        Screens.SEARCH_SCREEN -> {
-                            isHomeAsUp = true
-                            toolbar.title = null
-                        }
-                        Screens.ABOUT_SCREEN -> {
-                            isHomeAsUp = true
-                            toolbar.setTitle(R.string.about)
-                        }
-                        Screens.CREDITS_SCREEN -> {
-                            isHomeAsUp = true
-                            toolbar.setTitle(R.string.credits)
-                        }
-                        else -> {
-                            isHomeAsUp = true
-                            toolbar.title = it
+    override fun createPresenter(): MainContract.Presenter =
+            MainPresenter(router, scheduler)
 
-                        }
-
-                    }
-                    invalidateOptionsMenu()
-                })
-
-        mainViewModel.getTimer()
-                .observe(this, Observer {
-                    timeLeft.text = it
-                })
-
+    override fun showTime(time: String) {
+        timeLeft.text = time
     }
 
     private fun showHideBtnStream(playing: Boolean) {
@@ -341,15 +215,6 @@ class MainActivity : AppCompatActivity(),
                     .replace(R.id.fragment_container, PodcastTabsFragment())
                     .commitNowAllowingStateLoss()
         }
-    }
-
-    private fun <T : ViewModel> getViewModel(clazz: Class<T>): T = ViewModelProviders.of(this, viewModelFactory).get(clazz)
-
-    private fun dismissKeyboard(windowToken: IBinder?) {
-        val imm = getSystemService(
-                Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(windowToken, 0)
-
     }
 
     private val navigator = object : SupportAppNavigator(this, R.id.fragment_container) {
@@ -388,7 +253,7 @@ class MainActivity : AppCompatActivity(),
         private fun openWebPage(url: String) {
             val customTabsIntent = CustomTabsIntent.Builder()
                     .addDefaultShareMenuItem()
-                    .setToolbarColor(primaryColor)
+                    .setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.colorPrimary))
                     .setShowTitle(true)
                     .setCloseButtonIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_arrow_back_24dp))
                     .build()

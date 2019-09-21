@@ -7,10 +7,7 @@ import android.widget.TextView
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
-import butterknife.ButterKnife
 import su.tagir.apps.radiot.R
-
 
 class RecentQueriesAdapter(private val callback: Callback) : PagedListAdapter<String, QueryViewHolder>(diffCallback) {
 
@@ -33,7 +30,6 @@ class RecentQueriesAdapter(private val callback: Callback) : PagedListAdapter<St
 
     companion object {
 
-
         private val diffCallback = object : DiffUtil.ItemCallback<String>() {
             override fun areItemsTheSame(oldItem: String, newItem: String) = oldItem == newItem
 
@@ -45,12 +41,7 @@ class RecentQueriesAdapter(private val callback: Callback) : PagedListAdapter<St
 
 class QueryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    @BindView(R.id.query)
-    lateinit var query: TextView
-
-    init {
-        ButterKnife.bind(this, itemView)
-    }
+    private val query: TextView = itemView.findViewById(R.id.query)
 
     fun bind(query: String?) {
         this.query.text = query

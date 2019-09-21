@@ -1,8 +1,11 @@
 package su.tagir.apps.radiot.ui.localcontent
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.webkit.WebView
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
@@ -13,8 +16,9 @@ import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 import javax.inject.Inject
 
-
-class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalContentContract.Presenter>(), LocalContentContract.View, Injectable {
+class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalContentContract.Presenter>(),
+        LocalContentContract.View,
+        Injectable {
 
     @Inject
     lateinit var entryRepository: EntryRepository
@@ -27,16 +31,21 @@ class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalCon
 
     lateinit var webView: WebView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
-
     override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
             inflater.inflate(R.layout.fragment_content, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.title = arguments?.getString(ARG_TITLE)
+        toolbar.inflateMenu(R.menu.menu_content)
+        toolbar.setNavigationOnClickListener { presenter.exit() }
+        toolbar.setOnMenuItemClickListener {
+            presenter.openInBrowser()
+            false
+        }
+
         webView = view.findViewById(R.id.web_view)
         webView.setBackgroundColor(ContextCompat.getColor(view.context, R.color.colorBackground))
 
@@ -53,25 +62,13 @@ class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalCon
         webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
     }
 
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_content, menu)
-    }
-
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
-            R.id.web -> presenter.openInBrowser()
-        }
-        return false
-    }
-
-
     companion object {
-        const val ARG_ID = "entry_id"
+        private const val ARG_ID = "entry_id"
+        private const val ARG_TITLE = "entry_id"
 
-        fun newInstance(url: String?): LocalContentFragment{
+        fun newInstance(title: String?, url: String?): LocalContentFragment {
             val args = Bundle()
+            args.putString(ARG_TITLE, title)
             args.putString(ARG_ID, url)
             val fragment = LocalContentFragment()
             fragment.arguments = args

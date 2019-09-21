@@ -337,7 +337,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
     private fun getCurrentEntry(): Entry? {
         var entry: Entry? = null
         val cursor = contentResolver.query(Uri.parse(EntryContentProvider.ENTRY_URI), null, null, null, null)
-        cursor.use { c ->
+        cursor?.use { c ->
             if (c.moveToFirst()) {
                 entry = Entry(cursor)
             }

@@ -5,68 +5,51 @@ import io.reactivex.rxkotlin.plusAssign
 import su.tagir.apps.radiot.model.entries.Node
 import su.tagir.apps.radiot.model.repository.CommentsRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
-import su.tagir.apps.radiot.ui.mvp.ViewState
-import su.tagir.apps.radiot.ui.viewmodel.ListViewModel
 import timber.log.Timber
-import java.util.*
-import javax.inject.Inject
 
+class CommentsPresenter(private val postUrl: String,
+                        private val commentsRepository: CommentsRepository,
+                        private val scheduler: BaseSchedulerProvider) : BaseListPresenter<Node, CommentsContract.View>(), CommentsContract.Presenter {
 
-class CommentsViewModel @Inject constructor(
-        private val commentsRepository: CommentsRepository,
-        scheduler: BaseSchedulerProvider) : ListViewModel<Node>(scheduler) {
 
     private var loadDisposable: Disposable? = null
 
-    private val comments = LinkedList<Node>()
+    private val comments = mutableListOf<Node>()
 
-    private var postUrl: String? = null
-        set(value) {
-            if (field == value) {
-                return
-            }
-            field = value
-            loadData()
-        }
-
-    fun setUrl(url: String?) {
-        postUrl = url
+    override fun doOnAttach(view: CommentsContract.View) {
+        loadData(false)
     }
 
-    override fun loadData() {
+    override fun loadData(pullToRefresh: Boolean) {
         loadDisposable?.dispose()
-        loadDisposable = commentsRepository.getComments(postUrl ?: "")
+        loadDisposable = commentsRepository.getComments(postUrl)
                 .observeOn(scheduler.ui())
-                .doOnSubscribe { state.value = if (state.value == null) ViewState(Status.LOADING) else state.value?.copy(Status.LOADING) }
+                .doOnSubscribe { state = state.copy(Status.LOADING) }
                 .subscribe({
                     comments.clear()
                     comments.addAll(it.comments)
-                    state.value = state.value?.copy(data = it.comments, status = Status.SUCCESS)
+                    state = state.copy(data = it.comments, status = Status.SUCCESS)
                 },
                         {
                             Timber.e(it)
-                            state.value = state.value?.copy(status = Status.ERROR)
+                            state = state.copy(status = Status.ERROR)
                         })
 
-        disposable += loadDisposable!!
+        disposables += loadDisposable!!
     }
 
-    override fun requestUpdates() {
-        loadData()
-    }
-
-    fun showReplies(position: Int, node: Node) {
+    override fun showReplies(position: Int, node: Node) {
         val commentReplies = node.replies ?: return
 
         comments.removeAt(position)
         comments.add(position, node.copy(expanded = true))
         comments.addAll(position + 1, commentReplies.map { it.copy(level = node.level + 1) })
-        state.value = state.value?.copy(data = comments.toList())
+        state = state.copy(data = comments.toList())
     }
 
-    fun hideReplies(position: Int, node: Node) {
-        Timber.d("hide: $position")
+    override fun hideReplies(position: Int, node: Node) {
         comments.removeAt(position)
         val iterator = comments.listIterator(position)
 
@@ -80,7 +63,6 @@ class CommentsViewModel @Inject constructor(
             break
         }
         comments.add(position, node.copy(expanded = false))
-        state.value = state.value?.copy(data = comments.toList())
+        state = state.copy(data = comments.toList())
     }
-
 }
