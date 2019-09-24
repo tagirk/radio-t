@@ -13,19 +13,20 @@ import su.tagir.apps.radiot.ui.pirates.PiratesFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.pirates.downloaded.DownloadedPiratesFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
-import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
+import su.tagir.apps.radiot.ui.podcasts.PodcastsTabsFragment
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.ui.settings.CreditsFragment
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
+import su.tagir.apps.radiot.ui.settings.SettingsFragmentRoot
 
 @Module
 abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
-    abstract fun podcastTabsFragment(): PodcastTabsFragment
+    abstract fun podcastTabsFragment(): PodcastsTabsFragment
 
     @ContributesAndroidInjector
     abstract fun podcastsFragment(): PodcastsFragment
@@ -65,6 +66,9 @@ abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
     abstract fun chatFragment(): ChatFragment
+
+    @ContributesAndroidInjector
+    abstract fun settingsFragmentRoot(): SettingsFragmentRoot
 
     @ContributesAndroidInjector
     abstract fun settingsFragment(): SettingsFragment

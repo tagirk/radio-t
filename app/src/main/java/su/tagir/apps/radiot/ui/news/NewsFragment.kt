@@ -1,7 +1,5 @@
 package su.tagir.apps.radiot.ui.news
 
-import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
@@ -9,10 +7,10 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
 
-class NewsFragment : BaseMvpPagedListFragment<Entry, NewsContract.View, NewsContract.Presenter>(),
+class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.Presenter>(),
         NewsContract.View,
         Injectable {
 
@@ -25,7 +23,7 @@ class NewsFragment : BaseMvpPagedListFragment<Entry, NewsContract.View, NewsCont
     @Inject
     lateinit var entryRepository: EntryRepository
 
-    override fun createAdapter(): PagedListAdapter<Entry, out RecyclerView.ViewHolder> =
+    override fun createAdapter() =
             EntriesAdapter(type = EntriesAdapter.TYPE_NEWS,
                     glide = GlideApp.with(this),
                     actionHandler = object : EntriesAdapter.Callback {

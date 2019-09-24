@@ -6,9 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
@@ -16,24 +15,34 @@ import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.model.entries.User
+import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
+import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.utils.longDateTimeFormat
 
 class MessagesAdapter(private val glide: GlideRequests?,
-                      private val callback: Callback) : PagedListAdapter<MessageFull, MessagesAdapter.MessageViewHolder>(MessagesDiffCallback()) {
+                      private val callback: Callback) : DataBoundListAdapter<MessageFull>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
+
+    override val differ: AsyncListDiffer<MessageFull> = AsyncListDiffer(this, object: DiffUtil.ItemCallback<MessageFull>(){
+
+        override fun areItemsTheSame(oldItem: MessageFull, newItem: MessageFull): Boolean = oldItem.message?.id == newItem.message?.id
+
+        override fun areContentsTheSame(oldItem: MessageFull, newItem: MessageFull): Boolean = oldItem.message == newItem.message
+
+    })
+
+    override fun bind(viewHolder: DataBoundViewHolder<MessageFull>, position: Int) {
+        viewHolder.bind(items[position])
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<MessageFull> {
         val inflater = LayoutInflater.from(parent.context)
         return MessageViewHolder(inflater.inflate(R.layout.item_chat_message, parent, false), glide, callback)
     }
 
-    override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
-        val item = getItem(position)
-        holder.bind(item)
-    }
-
     class MessageViewHolder(itemView: View,
                             private val glide: GlideRequests?,
-                            private val callback: Callback) : RecyclerView.ViewHolder(itemView) {
+                            private val callback: Callback) : DataBoundViewHolder<MessageFull>(itemView) {
 
         val avatar: ImageView = itemView.findViewById(R.id.avatar_image)
 
@@ -53,9 +62,9 @@ class MessagesAdapter(private val glide: GlideRequests?,
         }
 
         @SuppressLint("SetTextI18n")
-        fun bind(message: MessageFull?) {
-            user = if (message?.user?.isNotEmpty() == true) message.user?.get(0) else null
-            timeText.text = message?.message?.sent?.longDateTimeFormat()
+        override fun bind(t: MessageFull?) {
+            user = if (t?.user?.isNotEmpty() == true) t.user?.get(0) else null
+            timeText.text = t?.message?.sent?.longDateTimeFormat()
             nicknameText.text = "${user?.displayName} @${user?.username}"
             glide
                     ?.load(user?.avatarUrlSmall)
@@ -70,7 +79,7 @@ class MessagesAdapter(private val glide: GlideRequests?,
                     .build()
 
 
-            Markwon.setMarkdown(messageText, spannableConfiguration, message?.message?.html ?: "")
+            Markwon.setMarkdown(messageText, spannableConfiguration, t?.message?.html ?: "")
         }
     }
 

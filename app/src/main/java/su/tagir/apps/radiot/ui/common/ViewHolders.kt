@@ -101,7 +101,7 @@ class PodcastViewHolder(view: View,
         blur.setImageDrawable(getImageByState(t.state))
         this.podcast = t
 
-        comments.text = "${t.commentsCount} COMMENTS"
+        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
     }
 
     private fun getImageByState(state: Int): Drawable? {

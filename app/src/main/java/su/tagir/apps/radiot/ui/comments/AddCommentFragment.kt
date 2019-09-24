@@ -10,12 +10,9 @@ import su.tagir.apps.radiot.model.entries.Comment
 
 class AddCommentFragment: BottomSheetDialogFragment(){
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+            inflater.inflate(R.layout.fragment_add_comment, container, false)
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_add_comment, container, false)
-        return v
-    }
 
     companion object {
 

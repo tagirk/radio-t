@@ -1,14 +1,22 @@
 package su.tagir.apps.radiot.ui.comments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.appbar.AppBarLayout
 import ru.noties.markwon.Markwon
 import ru.noties.markwon.SpannableConfiguration
 import su.tagir.apps.radiot.GlideApp
@@ -19,13 +27,16 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.Node
 import su.tagir.apps.radiot.model.repository.CommentsRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
-class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(), CommentsContract.View,
+class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(),
+        CommentsContract.View,
+        Toolbar.OnMenuItemClickListener,
         Injectable {
 
     @Inject
@@ -34,22 +45,39 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
     @Inject
     lateinit var scheduler: BaseSchedulerProvider
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
+    private var interactionListener: FragmentsInteractionListener? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        interactionListener = context as FragmentsInteractionListener
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_comment, menu)
+    override fun onDetach() {
+        interactionListener = null
+        super.onDetach()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+    override fun onResume() {
+        super.onResume()
+        interactionListener?.lockDrawer()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<AppBarLayout>(R.id.app_bar).visibility = View.VISIBLE
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.inflateMenu(R.menu.menu_comment)
+        toolbar.setOnMenuItemClickListener(this)
+        toolbar.setNavigationOnClickListener { activity?.onBackPressed() }
+    }
+
+    override fun onMenuItemClick(item: MenuItem?): Boolean {
+        when (item?.itemId) {
             R.id.add -> AddCommentFragment.newInstance(null).show(childFragmentManager, "add_comment")
         }
-        return super.onOptionsItemSelected(item)
+        return false
     }
-
 
     override fun createPresenter(): CommentsContract.Presenter {
         val postUrl = arguments!!.getString("url")!!
@@ -68,9 +96,6 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
                 }
             })
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
-            inflater.inflate(R.layout.fragment_entry_list, container, false)
-
     companion object {
 
         fun newInstance(entry: Entry): CommentsFragment {
@@ -85,6 +110,17 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
     class CommentsAdapter(private val glideRequests: GlideRequests?,
                           private val callback: Callback) : DataBoundListAdapter<Node>() {
+
+        override val differ: AsyncListDiffer<Node> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Node>(){
+
+            override fun areItemsTheSame(oldItem: Node, newItem: Node): Boolean =
+                    oldItem.comment.id == newItem.comment.id
+
+            override fun areContentsTheSame(oldItem: Node, newItem: Node): Boolean =
+                    oldItem == newItem
+
+        })
+
         override fun bind(viewHolder: DataBoundViewHolder<Node>, position: Int) {
             viewHolder.bind(items[position])
             (viewHolder as CommentViewHolder).itemView.setOnClickListener {
@@ -97,12 +133,6 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
             }
         }
 
-        override fun areItemsTheSame(oldItem: Node, newItem: Node): Boolean =
-                oldItem.comment.id == newItem.comment.id
-
-        override fun areContentsTheSame(oldItem: Node, newItem: Node): Boolean =
-                oldItem == newItem
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<Node> {
             val inflater = LayoutInflater.from(parent.context)
             val v = inflater.inflate(R.layout.item_comment, parent, false)
@@ -113,7 +143,6 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
             fun expand(position: Int, node: Node)
             fun hide(position: Int, node: Node)
         }
-
     }
 
     class CommentViewHolder(view: View,

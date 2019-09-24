@@ -11,10 +11,10 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
 
-class DownloadedPodcastsFragment: BaseMvpPagedListFragment<Entry, DownloadedPodcastsContract.View, DownloadedPodcastsContract.Presenter>(),
+class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsContract.View, DownloadedPodcastsContract.Presenter>(),
         DownloadedPodcastsContract.View,
         EntriesAdapter.Callback,
         Injectable {

@@ -47,14 +47,14 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
 
     private lateinit var error: LinearLayout
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_auth, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         webView = view.findViewById(R.id.web_view)
         progress = view.findViewById(R.id.progress)
-        toolbar = view.findViewById(R.id.progress)
+        toolbar = view.findViewById(R.id.toolbar)
         retry = view.findViewById(R.id.btn_retry)
         error = view.findViewById(R.id.error)
 
@@ -112,13 +112,13 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                progress.visibleGone(true)
+//                progress.visibleGone(true)
                 super.onPageStarted(view, url, favicon)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                progress.visibleGone(false)
+//                progress.visibleGone(false)
             }
 
             @Suppress("OverridingDeprecatedMember")

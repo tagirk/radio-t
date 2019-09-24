@@ -35,15 +35,15 @@ import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
+import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpActivity
 import su.tagir.apps.radiot.ui.news.NewsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesFragment
-import su.tagir.apps.radiot.ui.player.PlayerContract
 import su.tagir.apps.radiot.ui.player.PlayerFragment
-import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
+import su.tagir.apps.radiot.ui.podcasts.PodcastsTabsFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
@@ -52,7 +52,7 @@ import javax.inject.Inject
 class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View,
         HasSupportFragmentInjector,
         View.OnClickListener,
-        PlayerContract.Presenter.InteractionListener,
+        FragmentsInteractionListener,
         Injectable {
 
     @Inject
@@ -66,6 +66,9 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
 
     @Inject
     lateinit var scheduler: BaseSchedulerProvider
+
+    @Inject
+    lateinit var entryRepository: EntryRepository
 
     private lateinit var bottomSheet: ViewGroup
     private lateinit var fragmentContainer: FrameLayout
@@ -105,7 +108,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         }
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        bottomSheetBehavior.setBottomSheetCallback(BottomSheetCallback())
+        bottomSheetBehavior.bottomSheetCallback = BottomSheetCallback()
 
         initMainScreen()
         initBottomSheet()
@@ -174,18 +177,26 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         }
     }
 
-    override fun onExpand() {
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+    override fun showDrawer() {
+        drawerLayout.openDrawer(GravityCompat.START)
     }
 
-    override fun showCurrent(podcast: Entry?) {
-        bottomSheet.visibleGone(podcast != null)
-        setBottomMargin(if (podcast != null) resources.getDimensionPixelSize(R.dimen.player_peek_height) else 0)
-        showHideBtnStream(podcast?.url == STREAM_URL && podcast.state == PLAYING)
+    override fun lockDrawer() {
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+    }
+
+    override fun unlockDrawer() {
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+    }
+
+    override fun showCurrentPodcast(entry: Entry) {
+        bottomSheet.visibleGone(true)
+        setBottomMargin(resources.getDimensionPixelSize(R.dimen.player_peek_height))
+        showHideBtnStream(entry.url == STREAM_URL && entry.state == PLAYING)
     }
 
     override fun createPresenter(): MainContract.Presenter =
-            MainPresenter(router, scheduler)
+            MainPresenter(entryRepository, router, scheduler)
 
     override fun showTime(time: String) {
         timeLeft.text = time
@@ -212,7 +223,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         if (currentFragment == null) {
             supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_container, PodcastTabsFragment())
+                    .replace(R.id.fragment_container, PodcastsTabsFragment())
                     .commitNowAllowingStateLoss()
         }
     }

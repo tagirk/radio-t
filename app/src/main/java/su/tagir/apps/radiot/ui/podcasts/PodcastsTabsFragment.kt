@@ -1,11 +1,12 @@
 package su.tagir.apps.radiot.ui.podcasts
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toolbar
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -15,10 +16,11 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsFragment
 import javax.inject.Inject
 
-class PodcastTabsFragment: Fragment(),
+class PodcastsTabsFragment: Fragment(),
         Toolbar.OnMenuItemClickListener,
         Injectable {
 
@@ -28,6 +30,23 @@ class PodcastTabsFragment: Fragment(),
     private lateinit var viewPager: ViewPager
 
     private lateinit var tabs: TabLayout
+
+    private var interactionListener: FragmentsInteractionListener? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        interactionListener = context as FragmentsInteractionListener
+    }
+
+    override fun onDetach() {
+        interactionListener = null
+        super.onDetach()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        interactionListener?.unlockDrawer()
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_tabs, container, false)
@@ -39,6 +58,7 @@ class PodcastTabsFragment: Fragment(),
         toolbar.setTitle(R.string.podcasts)
         toolbar.inflateMenu(R.menu.menu_main)
         toolbar.setOnMenuItemClickListener(this)
+        toolbar.setNavigationOnClickListener { interactionListener?.showDrawer() }
 
         viewPager = view.findViewById(R.id.view_pager)
         tabs = view.findViewById(R.id.tabs)

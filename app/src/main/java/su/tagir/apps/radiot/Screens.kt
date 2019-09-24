@@ -12,11 +12,11 @@ import su.tagir.apps.radiot.ui.comments.CommentsFragment
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.news.NewsTabsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
-import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
+import su.tagir.apps.radiot.ui.podcasts.PodcastsTabsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.ui.settings.CreditsFragment
-import su.tagir.apps.radiot.ui.settings.SettingsFragment
+import su.tagir.apps.radiot.ui.settings.SettingsFragmentRoot
 
 
 object Screens {
@@ -36,7 +36,7 @@ object Screens {
 
     object PdcastsScreen: SupportAppScreen(){
         override fun getFragment(): Fragment {
-            return PodcastTabsFragment()
+            return PodcastsTabsFragment()
         }
     }
 
@@ -60,7 +60,7 @@ object Screens {
 
     object SettingsScreen: SupportAppScreen(){
         override fun getFragment(): Fragment {
-            return SettingsFragment()
+            return SettingsFragmentRoot()
         }
     }
 

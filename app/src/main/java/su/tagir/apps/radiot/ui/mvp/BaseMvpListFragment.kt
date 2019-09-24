@@ -30,7 +30,7 @@ abstract class BaseMvpListFragment<M, V: MvpListView<M>, P: MvpListPresenter<M, 
 
     protected lateinit var adapter: DataBoundListAdapter<M>
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_entry_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

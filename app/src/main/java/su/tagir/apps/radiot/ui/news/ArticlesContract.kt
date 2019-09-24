@@ -10,7 +10,8 @@ interface ArticlesContract{
 
     }
 
-    interface Presenter: MvpListPresenter<Article, View>, ArticlesAdapter.Callback{
+    interface Presenter: MvpListPresenter<Article, View>{
         fun updateActiveTheme()
+        fun showArticle(article: Article)
     }
 }

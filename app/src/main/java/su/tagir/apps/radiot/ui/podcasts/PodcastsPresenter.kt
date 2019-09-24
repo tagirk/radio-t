@@ -41,7 +41,6 @@ class PodcastsPresenter(private val entryRepository: EntryRepository,
         intervalDisposable =
                 Observable
                         .interval(0L, 5L, TimeUnit.SECONDS)
-                        .subscribeOn(scheduler.computation())
                         .observeOn(scheduler.io())
                         .subscribe({ entryRepository.checkDownloadStatus() }, { Timber.e(it) })
 

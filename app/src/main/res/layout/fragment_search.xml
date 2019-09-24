@@ -16,6 +16,7 @@
             android:layout_width="match_parent"
             app:navigationIcon="@drawable/ic_arrow_back_24dp"
             android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
 

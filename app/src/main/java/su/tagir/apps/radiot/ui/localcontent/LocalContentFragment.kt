@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.ui.localcontent
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 import javax.inject.Inject
 
@@ -31,7 +33,24 @@ class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalCon
 
     lateinit var webView: WebView
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
+    private var interactionListener: FragmentsInteractionListener? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        interactionListener = context as FragmentsInteractionListener
+    }
+
+    override fun onDetach() {
+        interactionListener = null
+        super.onDetach()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        interactionListener?.lockDrawer()
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_content, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

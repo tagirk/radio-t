@@ -14,13 +14,14 @@ import timber.log.Timber
 
 object AppInjector {
 
-    fun inject(app: App){
+    fun inject(app: App): AppComponent{
         Timber.d("inject App")
-        DaggerAppComponent
+        val component = DaggerAppComponent
                 .builder()
                 .application(app)
                 .build()
-                .inject(app)
+
+        component.inject(app)
 
         app.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks{
             override fun onActivityPaused(p0: Activity?) {
@@ -52,6 +53,8 @@ object AppInjector {
             }
 
         })
+
+        return component
     }
 
     private fun handleActivity(activity: Activity?){

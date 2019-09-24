@@ -1,6 +1,7 @@
 package su.tagir.apps.radiot.di
 
 import android.app.Application
+import android.content.SharedPreferences
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.support.AndroidSupportInjectionModule
@@ -27,5 +28,7 @@ interface AppComponent {
     }
 
     fun inject(app: App)
+
+    fun preferences(): SharedPreferences
 
 }

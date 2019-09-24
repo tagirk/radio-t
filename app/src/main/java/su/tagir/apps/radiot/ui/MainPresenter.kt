@@ -4,6 +4,7 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
+import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
 import timber.log.Timber
@@ -11,8 +12,10 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.floor
 
-class MainPresenter(private val router: Router,
-                    private val scheduler: BaseSchedulerProvider): BasePresenter<MainContract.View>(), MainContract.Presenter {
+class MainPresenter(private val entryRepository: EntryRepository,
+                    private val router: Router,
+                    private val scheduler: BaseSchedulerProvider) : BasePresenter<MainContract.View>(), MainContract.Presenter {
+
 
     private val nextShow: Calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
 
@@ -28,7 +31,14 @@ class MainPresenter(private val router: Router,
     }
 
     override fun doOnAttach(view: MainContract.View) {
+        observeCurrentPodcast()
         startTimerToNextShow()
+    }
+
+    override fun observeCurrentPodcast() {
+        disposables += entryRepository.getCurrent()
+                .observeOn(scheduler.ui())
+                .subscribe({ view?.showCurrentPodcast(it) }, { e -> Timber.e(e) })
     }
 
     override fun startTimerToNextShow() {

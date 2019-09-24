@@ -33,4 +33,12 @@
         <item quantity="other">секунд</item>
     </plurals>
 
+    <plurals name="comments">
+        <item quantity="zero">Нет комментариев</item>
+        <item quantity="one">%d комментарий</item>
+        <item quantity="few">%d комментария</item>
+        <item quantity="many">%d комментариев</item>
+        <item quantity="other">%d комментариев</item>
+    </plurals>
+
 </resources>

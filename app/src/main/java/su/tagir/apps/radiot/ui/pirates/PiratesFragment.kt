@@ -14,12 +14,12 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
 
 @RuntimePermissions
 class PiratesFragment:
-        BaseMvpPagedListFragment<Entry, PiratesContract.View, PiratesContract.Presenter>(),
+        BaseMvpListFragment<Entry, PiratesContract.View, PiratesContract.Presenter>(),
         PiratesContract.View,
         Injectable,
         EntriesAdapter.Callback{

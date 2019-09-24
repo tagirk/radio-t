@@ -18,29 +18,17 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val scheduler: BaseSchedulerProvider,
                       private val router: Router) : BasePresenter<PlayerContract.View>(), PlayerContract.Presenter {
 
-    private var listener: PlayerContract.Presenter.InteractionListener? = null
-
     private var currentPodcast: Entry? = null
         set(value) {
             field = value
-            listener?.showCurrent(value)
             value?.let { entry ->
                 view?.showCurrentPodcast(entry)
-
             }
         }
-
-    override fun setListener(listener: PlayerContract.Presenter.InteractionListener) {
-        this.listener = listener
-    }
 
     override fun doOnAttach(view: PlayerContract.View) {
         observeCurrent()
         startUpdateProgress()
-    }
-
-    override fun doOnDetach() {
-        listener = null
     }
 
     override fun pause() {
@@ -78,13 +66,9 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
         }
     }
 
-    override fun onTitleClick() {
-        listener?.onExpand()
-    }
-
     override fun seekTo(timeLabel: TimeLabel) {
         timeLabel.time?.let{time ->
-            view?.seekTo(time)
+            view?.seekTo(time/1000)
         }
     }
 

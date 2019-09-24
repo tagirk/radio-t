@@ -2,32 +2,37 @@ package su.tagir.apps.radiot.ui.common
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 
 class EntriesAdapter(private val type: Int, private val glide: RequestManager, private val actionHandler: Callback) :
-        PagedListAdapter<Entry, RecyclerView.ViewHolder>(diffCallback) {
+       DataBoundListAdapter<Entry>() {
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder) {
-            is PodcastViewHolder -> holder.bind(getItem(position))
-            is PrepViewHolder -> holder.bind(getItem(position))
-            is NewsViewHolder -> holder.bind(getItem(position))
+    override val differ: AsyncListDiffer<Entry> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Entry>(){
+        override fun areItemsTheSame(oldItem: Entry, newItem: Entry): Boolean = oldItem.url == newItem.url
+
+        override fun areContentsTheSame(oldItem: Entry, newItem: Entry) = oldItem == newItem
+    })
+
+    override fun bind(viewHolder: DataBoundViewHolder<Entry>, position: Int) {
+        when (viewHolder) {
+            is PodcastViewHolder -> viewHolder.bind(items[position])
+            is PrepViewHolder -> viewHolder.bind(items[position])
+            is NewsViewHolder -> viewHolder.bind(items[position])
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):DataBoundViewHolder<Entry> {
         val inflater = LayoutInflater.from(parent.context)
          when (viewType) {
             TYPE_NEWS -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
                 val holder =  NewsViewHolder(view)
                 holder.itemView.setOnClickListener {
-                    val entry = getItem(holder.adapterPosition) ?: return@setOnClickListener
+                    val entry = items[holder.adapterPosition]
                     actionHandler.select(entry)
                 }
                 return holder
@@ -36,7 +41,7 @@ class EntriesAdapter(private val type: Int, private val glide: RequestManager, p
                 val view = inflater.inflate(R.layout.item_entry, parent, false)
                 val holder =  PrepViewHolder(view)
                 holder.itemView.setOnClickListener {
-                    val entry = getItem(holder.adapterPosition) ?: return@setOnClickListener
+                    val entry = items[holder.adapterPosition]
                     actionHandler.select(entry)
                 }
                 return holder
@@ -45,23 +50,23 @@ class EntriesAdapter(private val type: Int, private val glide: RequestManager, p
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
                 val holder = PodcastViewHolder(view, glide)
                 holder.itemView.setOnClickListener {
-                    val entry = getItem(holder.adapterPosition) ?: return@setOnClickListener
+                    val entry = items[holder.adapterPosition]
                     actionHandler.select(entry)
                 }
                 holder.remove.setOnClickListener {
-                    val entry = getItem(holder.adapterPosition) ?: return@setOnClickListener
+                    val entry = items[holder.adapterPosition]
                     actionHandler.remove(entry)
                 }
                 holder.cancel.setOnClickListener {
-                    val entry = getItem(holder.adapterPosition) ?: return@setOnClickListener
+                    val entry = items[holder.adapterPosition]
                     actionHandler.remove(entry)
                 }
                 holder.download.setOnClickListener {
-                    val entry = getItem(holder.adapterPosition) ?: return@setOnClickListener
+                    val entry = items[holder.adapterPosition]
                     actionHandler.download(entry)
                 }
                 holder.comments.setOnClickListener {
-                    val entry = getItem(holder.adapterPosition) ?: return@setOnClickListener
+                    val entry = items[holder.adapterPosition]
                     actionHandler.openComments(entry)
                 }
                 return holder
@@ -78,13 +83,6 @@ class EntriesAdapter(private val type: Int, private val glide: RequestManager, p
         const val TYPE_NEWS = 3
         const val TYPE_PIRATES = 4
 
-        private val diffCallback
-            get() = object : DiffUtil.ItemCallback<Entry>() {
-                override fun areItemsTheSame(oldItem: Entry, newItem: Entry) = oldItem.url == newItem.url
-
-                override fun areContentsTheSame(oldItem: Entry, newItem: Entry) = oldItem == newItem
-
-            }
     }
 
     interface Callback{

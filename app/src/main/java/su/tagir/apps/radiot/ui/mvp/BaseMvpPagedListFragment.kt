@@ -31,13 +31,8 @@ abstract class BaseMvpPagedListFragment<M, V: MvpListView<M>, P: MvpListPresente
 
     protected lateinit var adapter: PagedListAdapter<M, out RecyclerView.ViewHolder>
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_entry_list, container, false)
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        initList()
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,10 +41,13 @@ abstract class BaseMvpPagedListFragment<M, V: MvpListView<M>, P: MvpListPresente
         errorText = view.findViewById(R.id.text_error)
         emptyView = view.findViewById(R.id.text_empty)
         list = view.findViewById(R.id.list)
+        progress = view.findViewById(R.id.progress)
         refreshLayout = view.findViewById(R.id.refresh_layout)
         loadMoreProgress = view.findViewById(R.id.load_more_progress)
 
         btnRetry.setOnClickListener { presenter.loadData(pullToRefresh = false) }
+
+        initList()
     }
 
     private fun initList() {

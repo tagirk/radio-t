@@ -4,9 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Bundle
-import android.os.IBinder
-import android.os.RemoteException
+import android.os.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,7 +44,6 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         View.OnClickListener,
         TimeLabelsAdapter.Callback {
 
-
     @Inject
     lateinit var entryRepository: EntryRepository
 
@@ -80,9 +77,21 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
     private var audioService: IAudioService? = null
 
-    private val serviceCallback = AudioServiceCallback(this)
+    private val requestHandler = RequestHandler(this)
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
+    private val serviceCallback = object : IAudioServiceCallback.Stub(){
+        override fun onStateChanged(loading: Boolean, state: Int) {
+            val msg = requestHandler.obtainMessage(0, -1, -1, loading)
+            requestHandler.sendMessage(msg)
+        }
+
+        override fun onError(error: String?) {
+            val msg = requestHandler.obtainMessage(1, -1, -1, error)
+            requestHandler.sendMessage(msg)
+        }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_player, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -109,7 +118,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         btnPause.setOnClickListener(this)
         btnPauseBig.setOnClickListener(this)
         btnPlay.setOnClickListener(this)
-        btnPauseBig.setOnClickListener(this)
+        btnPlayBig.setOnClickListener(this)
         btnChat.setOnClickListener(this)
         btnWeb.setOnClickListener(this)
         title.setOnClickListener(this)
@@ -151,11 +160,6 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         bindService(context)
     }
 
-    override fun onResume() {
-        super.onResume()
-        presenter.setListener(activity as PlayerContract.Presenter.InteractionListener)
-    }
-
     override fun onDetach() {
         try {
             audioService?.unregisterCallback(serviceCallback)
@@ -192,7 +196,6 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
             R.id.btn_play, R.id.btn_play_big -> presenter.resume()
             R.id.chat -> presenter.showChat()
             R.id.btn_web -> presenter.openWebPage()
-            R.id.title, R.id.image -> presenter.onTitleClick()
             R.id.btn_forward -> seekTo(seekBar.progress.toLong() + 30L)
             R.id.btn_replay -> seekTo(max(0L, seekBar.progress.toLong() - 30L))
         }
@@ -249,9 +252,9 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         btnReplay.isEnabled = !loading
         progress.visibleGone(loading)
         progressHorizontal.visibleInvisible(loading)
-        seekBar.visibleInvisible(loading)
-        leftTime.visibleInvisible(loading)
-        progressTime.visibleInvisible(loading)
+        seekBar.visibleInvisible(!loading)
+        leftTime.visibleInvisible(!loading)
+        progressTime.visibleInvisible(!loading)
     }
 
     override fun showError(error: String) {
@@ -298,17 +301,18 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         this.leftTime.text = (if (leftTime >= 0) leftTime else 0).convertSeconds()
     }
 
-    class AudioServiceCallback(playerFragment: PlayerFragment) : IAudioServiceCallback.Stub() {
 
+    class RequestHandler(playerFragment: PlayerFragment): Handler() {
         private val weakRef = WeakReference(playerFragment)
 
-        override fun onStateChanged(loading: Boolean, state: Int) {
-            weakRef.get()?.showLoading(loading)
-        }
-
-        override fun onError(error: String?) {
-            error?.let {
-                weakRef.get()?.showError(error)
+        override fun handleMessage(msg: Message) {
+            when(msg.what){
+                0 ->  weakRef.get()?.showLoading(msg.obj as Boolean)
+                1 -> {
+                    msg.obj?.let {error ->
+                        weakRef.get()?.showError(error as String)
+                    }
+                }
             }
         }
     }

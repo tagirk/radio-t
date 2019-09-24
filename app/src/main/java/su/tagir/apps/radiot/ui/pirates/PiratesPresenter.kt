@@ -18,6 +18,7 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
 
     override fun doOnAttach(view: PiratesContract.View) {
         observePodcasts()
+        loadData(false)
         startStatusTimer()
     }
 
@@ -25,19 +26,20 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
         disposables += entryRepository
                 .getEntries("pirates")
                 .subscribe({
-                    state.copy(data = it)
+                    state = state.copy(data = it)
                 }, { Timber.e(it) })
     }
 
     override fun loadData(pullToRefresh: Boolean) {
         loadDisposable?.dispose()
         loadDisposable = entryRepository.refreshPirates()
+                .subscribeOn(scheduler.io())
                 .observeOn(scheduler.ui())
-                .doOnSubscribe { state.copy(status = Status.REFRESHING) }
-                .subscribe({ state.copy(status = Status.SUCCESS) },
+                .doOnSubscribe { state = state.copy(status = if(pullToRefresh) Status.REFRESHING else Status.LOADING) }
+                .subscribe({ state = state.copy(status = Status.SUCCESS) },
                         {
                             Timber.e(it)
-                            state.copy(status = Status.ERROR)
+                            state = state.copy(status = Status.ERROR)
                         })
 
         disposables += loadDisposable!!
@@ -47,7 +49,6 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
        disposables +=
                 Observable
                         .interval(0L, 5L, TimeUnit.SECONDS)
-                        .subscribeOn(scheduler.computation())
                         .observeOn(scheduler.io())
                         .subscribe({ entryRepository.checkDownloadStatus() }, { Timber.e(it) })
     }

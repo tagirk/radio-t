@@ -26,14 +26,6 @@ interface PlayerContract {
         fun onArticleClick(article: Article?)
         fun showChat()
         fun openWebPage()
-        fun onTitleClick()
-        fun setListener(listener: InteractionListener)
         fun seekTo(timeLabel: TimeLabel)
-
-        interface InteractionListener{
-            fun onExpand()
-            fun showCurrent(podcast: Entry?)
-        }
-
     }
 }

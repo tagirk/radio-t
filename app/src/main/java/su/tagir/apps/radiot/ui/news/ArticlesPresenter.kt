@@ -35,11 +35,11 @@ class ArticlesPresenter(private val newsRepository: NewsRepository,
                 }, { Timber.e(it) })
     }
 
-    override fun loadData(refresh: Boolean) {
+    override fun loadData(pullToRefresh: Boolean) {
         loadDisposable?.dispose()
         loadDisposable = newsRepository.updateArticles()
                 .observeOn(scheduler.ui())
-                .doOnSubscribe { state = if (refresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING) }
+                .doOnSubscribe { state = if (pullToRefresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING) }
                 .subscribe({ state = state.copy(status = Status.SUCCESS) },
                         {
                             Timber.e(it)
@@ -60,8 +60,8 @@ class ArticlesPresenter(private val newsRepository: NewsRepository,
         disposables += activeThemeDisposable!!
     }
 
-    override fun onArticleClick(article: Article?) {
-        article?.link?.let { link ->
+    override fun showArticle(article: Article) {
+        article.link?.let { link ->
             router.navigateTo(Screens.WebScreen(link))
         }
 

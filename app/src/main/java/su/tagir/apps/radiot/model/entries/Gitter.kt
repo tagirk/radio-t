@@ -10,7 +10,8 @@ import java.util.*
 data class Token(@SerializedName("access_token") val token: String,
                  @SerializedName("token_type") val type: String,
                  @SerializedName("scope") val scope: String? = null,
-                 @SerializedName("expires_in") val createdAt: Long? = null)
+                 @SerializedName("expires_in") val expiresIn: Long? = null,
+                 @SerializedName("refresh_token") val refreshToken: String? = null)
 
 data class GitterMessage(
         @SerializedName("id") val id: String,

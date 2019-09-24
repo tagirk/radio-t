@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.paging.PagedList
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
@@ -16,12 +15,11 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
-import su.tagir.apps.radiot.ui.mvp.ViewState
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
 
 @RuntimePermissions
-class PodcastsFragment : BaseMvpPagedListFragment<Entry, PodcastsContract.View, PodcastsContract.Presenter>(), PodcastsContract.View,
+class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, PodcastsContract.Presenter>(), PodcastsContract.View,
         Injectable,
         EntriesAdapter.Callback {
 
@@ -33,6 +31,8 @@ class PodcastsFragment : BaseMvpPagedListFragment<Entry, PodcastsContract.View, 
 
     @Inject
     lateinit var router: Router
+
+
 
     private var entryForDownload: Entry? = null
         set(value) {
@@ -46,13 +46,6 @@ class PodcastsFragment : BaseMvpPagedListFragment<Entry, PodcastsContract.View, 
 
     override fun createPresenter(): PodcastsContract.Presenter {
         return PodcastsPresenter(entryRepository, scheduler, router)
-    }
-
-    override fun updateState(viewState: ViewState<List<Entry>>) {
-        showHideViews(viewState)
-        viewState.data?.let { data ->
-            adapter.submitList(data as PagedList<Entry>)
-        }
     }
 
     override fun showDownloadError(error: String?) {

@@ -6,14 +6,13 @@ import android.app.Service
 import android.content.ContentProvider
 import android.content.SharedPreferences
 import android.os.Build
-import android.preference.PreferenceManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
-import com.evernote.android.job.JobConfig
-import com.evernote.android.job.JobManager
 import com.facebook.stetho.Stetho
+import com.google.crypto.tink.config.TinkConfig
 import com.squareup.leakcanary.LeakCanary
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
@@ -21,17 +20,18 @@ import dagger.android.HasContentProviderInjector
 import dagger.android.HasServiceInjector
 import io.fabric.sdk.android.Fabric
 import saschpe.android.customtabs.CustomTabsActivityLifecycleCallbacks
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.di.AppInjector
-import su.tagir.apps.radiot.job.RadiotJobCreator
 import su.tagir.apps.radiot.ui.notification.createNotificationsChannels
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
 import timber.log.Timber
+import java.security.GeneralSecurityException
 import javax.inject.Inject
 
 class App : Application(),
         HasActivityInjector,
         HasServiceInjector,
-        HasContentProviderInjector{
+        HasContentProviderInjector {
 
     @Inject
     lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
@@ -47,6 +47,9 @@ class App : Application(),
     override fun serviceInjector() = dispatchingServiceInjector
     override fun contentProviderInjector() = dispatchContentProviderInjector
 
+    lateinit var appComponent: AppComponent
+        private set
+
     override fun onCreate() {
         super.onCreate()
 
@@ -55,10 +58,11 @@ class App : Application(),
         }
         LeakCanary.install(this)
 
-        AppInjector.inject(this)
+        initTink()
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
+        appComponent = AppInjector.inject(this)
 
+//        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
         initTools()
 
@@ -66,24 +70,28 @@ class App : Application(),
             createNotificationsChannels(this)
         }
 
-        JobManager
-                .create(this)
-                .addJobCreator(RadiotJobCreator())
-
         registerActivityLifecycleCallbacks(CustomTabsActivityLifecycleCallbacks())
         setNightMode()
     }
 
     private fun setNightMode() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val prefs = appComponent.preferences()
         val modes = resources.getStringArray(R.array.night_mode)
         val mode = prefs.getString(SettingsFragment.KEY_NIGHT_MODE, modes[0])
         when (mode) {
-            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
+            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
             modes[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
+    }
+
+    private fun initTink() {
+        try {
+            TinkConfig.register()
+        } catch (e: GeneralSecurityException) {
+            throw RuntimeException(e)
+        }
     }
 
     private fun initTools() {
@@ -116,7 +124,6 @@ class App : Application(),
         } else {
             Timber.plant(CrashReportingTree(PreferenceManager.getDefaultSharedPreferences(this)))
         }
-        JobConfig.setLogcatEnabled(BuildConfig.DEBUG)
     }
 
 

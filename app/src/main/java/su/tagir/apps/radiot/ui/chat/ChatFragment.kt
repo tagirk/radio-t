@@ -25,13 +25,13 @@ import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.model.repository.ChatRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
-import su.tagir.apps.radiot.ui.mvp.BaseMvpPagedListFragment
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import javax.inject.Inject
 
-class ChatFragment : BaseMvpPagedListFragment<MessageFull, ChatContract.View, ChatContract.Presenter>(), ChatContract.View,
+class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatContract.Presenter>(), ChatContract.View,
         Injectable,
         MessagesAdapter.Callback,
         BackClickHandler {
@@ -55,15 +55,14 @@ class ChatFragment : BaseMvpPagedListFragment<MessageFull, ChatContract.View, Ch
 
     lateinit var message: EditText
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View {
-        return inflater.inflate(R.layout.fragment_chat, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+            inflater.inflate(R.layout.fragment_chat, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar = view.findViewById(R.id.toolbar)
         btnDownward = view.findViewById(R.id.btn_downward)
-        btnSend = view.findViewById(R.id.btn_send)
+        btnSend = view.findViewById(R.id.send)
         sendProgress = view.findViewById(R.id.send_progress)
         message = view.findViewById(R.id.message)
     }
@@ -73,7 +72,7 @@ class ChatFragment : BaseMvpPagedListFragment<MessageFull, ChatContract.View, Ch
         toolbar.setNavigationOnClickListener { onBackClick() }
         toolbar.inflateMenu(R.menu.menu_chat)
         toolbar.setOnMenuItemClickListener { item ->
-            when(item?.itemId){
+            when (item?.itemId) {
                 R.id.exit -> presenter.signOut()
             }
             false
@@ -87,8 +86,10 @@ class ChatFragment : BaseMvpPagedListFragment<MessageFull, ChatContract.View, Ch
             false
         }
 
-        message.addTextChangedListener(object : TextWatcher{
-            override fun afterTextChanged(p0: Editable?) {btnSend.visibleInvisible(!p0.isNullOrBlank())}
+        message.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+                btnSend.visibleInvisible(!p0.isNullOrBlank())
+            }
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
@@ -118,7 +119,7 @@ class ChatFragment : BaseMvpPagedListFragment<MessageFull, ChatContract.View, Ch
         if (error != null) {
             showToast(error)
         }
-        if(state.completed){
+        if (state.completed) {
             message.setText("")
         }
     }

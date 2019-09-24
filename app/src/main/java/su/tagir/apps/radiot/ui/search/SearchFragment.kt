@@ -2,6 +2,7 @@ package su.tagir.apps.radiot.ui.search
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -19,14 +20,19 @@ import com.bumptech.glide.Glide
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.model.repository.EntryRepository
+import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
+import javax.inject.Inject
 
 @RuntimePermissions
 class SearchFragment :
@@ -37,6 +43,14 @@ class SearchFragment :
         ItemTouchHelper.Callback,
         EntriesAdapter.Callback {
 
+    @Inject
+    lateinit var entryRepository: EntryRepository
+
+    @Inject
+    lateinit var scheduler: BaseSchedulerProvider
+
+    @Inject
+    lateinit var router: Router
 
     private lateinit var recentQueries: RecyclerView
 
@@ -55,6 +69,22 @@ class SearchFragment :
             }
         }
 
+    private var interactionListener: FragmentsInteractionListener? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        interactionListener = context as FragmentsInteractionListener
+    }
+
+    override fun onDetach() {
+        interactionListener = null
+        super.onDetach()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        interactionListener?.lockDrawer()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -74,7 +104,7 @@ class SearchFragment :
         refreshLayout.isEnabled = false
     }
 
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_search, container, false)
 
     override fun onPause() {
@@ -106,9 +136,8 @@ class SearchFragment :
         }
     }
 
-    override fun createPresenter(): SearchContract.Presenter {
-        throw UnsupportedOperationException()
-    }
+    override fun createPresenter(): SearchContract.Presenter =
+            SearchPresenter(entryRepository, scheduler, router)
 
     override fun showDownloadError(error: String?) {
         context?.let { c ->
