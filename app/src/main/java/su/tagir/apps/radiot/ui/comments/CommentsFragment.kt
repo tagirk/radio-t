@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -15,10 +16,13 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
+import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.appbar.AppBarLayout
-import ru.noties.markwon.Markwon
-import ru.noties.markwon.SpannableConfiguration
+import io.noties.markwon.Markwon
+import io.noties.markwon.html.HtmlPlugin
+import io.noties.markwon.image.glide.GlideImagesPlugin
+import io.noties.markwon.linkify.LinkifyPlugin
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
@@ -32,6 +36,7 @@ import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.utils.visibleGone
+import timber.log.Timber
 import javax.inject.Inject
 
 class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(),
@@ -154,13 +159,19 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
         private val date: TextView = itemView.findViewById(R.id.date)
 
-        private val comment: TextView = itemView.findViewById(R.id.date)
+        private val comment: TextView = itemView.findViewById(R.id.comment)
 
         private val expand: TextView = itemView.findViewById(R.id.expand)
 
         private val votes: TextView = itemView.findViewById(R.id.votes)
 
         private val padding: Int = itemView.resources.getDimensionPixelSize(R.dimen.comment_padding)
+
+        private val markwon = Markwon.builder(itemView.context)
+                .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
+                .usePlugin(GlideImagesPlugin.create(Glide.with(itemView)))
+                .usePlugin(HtmlPlugin.create())
+                .build()
 
 
         @SuppressLint("SetTextI18n")
@@ -189,12 +200,12 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
                 else -> votes.setTextColor(ContextCompat.getColor(itemView.context, R.color.colorSecondaryText))
             }
 
-            val spannableConfiguration = SpannableConfiguration.builder(itemView.context)
-//                    .linkResolver { _, link -> callback.onUrlClick(link) }
-                    .build()
-
-
-            Markwon.setMarkdown(comment, spannableConfiguration, t?.comment?.text ?: "")
+//            val spannableConfiguration = SpannableConfiguration.builder(itemView.context)
+////                    .linkResolver { _, link -> callback.onUrlClick(link) }
+//                    .build()
+            val span = markwon.toMarkdown(t?.comment?.text ?: "")
+            Timber.d("span: $span")
+           comment.text = span
         }
 
     }

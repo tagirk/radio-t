@@ -17,10 +17,7 @@ import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsTabsFragment
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
-import su.tagir.apps.radiot.ui.settings.AboutFragment
-import su.tagir.apps.radiot.ui.settings.CreditsFragment
-import su.tagir.apps.radiot.ui.settings.SettingsFragment
-import su.tagir.apps.radiot.ui.settings.SettingsFragmentRoot
+import su.tagir.apps.radiot.ui.settings.*
 
 @Module
 abstract class FragmentsBuilderModule {
@@ -75,6 +72,9 @@ abstract class FragmentsBuilderModule {
 
     @ContributesAndroidInjector
     abstract fun aboutFragment(): AboutFragment
+
+    @ContributesAndroidInjector
+    abstract fun aboutFragmentRoot(): AboutFragmentRoot
 
     @ContributesAndroidInjector
     abstract fun creditsFragment(): CreditsFragment
