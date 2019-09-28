@@ -4,7 +4,7 @@
     package="su.tagir.apps.radiot">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".App"
@@ -38,13 +38,20 @@
                 <action android:name="su.tagir.apps.radiot.service.IAudioService" />
             </intent-filter>
         </service>
+
         <service
             android:name=".model.PodcastStateService"
             android:exported="false" />
 
         <service
-            android:name="com.evernote.android.job.gcm.PlatformGcmService"
-            tools:node="remove"/>
+            android:name=".service.MediaPlayerService"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":audio">
+            <intent-filter>
+                <action android:name="su.tagir.apps.radiot.service.IAudioService" />
+            </intent-filter>
+        </service>
 
         <provider
             android:name=".model.EntryContentProvider"

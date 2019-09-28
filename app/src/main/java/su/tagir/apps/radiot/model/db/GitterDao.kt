@@ -4,7 +4,6 @@ import androidx.paging.DataSource
 import androidx.room.*
 import su.tagir.apps.radiot.model.entries.GitterMessage
 import su.tagir.apps.radiot.model.entries.Message
-import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.model.entries.User
 
 @Dao
@@ -19,9 +18,11 @@ abstract class GitterDao {
     @Query("DELETE FROM ${Message.TABLE}")
     abstract fun deleteMessages()
 
-    @Transaction
     @Query("SELECT * FROM ${Message.TABLE} ORDER BY ${Message.SENT} DESC")
-    abstract fun getMessages():DataSource.Factory<Int, MessageFull>
+    abstract fun getMessages():DataSource.Factory<Int, Message>
+
+    @Query("SELECT * FROM chat_user WHERE id = :id")
+    abstract fun getUser(id: String?): User?
 
     @Transaction
     open fun saveMessages(messages: List<GitterMessage>?) {

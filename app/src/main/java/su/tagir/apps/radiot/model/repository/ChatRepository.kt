@@ -2,6 +2,7 @@ package su.tagir.apps.radiot.model.repository
 
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.Single
 import su.tagir.apps.radiot.model.entries.Event
 import su.tagir.apps.radiot.model.entries.GitterMessage
@@ -25,5 +26,5 @@ interface ChatRepository {
 
     fun loadMessages(lastId: String? = null): Completable
 
-    fun getMessages(): Flowable<out List<MessageFull>>
+    fun getMessages(): Observable<out List<MessageFull>>
 }

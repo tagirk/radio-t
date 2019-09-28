@@ -1,9 +1,7 @@
 package su.tagir.apps.radiot.model.entries
 
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.Relation
 import com.google.gson.annotations.SerializedName
 import java.util.*
 
@@ -92,13 +90,6 @@ data class Message(
     }
 }
 
-class MessageFull {
-
-    @Embedded
-    var message: Message? = null
-
-    @Relation(parentColumn = Message.FROM_USER, entityColumn = User.ID)
-    var user: List<User>? = null
+data class MessageFull( val message: Message, val user: User?)
 
 
-}

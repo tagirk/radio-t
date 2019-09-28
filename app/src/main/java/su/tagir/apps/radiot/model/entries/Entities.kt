@@ -208,3 +208,6 @@ data class Host(
         @SerializedName("twitter") val twitter: String? = null,
         @SerializedName("instagram") val instagram: String? = null,
         @SerializedName("lurk") val lurk: String? = null)
+
+@Entity(tableName = "")
+data class PageResult(val query: String?, val ids: List<String?>, val totalCount: Int?)

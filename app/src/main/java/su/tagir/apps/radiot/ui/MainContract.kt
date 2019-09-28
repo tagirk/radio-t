@@ -21,5 +21,7 @@ interface MainContract {
         fun navigateToCredits()
         fun startTimerToNextShow()
         fun observeCurrentPodcast()
+        fun playStream()
+        fun pause()
     }
 }

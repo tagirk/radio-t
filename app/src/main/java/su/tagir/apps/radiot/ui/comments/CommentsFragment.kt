@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -16,13 +17,14 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.appbar.AppBarLayout
 import io.noties.markwon.Markwon
 import io.noties.markwon.html.HtmlPlugin
-import io.noties.markwon.image.glide.GlideImagesPlugin
+import io.noties.markwon.image.ImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
+import io.noties.markwon.utils.NoCopySpannableFactory
+import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
@@ -35,8 +37,8 @@ import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
+import su.tagir.apps.radiot.utils.BetterLinkMovementMethod
 import su.tagir.apps.radiot.utils.visibleGone
-import timber.log.Timber
 import javax.inject.Inject
 
 class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(),
@@ -49,6 +51,9 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
     @Inject
     lateinit var scheduler: BaseSchedulerProvider
+
+    @Inject
+    lateinit var router: Router
 
     private var interactionListener: FragmentsInteractionListener? = null
 
@@ -75,6 +80,8 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
         toolbar.inflateMenu(R.menu.menu_comment)
         toolbar.setOnMenuItemClickListener(this)
         toolbar.setNavigationOnClickListener { activity?.onBackPressed() }
+        toolbar.setTitle(R.string.comments)
+        toolbar.subtitle = arguments?.getString("title")
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean {
@@ -86,20 +93,28 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
     override fun createPresenter(): CommentsContract.Presenter {
         val postUrl = arguments!!.getString("url")!!
-        return CommentsPresenter(postUrl, commentsRepository, scheduler)
+        return CommentsPresenter(postUrl, commentsRepository, router, scheduler)
     }
 
 
     override fun createAdapter(): DataBoundListAdapter<Node> =
-            CommentsAdapter(GlideApp.with(this), object : CommentsAdapter.Callback {
-                override fun expand(position: Int, node: Node) {
-                    presenter.showReplies(position, node)
-                }
+            CommentsAdapter(GlideApp.with(this),
+                    object : CommentsAdapter.Callback {
+                        override fun expand(position: Int, node: Node) {
+                            presenter.showReplies(position, node)
+                        }
 
-                override fun hide(position: Int, node: Node) {
-                    presenter.hideReplies(position, node)
-                }
-            })
+                        override fun hide(position: Int, node: Node) {
+                            presenter.hideReplies(position, node)
+                        }
+
+                    },
+                    BetterLinkMovementMethod
+                            .linkify(Linkify.WEB_URLS, activity)
+                            .setOnLinkClickListener { _, url ->
+                                presenter.openUrl(url)
+                                true
+                            })
 
     companion object {
 
@@ -114,9 +129,10 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
     }
 
     class CommentsAdapter(private val glideRequests: GlideRequests?,
-                          private val callback: Callback) : DataBoundListAdapter<Node>() {
+                          private val callback: Callback,
+                          private val linkMethod: LinkMovementMethod) : DataBoundListAdapter<Node>() {
 
-        override val differ: AsyncListDiffer<Node> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Node>(){
+        override val differ: AsyncListDiffer<Node> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Node>() {
 
             override fun areItemsTheSame(oldItem: Node, newItem: Node): Boolean =
                     oldItem.comment.id == newItem.comment.id
@@ -128,7 +144,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
         override fun bind(viewHolder: DataBoundViewHolder<Node>, position: Int) {
             viewHolder.bind(items[position])
-            (viewHolder as CommentViewHolder).itemView.setOnClickListener {
+            (viewHolder as CommentViewHolder).expand.setOnClickListener {
                 val node = items[viewHolder.adapterPosition]
                 if (node.expanded) {
                     callback.hide(viewHolder.adapterPosition, node)
@@ -141,7 +157,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<Node> {
             val inflater = LayoutInflater.from(parent.context)
             val v = inflater.inflate(R.layout.item_comment, parent, false)
-            return CommentViewHolder(v, glideRequests)
+            return CommentViewHolder(v, glideRequests, linkMethod)
         }
 
         interface Callback {
@@ -151,7 +167,8 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
     }
 
     class CommentViewHolder(view: View,
-                            private val glideRequests: GlideRequests?) : DataBoundViewHolder<Node>(view) {
+                            private val glideRequests: GlideRequests?,
+                            linkMethod: LinkMovementMethod) : DataBoundViewHolder<Node>(view) {
 
         private val avatar: ImageView = itemView.findViewById(R.id.avatar)
 
@@ -161,7 +178,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
         private val comment: TextView = itemView.findViewById(R.id.comment)
 
-        private val expand: TextView = itemView.findViewById(R.id.expand)
+        val expand: TextView = itemView.findViewById(R.id.expand)
 
         private val votes: TextView = itemView.findViewById(R.id.votes)
 
@@ -169,10 +186,14 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
         private val markwon = Markwon.builder(itemView.context)
                 .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
-                .usePlugin(GlideImagesPlugin.create(Glide.with(itemView)))
+                .usePlugin(ImagesPlugin.create())
                 .usePlugin(HtmlPlugin.create())
                 .build()
 
+        init {
+            comment.setSpannableFactory(NoCopySpannableFactory.getInstance()) //https://noties.io/Markwon/docs/v4/recipes.html#spannablefactory
+            comment.movementMethod = linkMethod
+        }
 
         @SuppressLint("SetTextI18n")
         override fun bind(t: Node?) {
@@ -200,12 +221,8 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
                 else -> votes.setTextColor(ContextCompat.getColor(itemView.context, R.color.colorSecondaryText))
             }
 
-//            val spannableConfiguration = SpannableConfiguration.builder(itemView.context)
-////                    .linkResolver { _, link -> callback.onUrlClick(link) }
-//                    .build()
             val span = markwon.toMarkdown(t?.comment?.text ?: "")
-            Timber.d("span: $span")
-           comment.text = span
+            comment.text = span
         }
 
     }

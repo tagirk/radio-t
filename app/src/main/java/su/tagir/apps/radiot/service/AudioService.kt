@@ -14,10 +14,12 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteCallbackList
-import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
-import com.google.android.exoplayer2.source.ExtractorMediaSource
+import com.google.android.exoplayer2.ExoPlaybackException
+import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.*
@@ -135,7 +137,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         super.onCreate()
         registerReceiver(becomingNoisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
 
-        val adaptiveTrackSelectionFactory = AdaptiveTrackSelection.Factory(DefaultBandwidthMeter())
+        val adaptiveTrackSelectionFactory = AdaptiveTrackSelection.Factory()
         trackSelector = DefaultTrackSelector(adaptiveTrackSelectionFactory)
 
         player = ExoPlayerFactory.newSimpleInstance(this, trackSelector)
@@ -173,7 +175,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
                 stopForeground(true)
             }
         }
-        return Service.START_NOT_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onBind(p0: Intent): IBinder? {
@@ -272,7 +274,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             try {
                 fileSource.open(spec)
                 val factory = DataSource.Factory { fileSource }
-                ExtractorMediaSource(fileSource.uri, factory, DefaultExtractorsFactory(), null, null)
+                ProgressiveMediaSource.Factory(factory).createMediaSource(fileSource.uri)
             } catch (e: FileDataSource.FileDataSourceException) {
                 Timber.e(e)
                 createHttpMediaSource(url)
@@ -291,8 +293,8 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
     private fun createHttpMediaSource(url: String?): MediaSource {
         val radioUri = Uri.parse(url)
         val userAgent = Util.getUserAgent(this, "RadioT")
-        val mediaDataSourceFactory = DefaultHttpDataSourceFactory(userAgent, DefaultBandwidthMeter())
-        return ExtractorMediaSource(radioUri, mediaDataSourceFactory, DefaultExtractorsFactory(), null, null)
+        val mediaDataSourceFactory = DefaultHttpDataSourceFactory(userAgent, DefaultBandwidthMeter.Builder(this).build())
+        return ProgressiveMediaSource.Factory(mediaDataSourceFactory).createMediaSource(radioUri)
     }
 
     private fun updateState() {
@@ -361,7 +363,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         callbackList.finishBroadcast()
     }
 
-    private inner class EventsListener : Player.DefaultEventListener() {
+    private inner class EventsListener : Player.EventListener {
 
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             updateState()
@@ -374,9 +376,6 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             }
 
             broadcastError(errorStr)
-        }
-
-        override fun onTimelineChanged(timeline: Timeline?, manifest: Any?) {
         }
     }
 

@@ -39,10 +39,6 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
         entryRepository.resume()
     }
 
-    override fun playStream() {
-        entryRepository.playStream(STREAM_URL)
-    }
-
     override fun onArticleClick(article: Article?) {
         article?.link?.let { link ->
             router.navigateTo(Screens.WebScreen(link))

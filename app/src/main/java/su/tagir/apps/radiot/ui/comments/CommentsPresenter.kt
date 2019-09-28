@@ -2,6 +2,8 @@ package su.tagir.apps.radiot.ui.comments
 
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
+import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Node
 import su.tagir.apps.radiot.model.repository.CommentsRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
@@ -11,6 +13,7 @@ import timber.log.Timber
 
 class CommentsPresenter(private val postUrl: String,
                         private val commentsRepository: CommentsRepository,
+                        private val router: Router,
                         private val scheduler: BaseSchedulerProvider) : BaseListPresenter<Node, CommentsContract.View>(), CommentsContract.Presenter {
 
 
@@ -64,5 +67,9 @@ class CommentsPresenter(private val postUrl: String,
         }
         comments.add(position, node.copy(expanded = false))
         state = state.copy(data = comments.toList())
+    }
+
+    override fun openUrl(url: String) {
+        router.navigateTo(Screens.WebScreen(url))
     }
 }

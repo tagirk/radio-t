@@ -13,6 +13,7 @@ interface CommentsContract {
     interface Presenter: MvpListPresenter<Node, View>{
         fun showReplies(position: Int, node: Node)
         fun hideReplies(position: Int, node: Node)
+        fun openUrl(url: String)
     }
 
 

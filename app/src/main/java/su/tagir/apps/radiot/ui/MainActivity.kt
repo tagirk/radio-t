@@ -97,9 +97,9 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         dim = findViewById(R.id.dim)
         timeLeft = findViewById(R.id.time_left)
         playStream = findViewById(R.id.play)
-//        playStream.setOnClickListener { playerViewModel.onPlayStreamClick() }
+        playStream.setOnClickListener { presenter.playStream() }
         pauseStream = findViewById(R.id.pause)
-//        pauseStream.setOnClickListener { playerViewModel.onPauseClick() }
+        pauseStream.setOnClickListener { presenter.pause() }
 
         val navItems = navigationView.findViewById<LinearLayout>(R.id.nav_items)
 

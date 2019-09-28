@@ -39,8 +39,8 @@ class ChatPresenter(
 
     override fun observeMessages() {
         disposables += chatRepository.getMessages()
-                .subscribe({
-                    state = state.copy(data = it)
+                .subscribe({list ->
+                    state = state.copy(data = list)
                 }, { Timber.e(it) })
 
     }

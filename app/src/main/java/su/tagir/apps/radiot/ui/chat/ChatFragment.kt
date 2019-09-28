@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,7 @@ import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
+import su.tagir.apps.radiot.utils.BetterLinkMovementMethod
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import javax.inject.Inject
@@ -98,7 +100,12 @@ class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatCon
         })
     }
 
-    override fun createAdapter() = MessagesAdapter(GlideApp.with(this), this)
+    override fun createAdapter() = MessagesAdapter(GlideApp.with(this), this,  BetterLinkMovementMethod
+            .linkify(Linkify.WEB_URLS, activity)
+            .setOnLinkClickListener { _, url ->
+                presenter.onUrlClick(url)
+                true
+            })
 
     override fun onBackClick() {
         presenter.onBackClicked()
@@ -126,10 +133,6 @@ class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatCon
 
     override fun onMentionClick(mention: String?) {
         presenter.onMentionClick(mention)
-    }
-
-    override fun onUrlClick(url: String?) {
-        presenter.onUrlClick(url)
     }
 
     @SuppressLint("SetTextI18n")

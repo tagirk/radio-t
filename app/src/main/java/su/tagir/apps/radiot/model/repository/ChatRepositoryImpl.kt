@@ -2,28 +2,22 @@ package su.tagir.apps.radiot.model.repository
 
 import androidx.paging.RxPagedListBuilder
 import com.google.gson.Gson
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Single
+import io.reactivex.*
 import okio.BufferedSource
 import su.tagir.apps.radiot.model.api.*
 import su.tagir.apps.radiot.model.db.GitterDao
-import su.tagir.apps.radiot.model.entries.Event
-import su.tagir.apps.radiot.model.entries.GitterMessage
-import su.tagir.apps.radiot.model.entries.MessageFull
-import su.tagir.apps.radiot.model.entries.Token
+import su.tagir.apps.radiot.model.entries.*
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.chat.AuthListener
 import timber.log.Timber
 
-class ChatRepositoryImpl (private val authClient: GitterAuthClient,
-                          private val streamClient: GitterStreamClient,
-                          private val gitterClient: GitterClient,
-                          private val gitterDao: GitterDao,
-                          private val authHolder: AuthHolder,
-                          private val gson: Gson,
-                          private val scheduler: BaseSchedulerProvider): ChatRepository {
+class ChatRepositoryImpl(private val authClient: GitterAuthClient,
+                         private val streamClient: GitterStreamClient,
+                         private val gitterClient: GitterClient,
+                         private val gitterDao: GitterDao,
+                         private val authHolder: AuthHolder,
+                         private val gson: Gson,
+                         private val scheduler: BaseSchedulerProvider) : ChatRepository {
 
     private val roomId = "5738c079c43b8c6019730ee3"
 //    private val roomId = "5a832dffd73408ce4f8d0021"
@@ -31,7 +25,7 @@ class ChatRepositoryImpl (private val authClient: GitterAuthClient,
     private var authListener: AuthListener? = null
 
     init {
-        authHolder.subscribeToSessionExpired(object : SessionListener{
+        authHolder.subscribeToSessionExpired(object : SessionListener {
             override fun sessionExpired() {
                 authListener?.needAuth()
             }
@@ -48,7 +42,7 @@ class ChatRepositoryImpl (private val authClient: GitterAuthClient,
                     .doOnSuccess {
                         authHolder.accessToken = it.token
                         authHolder.tokenType = it.type
-                        it.expiresIn?.let{time ->
+                        it.expiresIn?.let { time ->
                             authHolder.expiresIn = time
                         }
                     }
@@ -66,29 +60,36 @@ class ChatRepositoryImpl (private val authClient: GitterAuthClient,
         return streamClient.getRoomMessagesStream(roomId)
                 .flatMap { responseBody -> events(responseBody.source()) }
                 .filter { checkIfValidMessageJson(it) }
-                .map {gson.fromJson(it, GitterMessage::class.java) }
+                .map { gson.fromJson(it, GitterMessage::class.java) }
                 .observeOn(scheduler.io())
                 .doOnNext { gitterDao.saveMessage(it) }
     }
 
     override fun getEventsStream() =
             streamClient.getRoomEventsStream(roomId)
-                .flatMap { responseBody -> events(responseBody.source()) }
-                .filter { checkIfValidMessageJson(it) }
-                .map { gson.fromJson(it, Event::class.java) }
+                    .flatMap { responseBody -> events(responseBody.source()) }
+                    .filter { checkIfValidMessageJson(it) }
+                    .map { gson.fromJson(it, Event::class.java) }
 
 
     override fun loadMessages(lastId: String?): Completable {
         return gitterClient.getRoomMessages(roomId, 50, lastId)
                 .observeOn(scheduler.io())
-                .doOnSuccess { gitterDao.saveMessages(it) }
+                .doOnSuccess {
+                    gitterDao.saveMessages(it)
+                }
                 .ignoreElement()
     }
 
-    override fun getMessages(): Flowable<out List<MessageFull>>  = RxPagedListBuilder(gitterDao.getMessages(), 50)
-            .setFetchScheduler(scheduler.io())
-            .setNotifyScheduler(scheduler.ui())
-            .buildFlowable(BackpressureStrategy.BUFFER)
+    override fun getMessages(): Observable<out List<MessageFull>> = RxPagedListBuilder(gitterDao.getMessages(), 50)
+            .buildObservable()
+            .map { messages ->
+                messages.filterNotNull().map { m ->
+                    val user = gitterDao.getUser(m.fromUserId) ?: User("", avatarUrlSmall = "")
+                    MessageFull(m, user)
+                }
+            }
+
 
     private fun events(source: BufferedSource): Flowable<String?> {
         return Flowable.create({ emitter ->

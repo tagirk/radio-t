@@ -3,6 +3,7 @@ package su.tagir.apps.radiot.ui
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
@@ -77,6 +78,14 @@ class MainPresenter(private val entryRepository: EntryRepository,
 
     override fun navigateToCredits() {
         router.navigateTo(Screens.CreditsScreen)
+    }
+
+    override fun playStream() {
+        entryRepository.playStream(STREAM_URL)
+    }
+
+    override fun pause() {
+        entryRepository.pause()
     }
 
     private fun convertTime(nextShowTime: Long): String {
