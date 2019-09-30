@@ -3,6 +3,7 @@ package su.tagir.apps.radiot.model.entries
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
+import su.tagir.apps.radiot.model.entities.MessageQueries
 import java.util.*
 
 data class Token(@SerializedName("access_token") val token: String,
@@ -68,9 +69,7 @@ data class Url(val url: String?)
 
 data class Mention(val screenName: String?, val userId: String?, val userIds: List<String>?)
 
-@Entity(tableName = Message.TABLE)
 data class Message(
-        @PrimaryKey(autoGenerate = false)
         val id: String,
         val text: String? = null,
         val html: String? = null,
@@ -80,16 +79,25 @@ data class Message(
         val unread: Boolean = false,
         val readBy: Int? = null,
         val urls: List<Url>? = null,
-        val mentions: List<Mention>? = null) {
-
-    companion object {
-        const val TABLE = "message"
-        const val ID = "id"
-        const val FROM_USER = "fromUserId"
-        const val SENT = "sent"
-    }
-}
+        val mentions: List<Mention>? = null)
 
 data class MessageFull( val message: Message, val user: User?)
 
+fun Message.insert(messageQueries: MessageQueries){
+    messageQueries.insert(id, text, html, sent, editedAt, fromUserId, unread, readBy, urls, mentions)
+}
 
+val messageMapper: (id: String,
+                    text: String? = null,
+                    val html: String? = null,
+                    val sent: Date? = null,
+                    val editedAt: Date? = null,
+                    val fromUserId: String? = null,
+                    val unread: Boolean = false,
+                    val readBy: Int? = null,
+                    val urls: List<Url>? = null,
+                    val mentions: List<Mention>? = null)
+
+fun User.insert(userQueries: UserQueries){
+    userQueries.insert(id, username, avatarUrl, avatarUrlSmall, displayName, url, avatarUrlMedium)
+}

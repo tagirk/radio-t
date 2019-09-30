@@ -1,6 +1,5 @@
 package su.tagir.apps.radiot.model.api
 
-import io.reactivex.Single
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -12,18 +11,18 @@ import su.tagir.apps.radiot.model.entries.PostInfo
 interface RemarkClient {
 
     @POST("comment")
-    fun postComment(@Body comment: Comment): Single<Comment>
+    suspend fun postComment(@Body comment: Comment): Comment
 
     @POST("preview")
-    fun previewComment(@Body comment: Comment): Single<Comment>
+    suspend fun previewComment(@Body comment: Comment): Comment
 
     @GET("find")
-    fun getComments(@Query("site") siteId: String = "radiot",
+    suspend fun getComments(@Query("site") siteId: String = "radiot",
                     @Query("url") postUrl: String,
                     @Query("sort") sort:String = "-time",
-                    @Query("format") format: String = "tree"): Single<CommentsTree>
+                    @Query("format") format: String = "tree"): CommentsTree
 
     @POST("counts")
-    fun getCommentsCount(@Query("site") siteId: String = "radiot",
-                         @Body urls: List<String>): Single<List<PostInfo>>
+    suspend fun getCommentsCount(@Query("site") siteId: String = "radiot",
+                         @Body urls: List<String>): List<PostInfo>
 }

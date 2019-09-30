@@ -1,30 +1,26 @@
 package su.tagir.apps.radiot.model.repository
 
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
 import su.tagir.apps.radiot.model.entries.Event
 import su.tagir.apps.radiot.model.entries.GitterMessage
 import su.tagir.apps.radiot.model.entries.MessageFull
-import su.tagir.apps.radiot.model.entries.Token
 import su.tagir.apps.radiot.ui.chat.AuthListener
 
 interface ChatRepository {
 
     fun subcribeAuthNeeded(authListener: AuthListener)
 
-    fun getOAuthToken(appId: String?, appKey: String?, code: String, redirectUri: String?): Single<Token>
+    suspend fun getOAuthToken(appId: String?, appKey: String?, code: String, redirectUri: String?)
 
     fun removeAuthData()
 
-    fun sendMessage(message: String): Completable
+    suspend fun sendMessage(message: String)
 
-    fun getMessageStream(): Flowable<GitterMessage>
+    fun getMessageStream(): Flow<GitterMessage>
 
-    fun getEventsStream(): Flowable<Event>
+    fun getEventsStream(): Flow<Event>
 
-    fun loadMessages(lastId: String? = null): Completable
+    suspend fun loadMessages(lastId: String? = null)
 
-    fun getMessages(): Observable<out List<MessageFull>>
+    fun getMessages(): Flow<List<MessageFull>>
 }

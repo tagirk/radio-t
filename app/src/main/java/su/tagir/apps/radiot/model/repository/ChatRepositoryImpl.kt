@@ -2,11 +2,17 @@ package su.tagir.apps.radiot.model.repository
 
 import androidx.paging.RxPagedListBuilder
 import com.google.gson.Gson
-import io.reactivex.*
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
+import io.reactivex.Observable
+import kotlinx.coroutines.flow.Flow
 import okio.BufferedSource
 import su.tagir.apps.radiot.model.api.*
-import su.tagir.apps.radiot.model.db.GitterDao
-import su.tagir.apps.radiot.model.entries.*
+import su.tagir.apps.radiot.model.db.RadiotDb
+import su.tagir.apps.radiot.model.entries.Event
+import su.tagir.apps.radiot.model.entries.GitterMessage
+import su.tagir.apps.radiot.model.entries.MessageFull
+import su.tagir.apps.radiot.model.entries.User
 import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.chat.AuthListener
 import timber.log.Timber
@@ -14,13 +20,15 @@ import timber.log.Timber
 class ChatRepositoryImpl(private val authClient: GitterAuthClient,
                          private val streamClient: GitterStreamClient,
                          private val gitterClient: GitterClient,
-                         private val gitterDao: GitterDao,
+                         private val database: RadiotDb
                          private val authHolder: AuthHolder,
                          private val gson: Gson,
                          private val scheduler: BaseSchedulerProvider) : ChatRepository {
 
     private val roomId = "5738c079c43b8c6019730ee3"
 //    private val roomId = "5a832dffd73408ce4f8d0021"
+
+    private val messageQueries = database.messageQueries
 
     private var authListener: AuthListener? = null
 
@@ -37,26 +45,23 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
 
     }
 
-    override fun getOAuthToken(appId: String?, appKey: String?, code: String, redirectUri: String?): Single<Token> =
-            authClient.auth(appId, appKey, code, redirectUri)
-                    .doOnSuccess {
-                        authHolder.accessToken = it.token
-                        authHolder.tokenType = it.type
-                        it.expiresIn?.let { time ->
-                            authHolder.expiresIn = time
-                        }
-                    }
+    override suspend fun getOAuthToken(appId: String?, appKey: String?, code: String, redirectUri: String?){
+        val token = authClient.auth(appId, appKey, code, redirectUri)
+        authHolder.accessToken = token.token
+        authHolder.tokenType = token.type
+        token.expiresIn?.let { time ->
+            authHolder.expiresIn = time
+        }
+    }
 
     override fun removeAuthData() {
         authHolder.clear()
     }
 
-    override fun sendMessage(message: String): Completable {
-        return gitterClient.sendMessage(roomId, message)
-                .ignoreElement()
-    }
+    override suspend fun sendMessage(message: String) = gitterClient.sendMessage(roomId, message)
 
-    override fun getMessageStream(): Flowable<GitterMessage> {
+
+    override fun getMessageStream(): Flow<GitterMessage> {
         return streamClient.getRoomMessagesStream(roomId)
                 .flatMap { responseBody -> events(responseBody.source()) }
                 .filter { checkIfValidMessageJson(it) }
@@ -72,8 +77,9 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
                     .map { gson.fromJson(it, Event::class.java) }
 
 
-    override fun loadMessages(lastId: String?): Completable {
-        return gitterClient.getRoomMessages(roomId, 50, lastId)
+    override suspend fun loadMessages(lastId: String?) {
+        val messages = gitterClient.getRoomMessages(roomId, 50, lastId)
+         messageQueries.insert()
                 .observeOn(scheduler.io())
                 .doOnSuccess {
                     gitterDao.saveMessages(it)

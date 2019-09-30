@@ -1,43 +1,41 @@
 package su.tagir.apps.radiot.model.repository
 
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Maybe
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
 import su.tagir.apps.radiot.model.entries.Entry
+
 import su.tagir.apps.radiot.model.entries.TimeLabel
 
 interface EntryRepository {
 
-    fun getCurrent(): Flowable<Entry>
+    fun getCurrent(): Flow<Entry>
 
-    fun getTimeLabels(entry: Entry?): Flowable<List<TimeLabel>>
+    fun getTimeLabels(entry: Entry?): Flow<List<TimeLabel>>
 
-    fun refreshPodcasts(): Completable
+    suspend fun refreshPodcasts()
 
-    fun refreshPirates(): Completable
+    suspend fun refreshPirates()
 
-    fun getEntries(vararg categories: String): Flowable<out List<Entry>>
+    fun getEntries(vararg categories: String): Flow<List<Entry>>
 
-    fun getDownloadedEntries(vararg categories: String): Flowable<out List<Entry>>
+    fun getDownloadedEntries(vararg categories: String): Flow<List<Entry>>
 
-    fun refreshNews(): Completable
+    suspend fun refreshNews()
 
-    fun search(query: String): Completable
+    suspend fun search(query: String)
 
-    fun searchNextPage(query: String, skip: Int): Single<Boolean>
+    suspend fun searchNextPage(query: String, skip: Int): Boolean
 
-    fun getRecentSearches(): Flowable<out List<String>>
+    fun getRecentSearches(): Flow<List<String>>
 
-    fun getForQuery(query: String): Flowable<List<Entry>>
+    fun getForQuery(query: String): Flow<List<Entry>>
 
-    fun removeQuery(query: String?)
+    suspend fun removeQuery(query: String)
 
-    fun startDownload(url: String?): Completable
+    suspend fun startDownload(url: String?)
 
-    fun checkDownloadStatus()
+    suspend fun checkDownloadStatus()
 
-    fun deleteFile(id: Long): Completable
+    suspend fun deleteFile(id: Long)
 
     fun play(podcast: Entry)
 
@@ -45,11 +43,11 @@ interface EntryRepository {
 
     fun resume()
 
-    fun playStream(url: String)
+    suspend fun playStream(url: String)
 
-    fun setCurrentEntry(audioUrl: String?, lastProgress: Long)
+    suspend fun setCurrentEntry(audioUrl: String?, lastProgress: Long)
 
-    fun updateCurrentEntryStateAndProgress(state: Int, progress: Long)
+    suspend fun updateCurrentEntryStateAndProgress(state: Int, progress: Long)
 
-    fun getEntry(id: String): Maybe<Entry>
+    fun getEntry(id: String): Flow<Entry>
 }

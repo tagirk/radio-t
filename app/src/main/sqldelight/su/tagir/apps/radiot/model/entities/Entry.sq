@@ -1,0 +1,84 @@
+import java.util.Date;
+import kotlin.collections.List;
+
+CREATE TABLE entry(
+    url TEXT NOT NULL PRIMARY KEY,
+    title TEXT,
+    date INTEGER AS Date,
+    categories TEXT AS List<String>,
+    image TEXT,
+    fileName TEXT,
+    body TEXT,
+    showNotes TEXT,
+    audioUrl TEXT,
+    progress INTEGER AS Long NOT NULL,
+    state INTEGER AS Int NOT NULL,
+    file TEXT,
+    downloadId INTEGER AS Long NOT NULL,
+    downloadProgress INTEGER AS Int NOT NULL,
+    commentsCount INTEGER AS Int NOT NULL);
+
+insert:
+INSERT OR REPLACE INTO entry (url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount)
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+
+update:
+UPDATE entry SET
+    title = ?,
+    audioUrl = ?,
+    body = ?,
+    date = ?,
+    image = ?,
+    showNotes = ?,
+    fileName = ? WHERE url = ?;
+
+updateCommentsCount:
+UPDATE entry SET commentsCount = ? WHERE url = ?;
+
+count:
+SELECT COUNT(url) FROM entry WHERE url = ?;
+
+findByUrl:
+SELECT * FROM entry WHERE url = ? LIMIT 1;
+
+findByCategories:
+SELECT * FROM entry WHERE categories IN(?) ORDER BY date DESC;
+
+findDownloadedByCategories:
+SELECT * FROM entry WHERE file != NULL AND categories IN(?) ORDER BY date DESC;
+
+resetStates:
+UPDATE entry SET state = ? WHERE state != ?;
+
+updateState:
+UPDATE entry SET state = ? WHERE audioUrl = ?;
+
+findCurrentPlaying:
+SELECT * FROM entry WHERE state = 1 OR state = 2 LIMIT 1;
+
+updateCurrentPlayingEntryState:
+UPDATE entry SET state = ? WHERE state != 0;
+
+updateCurrentPlayingEntryProgress:
+UPDATE entry SET progress = ? WHERE state = 1 OR state = 2;
+
+updateDownloadId:
+UPDATE entry SET downloadId = ?, downloadProgress = 0 WHERE audioUrl = ?;
+
+saveFilePath:
+UPDATE entry SET file = ?, downloadProgress = -1 WHERE downloadId = ?;
+
+deleteFilePath:
+UPDATE entry SET file = NULL, downloadProgress = -1, downloadId = -1 WHERE downloadId = ?;
+
+selectDownloadIds:
+SELECT downloadId FROM entry WHERE downloadId != -1 AND downloadProgress != -1;
+
+updateDownloadProgress:
+UPDATE entry SET downloadProgress = ? WHERE downloadId = ?;
+
+resetDownloadProgress:
+UPDATE entry SET downloadProgress = -1, downloadId = -1 WHERE downloadId = ?;
+
+findByIds:
+SELECT * FROM entry WHERE url IN (?) ORDER BY date DESC;

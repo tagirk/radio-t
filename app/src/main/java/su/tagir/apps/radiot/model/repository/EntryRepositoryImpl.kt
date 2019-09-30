@@ -1,156 +1,162 @@
 package su.tagir.apps.radiot.model.repository
 
 import android.app.Application
-import androidx.paging.RxPagedListBuilder
-import io.reactivex.*
+import android.text.TextUtils
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import su.tagir.apps.radiot.model.api.RemarkClient
 import su.tagir.apps.radiot.model.api.RestClient
-import su.tagir.apps.radiot.model.db.EntryDao
-import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.entries.RTEntry
-import su.tagir.apps.radiot.model.entries.SearchResult
-import su.tagir.apps.radiot.model.entries.TimeLabel
-import su.tagir.apps.radiot.model.parser.PiratesParser
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.model.db.RadiotDb
+import su.tagir.apps.radiot.model.entries.*
 import su.tagir.apps.radiot.service.AudioService
-import timber.log.Timber
-import java.net.HttpURLConnection
-import java.net.URL
+import su.tagir.apps.radiot.utils.timeOfDay
+import java.util.*
+import kotlin.collections.HashMap
 
-class EntryRepositoryImpl (private val restClient: RestClient,
-                                              private val remarkClient: RemarkClient,
-                                              private val entryDao: EntryDao,
-                                              private val downloadManager: DownloadManager,
-                                              private val application: Application,
-                                              private val scheduler: BaseSchedulerProvider) : EntryRepository{
+class EntryRepositoryImpl(private val restClient: RestClient,
+                          private val remarkClient: RemarkClient,
+                          private val database: RadiotDb,
+                          private val downloadManager: DownloadManager,
+                          private val application: Application) : EntryRepository {
 
     companion object {
         const val PAGE_SIZE = 20
     }
 
-    override fun getCurrent(): Flowable<Entry> =
-            entryDao.getCurrentEntryLive().distinctUntilChanged().subscribeOn(scheduler.io())
+    private val entryQueries = database.entryQueries
+    private val timeLabelQueries = database.timeLabelQueries
+    private val pageResultQueries = database.pageResultQueries
 
-    override fun getTimeLabels(entry: Entry?): Flowable<List<TimeLabel>> =
-            entryDao.getTimeLabels(entry?.date).distinctUntilChanged().subscribeOn(scheduler.io())
+    override fun getCurrent(): Flow<Entry> =
+            entryQueries.findCurrentPlaying(mapper = entryMapper).asFlow().mapToOne()
+
+    override fun getTimeLabels(entry: Entry?): Flow<List<TimeLabel>> =
+            timeLabelQueries.findByPodcastTime(entry?.date, mapper = timeLabelMapper).asFlow().mapToList()
 
 
-    override fun refreshPodcasts(): Completable =
-            restClient
-                    .getPosts(PAGE_SIZE, "podcast")
-                    .doOnSuccess { entryDao.saveRadioTEntries(it) }
-                    .map { entries -> entries.map { it.url } }
-                    .flatMap { remarkClient.getCommentsCount(urls = it) }
-                    .doOnSuccess { entryDao.updateEntriesCommentsCount(it) }
-                    .ignoreElement()
-
-    override fun refreshPirates(): Completable {
-        return Single.create(SingleOnSubscribe<List<RTEntry>> { emitter ->
-            try {
-                val connection = URL("https://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.addRequestProperty("Accept", "application/xml")
-                connection.doInput = true
-                connection.connect()
-                val podcasts = PiratesParser.parsePirates(connection.inputStream)
-                if(!emitter.isDisposed) {
-                    emitter.onSuccess(podcasts)
-                }
-            } catch (e: Exception) {
-                Timber.e(e)
-                if(!emitter.isDisposed) {
-                    emitter.onError(e)
-                }
+    override suspend fun refreshPodcasts() {
+        val podcasts = restClient.getPosts(PAGE_SIZE, "podcast")
+        val commentsCount = remarkClient.getCommentsCount(urls = podcasts.map { it.url })
+        database.transaction {
+            insertRTEntries(podcasts)
+            commentsCount.forEach { info ->
+                entryQueries.updateCommentsCount(info.count, info.url)
             }
-        })
-                .doOnSuccess { entryDao.saveRadioTEntries(it) }
-                .ignoreElement()
+        }
+
     }
 
-    override fun getEntries(vararg categories: String): Flowable<out List<Entry>> =
-            RxPagedListBuilder(entryDao.getEntries(categories), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.io())
-                    .setNotifyScheduler(scheduler.ui())
-                    .buildFlowable(BackpressureStrategy.LATEST)
 
-    override fun getDownloadedEntries(vararg categories: String): Flowable<out List<Entry>> =
-            RxPagedListBuilder(entryDao.getDownloadedEntries(categories), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.io())
-                    .setNotifyScheduler(scheduler.ui())
-                    .buildFlowable(BackpressureStrategy.LATEST)
-                    .distinctUntilChanged()
+    override suspend fun refreshPirates() {
+//        return Single.create(SingleOnSubscribe<List<RTEntry>> { emitter ->
+//            try {
+//                val connection = URL("https://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
+//                connection.requestMethod = "GET"
+//                connection.addRequestProperty("Accept", "application/xml")
+//                connection.doInput = true
+//                connection.connect()
+//                val podcasts = PiratesParser.parsePirates(connection.inputStream)
+//                if (!emitter.isDisposed) {
+//                    emitter.onSuccess(podcasts)
+//                }
+//            } catch (e: Exception) {
+//                Timber.e(e)
+//                if (!emitter.isDisposed) {
+//                    emitter.onError(e)
+//                }
+//            }
+//        })
+//                .doOnSuccess { entryDao.saveRadioTEntries(it) }
+//                .ignoreElement()
+    }
 
-    override fun refreshNews(): Completable =
-            restClient
-                    .getPosts(PAGE_SIZE, "news,info")
-                    .observeOn(scheduler.io())
-                    .doOnSuccess { entryDao.saveRadioTEntries(it) }
-                    .ignoreElement()
+    override fun getEntries(vararg categories: String): Flow<List<Entry>> =
+            entryQueries.findByCategories(categories.asList(), entryMapper).asFlow().mapToList()
 
 
-    override fun search(query: String): Completable =
-            restClient
-                    .search(query, 0, PAGE_SIZE)
-                    .observeOn(scheduler.io())
-                    .doOnSuccess {entries -> entryDao.saveSearchResult(SearchResult(query, entries.map { it.url }), entries) }
-                    .ignoreElement()
+    override fun getDownloadedEntries(vararg categories: String): Flow<List<Entry>> =
+            entryQueries.findDownloadedByCategories(categories.asList(), mapper = entryMapper).asFlow().mapToList()
 
-    override fun searchNextPage(query: String, skip: Int): Single<Boolean> =
-            restClient
-                    .search(query, skip, PAGE_SIZE)
-                    .observeOn(scheduler.io())
-                    .doOnSuccess {
-                        if (it.isNotEmpty()) {
-                            entryDao.mergeAndsaveSearchResult(query, it)
-                        }
+    override suspend fun refreshNews() {
+        val news = restClient.getPosts(PAGE_SIZE, "news,info")
+        database.transaction {
+            insertRTEntries(news)
+        }
+    }
+
+    override suspend fun search(query: String) {
+        val entries = restClient.search(query, 0, PAGE_SIZE)
+        database.transaction {
+            pageResultQueries.insert(query, entries.map { it.url }, null, Date())
+            insertRTEntries(entries)
+        }
+    }
+
+    override suspend fun searchNextPage(query: String, skip: Int): Boolean {
+        val entries = restClient.search(query, skip, PAGE_SIZE)
+        database.transaction {
+            mergeAndsavePageResult(query, entries)
+        }
+        return entries.isNotEmpty()
+    }
+
+
+    override fun getRecentSearches(): Flow<List<String>> =
+            pageResultQueries.findRecentSearches().asFlow().mapToList()
+
+
+    @ExperimentalCoroutinesApi
+    override fun getForQuery(query: String): Flow<List<Entry>> =
+            pageResultQueries.findByQuery(query, pageResultMapper)
+                    .asFlow()
+                    .mapToOne()
+                    .flatMapLatest { result ->
+                        val idsStr = "'${TextUtils.join("','", result.ids)}'"
+                        entryQueries.findByIds(idsStr, entryMapper).asFlow().mapToList()
                     }
-                    .map { it.isNotEmpty() }
 
-
-    override fun getRecentSearches(): Flowable<out List<String>> =
-            RxPagedListBuilder(entryDao.findRecentSearches(), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.io())
-                    .setNotifyScheduler(scheduler.ui())
-                    .buildFlowable(BackpressureStrategy.LATEST)
-
-    override fun getForQuery(query: String): Flowable<List<Entry>> {
-        return entryDao
-                .findSearchResultLive(query)
-                .flatMapSingle { entryDao.loadById(it.ids)}
-                .subscribeOn(scheduler.io())
+    override suspend fun removeQuery(query: String) {
+        pageResultQueries.removeQuery(query)
     }
 
-    override fun removeQuery(query: String?) {
-        scheduler.computation().createWorker().schedule {
-            entryDao.removeQuery(query)
-        }
+    override suspend fun startDownload(url: String?) {
+        val downloadId = downloadManager.startDownload(url)
+        entryQueries.updateDownloadId(downloadId, url)
     }
 
-    override fun startDownload(url: String?): Completable {
-        return Completable.fromCallable {
-            val downloadId = downloadManager.startDownload(url)
-            entryDao.updateDownloadId(downloadId, url)
-            return@fromCallable url
-        }
-    }
-
-    override fun checkDownloadStatus() {
-        val ids = entryDao.getDownloadIds().toMutableList()
+    override suspend fun checkDownloadStatus() {
+        val ids = entryQueries.selectDownloadIds().executeAsList().toMutableList()
         if (ids.isEmpty()) {
             return
         }
         val downloadProgressMap = HashMap<Long, Int>()
         val fileNames = HashMap<Long, String>()
         downloadManager.checkDownloadStatus(ids, downloadProgressMap, fileNames)
-        entryDao.updateDownloadStatus(ids, downloadProgressMap, fileNames)
+
+
+        database.transaction {
+            ids.forEach { id ->
+                entryQueries.resetDownloadProgress(id)
+            }
+
+            downloadProgressMap.forEach {
+                entryQueries.updateDownloadProgress(it.value, it.key)
+            }
+
+            fileNames
+                    .forEach {
+                        entryQueries.saveFilePath(it.value, it.key)
+                    }
+        }
     }
 
-    override fun deleteFile(id: Long): Completable {
-        return Completable.fromCallable {
-            downloadManager.delete(id)
-            entryDao.deleteFilePath(id)
-            return@fromCallable id
-        }
+    override suspend fun deleteFile(id: Long) {
+        downloadManager.delete(id)
+        entryQueries.deleteFilePath(id)
     }
 
     override fun play(podcast: Entry) {
@@ -165,18 +171,61 @@ class EntryRepositoryImpl (private val restClient: RestClient,
         AudioService.resume(application)
     }
 
-    override fun playStream(url: String) {
-        entryDao.playStream(url)
+    override suspend fun playStream(url: String) {
+        database.transaction {
+            entryQueries.resetStates(EntryState.IDLE, EntryState.IDLE)
+            val streamEntry = Entry(url = url, title = "Online вещание", audioUrl = url, state = EntryState.PAUSED, categories = listOf("online_stream"))
+            streamEntry.insert(entryQueries)
+        }
         AudioService.play(null, url, 0L, application)
     }
 
-    override fun setCurrentEntry(audioUrl: String?, lastProgress: Long) {
-        entryDao.setCurrentEntry(audioUrl, lastProgress)
+    override suspend fun setCurrentEntry(audioUrl: String?, lastProgress: Long) {
+        database.transaction {
+            if (lastProgress > 0) {
+                entryQueries.updateCurrentPlayingEntryProgress(lastProgress)
+            }
+            entryQueries.resetStates(EntryState.IDLE, EntryState.IDLE)
+            if (audioUrl != null) {
+                entryQueries.updateState(state = EntryState.PAUSED, audioUrl = audioUrl)
+            }
+        }
     }
 
-    override fun updateCurrentEntryStateAndProgress(state: Int, progress: Long) {
-        entryDao.updateCurrentEntryStateAndProgress(state, progress)
+    override suspend fun updateCurrentEntryStateAndProgress(state: Int, progress: Long) {
+        database.transaction {
+            if (state != EntryState.PLAYING && progress > 0) {
+                entryQueries.updateCurrentPlayingEntryProgress(progress)
+            }
+            entryQueries.updateCurrentPlayingEntryState(state)
+        }
     }
 
-    override fun getEntry(id: String): Maybe<Entry> = entryDao.getEntry(id)
+    override fun getEntry(id: String): Flow<Entry> = entryQueries.findByUrl(id, entryMapper).asFlow().mapToOne()
+
+    private fun insertRTEntries(rtEntries: List<RTEntry>) {
+        rtEntries.forEach { podcast ->
+            val count = entryQueries.count(podcast.url).executeAsOne()
+            val entry = Entry(podcast)
+            if (count == 0L) {
+                entry.insert(entryQueries)
+            } else {
+                entry.update(entryQueries)
+            }
+            podcast
+                    .timeLabels
+                    ?.forEach { timeLabel ->
+                        timeLabelQueries.insert(timeLabel.topic, timeLabel.time?.timeOfDay(), timeLabel.duration, timeLabel.time)
+                    }
+        }
+    }
+
+    private fun mergeAndsavePageResult(query: String, entries: List<RTEntry>, totalCount: Int? = null) {
+        val current = pageResultQueries.findByQuery(query, mapper = pageResultMapper).executeAsOneOrNull()
+                ?: PageResult(query, emptyList(), totalCount)
+        val merged = current.ids.toMutableList()
+        merged.addAll(entries.map { it.url })
+        pageResultQueries.insert(query, merged, totalCount, Date())
+        insertRTEntries(entries)
+    }
 }
