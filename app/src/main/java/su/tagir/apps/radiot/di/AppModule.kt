@@ -12,22 +12,16 @@ import com.google.gson.GsonBuilder
 import com.ironz.binaryprefs.BinaryPreferencesBuilder
 import dagger.Module
 import dagger.Provides
-import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import su.tagir.apps.radiot.BuildConfig
 import su.tagir.apps.radiot.encryption.TinkKeyEncryption
 import su.tagir.apps.radiot.encryption.TinkValueEncryption
 import su.tagir.apps.radiot.model.api.*
-import su.tagir.apps.radiot.model.db.EntryDao
-import su.tagir.apps.radiot.model.db.GitterDao
-import su.tagir.apps.radiot.model.db.NewsDao
+import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.repository.*
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.schedulers.SchedulerProvider
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -84,15 +78,12 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideApiClient(scheduler: BaseSchedulerProvider): RestClient {
+    fun provideApiClient(): RestClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://radio-t.com/site-api/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
-        val dispatcher = Dispatcher()
-        dispatcher.maxRequests = 1
-        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
+        val httpClient = OkHttpClient.Builder()
 
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
@@ -109,15 +100,12 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideRemarkClient(scheduler: BaseSchedulerProvider): RemarkClient {
+    fun provideRemarkClient(): RemarkClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://remark42.radio-t.com/api/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
-        val dispatcher = Dispatcher()
-        dispatcher.maxRequests = 1
-        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
+        val httpClient = OkHttpClient.Builder()
 
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
@@ -134,15 +122,12 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideNewsApiClient(scheduler: BaseSchedulerProvider): NewsRestClient {
+    fun provideNewsApiClient(): NewsRestClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://news.radio-t.com/api/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
-        val dispatcher = Dispatcher()
-        dispatcher.maxRequests = 1
-        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
+        val httpClient = OkHttpClient.Builder()
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -158,16 +143,12 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideGitterAuthClient(scheduler: BaseSchedulerProvider): GitterAuthClient {
+    fun provideGitterAuthClient(): GitterAuthClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
 
-
-        val dispatcher = Dispatcher()
-        dispatcher.maxRequests = 1
-        val httpClient = OkHttpClient.Builder().dispatcher(dispatcher)
+        val httpClient = OkHttpClient.Builder()
 
         if (BuildConfig.DEBUG) {
             val loggingInterceptor = HttpLoggingInterceptor()
@@ -184,12 +165,10 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideGitterClient(authHolder: GitterAuthHolder, scheduler: BaseSchedulerProvider): GitterClient {
+    fun provideGitterClient(authHolder: GitterAuthHolder): GitterClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://api.gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
-
 
         val httpClient = OkHttpClient.Builder()
                 .addInterceptor(ApiHeadersInterceptor(authHolder))
@@ -210,12 +189,10 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideGitterStreamClient(authHolder: GitterAuthHolder, scheduler: BaseSchedulerProvider): GitterStreamClient {
+    fun provideGitterStreamClient(authHolder: GitterAuthHolder): GitterStreamClient {
         val builder = Retrofit.Builder()
                 .baseUrl("https://stream.gitter.im/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler.io()))
-
 
         val httpClient = OkHttpClient.Builder()
                 .addNetworkInterceptor(ApiHeadersInterceptor(authHolder))
@@ -226,11 +203,6 @@ class AppModule {
                 .build()
                 .create(GitterStreamClient::class.java)
     }
-
-
-    @Singleton
-    @Provides
-    fun provideScheduler(): BaseSchedulerProvider = SchedulerProvider()
 
     @Singleton
     @Provides
@@ -243,37 +215,33 @@ class AppModule {
     fun provideChatRepository(authClient: GitterAuthClient,
                               streamClient: GitterStreamClient,
                               gitterClient: GitterClient,
-                              gitterDao: GitterDao,
+                              database: RadiotDb,
                               authHolder: GitterAuthHolder,
-                              gson: Gson,
-                              scheduler: BaseSchedulerProvider): ChatRepository =
+                              gson: Gson): ChatRepository =
 
             ChatRepositoryImpl(authClient,
                     streamClient,
                     gitterClient,
-                    gitterDao,
+                    database,
                     authHolder,
-                    gson,
-                    scheduler)
+                    gson)
 
     @Singleton
     @Provides
     fun provideEntryRepository(restClient: RestClient,
                                remarkClient: RemarkClient,
-                               entryDao: EntryDao,
+                               database: RadiotDb,
                                downloadManager: DownloadManager,
-                               application: Application,
-                               scheduler: BaseSchedulerProvider): EntryRepository =
+                               application: Application): EntryRepository =
 
-            EntryRepositoryImpl(restClient, remarkClient, entryDao, downloadManager, application, scheduler)
+            EntryRepositoryImpl(restClient, remarkClient, database, downloadManager, application)
 
     @Singleton
     @Provides
     fun provideNewsRepository(newsRestClient: NewsRestClient,
-                              newsDao: NewsDao,
-                              scheduler: BaseSchedulerProvider): NewsRepository =
+                              database: RadiotDb): NewsRepository =
 
-            NewsRepositoryImpl(newsRestClient, newsDao, scheduler)
+            NewsRepositoryImpl(newsRestClient, database)
 
     @Singleton
     @Provides

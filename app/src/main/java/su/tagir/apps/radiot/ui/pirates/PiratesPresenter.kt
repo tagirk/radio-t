@@ -1,20 +1,23 @@
 package su.tagir.apps.radiot.ui.pirates
 
-import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
-import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 class PiratesPresenter(private val entryRepository: EntryRepository,
-                       private val scheduler: BaseSchedulerProvider) : BaseListPresenter<Entry, PiratesContract.View>(), PiratesContract.Presenter {
+                       dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Entry, PiratesContract.View>(dispatcher), PiratesContract.Presenter {
 
-    private var loadDisposable: Disposable? = null
+    private var loadJob: Job? = null
+
+    private val downloadErrorHandler by lazy {
+        CoroutineExceptionHandler { _, exception ->
+            view?.showDownloadError(exception.message)
+        }
+    }
 
     override fun doOnAttach(view: PiratesContract.View) {
         observePodcasts()
@@ -23,46 +26,38 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
     }
 
     private fun observePodcasts() {
-        disposables += entryRepository
-                .getEntries("pirates")
-                .subscribe({
-                    state = state.copy(data = it)
-                }, { Timber.e(it) })
+        launch {
+            entryRepository
+                    .getEntries("pirates")
+                    .collect {
+                        state = state.copy(data = it)
+                    }
+        }
     }
 
     override fun loadData(pullToRefresh: Boolean) {
-        loadDisposable?.dispose()
-        loadDisposable = entryRepository.refreshPirates()
-                .subscribeOn(scheduler.io())
-                .observeOn(scheduler.ui())
-                .doOnSubscribe { state = state.copy(status = if(pullToRefresh) Status.REFRESHING else Status.LOADING) }
-                .subscribe({ state = state.copy(status = Status.SUCCESS) },
-                        {
-                            Timber.e(it)
-                            state = state.copy(status = Status.ERROR)
-                        })
-
-        disposables += loadDisposable!!
+        loadJob?.cancel()
+        loadJob = launch {
+            state = state.copy(status = if (pullToRefresh) Status.REFRESHING else Status.LOADING)
+            entryRepository.refreshPirates()
+            state = state.copy(status = Status.SUCCESS)
+        }
     }
 
     private fun startStatusTimer() {
-       disposables +=
-                Observable
-                        .interval(0L, 5L, TimeUnit.SECONDS)
-                        .observeOn(scheduler.io())
-                        .subscribe({ entryRepository.checkDownloadStatus() }, { Timber.e(it) })
+        launch {
+            while (true) {
+                entryRepository.checkDownloadStatus()
+                delay(5000L)
+            }
+        }
     }
 
-
     override fun download(entry: Entry) {
-            addDisposable(entryRepository
+        launch(downloadErrorHandler) {
+            entryRepository
                     .startDownload(entry.audioUrl)
-                    .subscribeOn(scheduler.io())
-                    .observeOn(scheduler.ui())
-                    .subscribe({}, { t ->
-                        Timber.e(t)
-                        view?.showDownloadError(t.message)
-                    }))
+        }
     }
 
     override fun select(entry: Entry) {
@@ -70,11 +65,9 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun remove(entry: Entry) {
-        disposables +=  entryRepository.deleteFile(entry.downloadId)
-                .observeOn(scheduler.ui())
-                .subscribe({}, { e ->
-                    Timber.e(e)
-                    view?.showDownloadError(e.localizedMessage)
-                })
+        launch(downloadErrorHandler) {
+            entryRepository
+                    .deleteFile(entry.downloadId)
+        }
     }
 }

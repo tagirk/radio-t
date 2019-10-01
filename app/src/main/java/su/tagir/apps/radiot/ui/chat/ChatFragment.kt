@@ -24,7 +24,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.model.repository.ChatRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
@@ -43,9 +42,6 @@ class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatCon
 
     @Inject
     lateinit var router: Router
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
 
     private lateinit var toolbar: Toolbar
 
@@ -117,7 +113,7 @@ class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatCon
     }
 
     override fun createPresenter(): ChatContract.Presenter =
-            ChatPresenter(chatRepository, router, scheduler)
+            ChatPresenter(chatRepository, router)
 
     override fun showSendState(state: ViewState<Void>) {
         sendProgress.visibleInvisible(state.loading)

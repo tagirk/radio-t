@@ -45,9 +45,9 @@ interface EntryRepository {
 
     suspend fun playStream(url: String)
 
-    suspend fun setCurrentEntry(audioUrl: String?, lastProgress: Long)
+    fun setCurrentEntry(audioUrl: String?, lastProgress: Long)
 
-    suspend fun updateCurrentEntryStateAndProgress(state: Int, progress: Long)
+    fun updateCurrentEntryStateAndProgress(state: Int, progress: Long)
 
     fun getEntry(id: String): Flow<Entry>
 }

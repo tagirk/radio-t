@@ -13,7 +13,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 import javax.inject.Inject
@@ -24,9 +23,6 @@ class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalCon
 
     @Inject
     lateinit var entryRepository: EntryRepository
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
 
     @Inject
     lateinit var router: Router
@@ -71,7 +67,7 @@ class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalCon
     }
 
     override fun createPresenter(): LocalContentContract.Presenter =
-            LocalContentPresenter(arguments!!.getString("entry_id")!!, entryRepository, router, scheduler)
+            LocalContentPresenter(arguments!!.getString("entry_id")!!, entryRepository, router)
 
     override fun showContent(entry: Entry) {
         val sb = "<HTML><HEAD><LINK href=\"material.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>" +

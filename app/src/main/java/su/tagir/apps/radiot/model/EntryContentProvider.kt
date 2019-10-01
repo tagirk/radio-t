@@ -6,7 +6,7 @@ import android.content.UriMatcher
 import android.database.Cursor
 import android.net.Uri
 import dagger.android.AndroidInjection
-import su.tagir.apps.radiot.model.db.EntryDao
+import su.tagir.apps.radiot.model.db.RadiotDb
 import javax.inject.Inject
 
 class EntryContentProvider : ContentProvider() {
@@ -26,7 +26,7 @@ class EntryContentProvider : ContentProvider() {
     }
 
     @Inject
-    lateinit var entryDao: EntryDao
+    lateinit var database: RadiotDb
 
     override fun onCreate(): Boolean {
         return false
@@ -39,9 +39,11 @@ class EntryContentProvider : ContentProvider() {
     override fun query(p0: Uri, p1: Array<out String>?, p2: String?, p3: Array<out String>?, p4: String?): Cursor {
         AndroidInjection.inject(this)
         val cursor = when (uriMatcher.match(p0)) {
-            CURRENT_ENTRY -> entryDao.getCurrentEntryCursor()
+            CURRENT_ENTRY -> {
+                 database.entryQueries.findCurrentPlaying().execute() as Cursor
 
-            else -> throw IllegalArgumentException("Unknown uri: " + p0)
+            }
+            else -> throw IllegalArgumentException("Unknown uri: $p0")
         }
         cursor.setNotificationUri(context?.contentResolver, p0 )
         return cursor

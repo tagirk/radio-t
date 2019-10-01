@@ -1,16 +1,27 @@
 package su.tagir.apps.radiot.ui.mvp
 
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.*
+import timber.log.Timber
+import kotlin.coroutines.CoroutineContext
 
-abstract class BasePresenter<V: MvpView>: MvpPresenter<V> {
+abstract class BasePresenter<V: MvpView>(private val dispatcher: CoroutineDispatcher): MvpPresenter<V>, CoroutineScope {
 
     protected var view: V? = null
 
-    val disposables = CompositeDisposable()
+    private lateinit var job: Job
+
+    protected open var exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Timber.e(throwable)
+        view?.showProgress(false)
+        view?.showError(throwable)
+    }
+
+    override val coroutineContext: CoroutineContext
+        get() = job + dispatcher + exceptionHandler
 
     override fun attachView(view: V) {
         this.view = view
+        job = SupervisorJob()
         this.doOnAttach(view)
     }
 
@@ -28,11 +39,9 @@ abstract class BasePresenter<V: MvpView>: MvpPresenter<V> {
 
     }
 
-    fun addDisposable(disposable: Disposable){
-        disposables.add(disposable)
+    fun dispose(){
+        job.cancel()
     }
 
-    fun dispose(){
-        disposables.clear()
-    }
+
 }

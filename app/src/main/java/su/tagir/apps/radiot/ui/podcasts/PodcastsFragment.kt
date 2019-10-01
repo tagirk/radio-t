@@ -13,7 +13,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
@@ -27,12 +26,7 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
     lateinit var entryRepository: EntryRepository
 
     @Inject
-    lateinit var scheduler: BaseSchedulerProvider
-
-    @Inject
     lateinit var router: Router
-
-
 
     private var entryForDownload: Entry? = null
         set(value) {
@@ -45,7 +39,7 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
     override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
 
     override fun createPresenter(): PodcastsContract.Presenter {
-        return PodcastsPresenter(entryRepository, scheduler, router)
+        return PodcastsPresenter(entryRepository, router)
     }
 
     override fun showDownloadError(error: String?) {

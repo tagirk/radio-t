@@ -1,19 +1,20 @@
 package su.tagir.apps.radiot.ui.localcontent
 
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
-import timber.log.Timber
 
 class LocalContentPresenter(
         private val entryId: String,
         private val entryRepository: EntryRepository,
         private val router: Router,
-        private val scheduler: BaseSchedulerProvider) : BasePresenter<LocalContentContract.View>(), LocalContentContract.Presenter {
+        dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<LocalContentContract.View>(dispatcher), LocalContentContract.Presenter {
 
     private var entry: Entry? = null
 
@@ -23,12 +24,13 @@ class LocalContentPresenter(
     }
 
     override fun loadContent(id: String) {
-        disposables += entryRepository.getEntry(id)
-                .observeOn(scheduler.ui())
-                .subscribe({entry ->
-                    this.entry = entry
-                    view?.showContent(entry)
-                }, { Timber.e(it) })
+        launch {
+           entryRepository.getEntry(id)
+                   .collect{entry ->
+                       this@LocalContentPresenter.entry = entry
+                       view?.showContent(entry)
+                   }
+        }
     }
 
     override fun openInBrowser() {

@@ -36,7 +36,6 @@ import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpActivity
 import su.tagir.apps.radiot.ui.news.NewsFragment
@@ -55,6 +54,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         FragmentsInteractionListener,
         Injectable {
 
+
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
@@ -63,9 +63,6 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
 
     @Inject
     lateinit var router: Router
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
 
     @Inject
     lateinit var entryRepository: EntryRepository
@@ -196,7 +193,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
     }
 
     override fun createPresenter(): MainContract.Presenter =
-            MainPresenter(entryRepository, router, scheduler)
+            MainPresenter(entryRepository, router)
 
     override fun showTime(time: String) {
         timeLeft.text = time

@@ -5,20 +5,13 @@ import kotlin.collections.List;
 CREATE TABLE pageResult(
     query TEXT NOT NULL PRIMARY KEY,
     ids TEXT AS List<String> NOT NULL,
-    totalCount INTEGER AS Int,
-    timeStamp INTEGER AS Date NOT NULL);
+    totalCount INTEGER AS Int);
 
 insert:
-INSERT OR REPLACE INTO pageResult(query, ids, totalCount, timeStamp) VALUES(?, ?, ?, ?);
+INSERT OR REPLACE INTO pageResult(query, ids, totalCount) VALUES(?, ?, ?);
 
 findByQuery:
 SELECT * FROM pageResult WHERE query = ?;
-
-findByIds:
-SELECT * FROM pageResult WHERE ids IN (?) ORDER BY timeStamp DESC;
-
-findRecentSearches:
-SELECT query FROM pageResult ORDER BY timeStamp DESC;
 
 removeQuery:
 DELETE FROM pageResult WHERE query = ?;

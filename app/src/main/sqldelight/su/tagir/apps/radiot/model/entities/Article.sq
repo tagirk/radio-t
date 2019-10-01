@@ -11,13 +11,13 @@ CREATE TABLE article(
     author TEXT,
     date INTEGER AS Date,
     addedDate INTEGER AS Date,
-    active INTEGER AS Boolean DEFAULT 0,
-    geek INTEGER AS Boolean DEFAULT 0,
+    active INTEGER AS Boolean DEFAULT 0 NOT NULL,
+    geek INTEGER AS Boolean DEFAULT 0 NOT NULL,
     domain TEXT,
-    comments INTEGER AS Int,
-    likes INTEGER AS Int,
-    deleted INTEGER AS Boolean DEFAULT 0,
-    archived INTEGER AS Boolean DEFAULT 0);
+    comments INTEGER AS Int DEFAULT 0 NOT NULL,
+    likes INTEGER AS Int DEFAULT 0 NOT NULL,
+    deleted INTEGER AS Boolean DEFAULT 0 NOT NULL,
+    archived INTEGER AS Boolean DEFAULT 0 NOT NULL);
 
 insert:
 INSERT OR REPLACE INTO article(slug, title, content, snippet, image, link, author, date, addedDate, active, geek, domain, comments, likes, deleted, archived)

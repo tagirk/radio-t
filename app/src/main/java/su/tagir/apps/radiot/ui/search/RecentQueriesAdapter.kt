@@ -4,21 +4,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
+import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 
-class RecentQueriesAdapter(private val callback: Callback) : PagedListAdapter<String, QueryViewHolder>(diffCallback) {
+class RecentQueriesAdapter(private val callback: Callback) : DataBoundListAdapter<String>() {
 
 
-    override fun onBindViewHolder(holder: QueryViewHolder, position: Int) {
-       val item = getItem(position)
-        holder.bind(item)
-        holder.itemView.setOnClickListener { callback.onQueryClick(item) }
+    override val differ: AsyncListDiffer<String> = AsyncListDiffer(this, object: DiffUtil.ItemCallback<String>(){
+        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+
+        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+    })
+
+
+    override fun bind(viewHolder: DataBoundViewHolder<String>, position: Int) {
+        val item = items[position]
+        viewHolder.bind(item)
+        viewHolder.itemView.setOnClickListener { callback.onQueryClick(item) }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QueryViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<String> {
         val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.item_resent_query, parent, false)
         return QueryViewHolder(view)
@@ -28,22 +36,13 @@ class RecentQueriesAdapter(private val callback: Callback) : PagedListAdapter<St
         fun onQueryClick(query: String?)
     }
 
-    companion object {
-
-        private val diffCallback = object : DiffUtil.ItemCallback<String>() {
-            override fun areItemsTheSame(oldItem: String, newItem: String) = oldItem == newItem
-
-            override fun areContentsTheSame(oldItem: String, newItem: String) = oldItem == newItem
-
-        }
-    }
 }
 
-class QueryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class QueryViewHolder(itemView: View) :DataBoundViewHolder<String>(itemView) {
 
     private val query: TextView = itemView.findViewById(R.id.query)
 
-    fun bind(query: String?) {
-        this.query.text = query
+    override fun bind(t: String?) {
+        this.query.text = t
     }
 }

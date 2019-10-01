@@ -1,21 +1,20 @@
 package su.tagir.apps.radiot.ui
 
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
-import timber.log.Timber
+import su.tagir.apps.radiot.utils.startTimer
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.math.floor
 
 class MainPresenter(private val entryRepository: EntryRepository,
                     private val router: Router,
-                    private val scheduler: BaseSchedulerProvider) : BasePresenter<MainContract.View>(), MainContract.Presenter {
+                    dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<MainContract.View>(dispatcher), MainContract.Presenter {
 
 
     private val nextShow: Calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
@@ -37,19 +36,19 @@ class MainPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun observeCurrentPodcast() {
-        disposables += entryRepository.getCurrent()
-                .observeOn(scheduler.ui())
-                .subscribe({ view?.showCurrentPodcast(it) }, { e -> Timber.e(e) })
+        launch {
+            entryRepository.getCurrent()
+                    .collect { view?.showCurrentPodcast(it) }
+        }
     }
 
     override fun startTimerToNextShow() {
-        disposables += Observable.interval(0L, 1L, TimeUnit.SECONDS)
-                .observeOn(scheduler.ui())
-                .subscribe({
-                    val time = convertTime(nextShow.timeInMillis)
-                    view?.showTime(time)
-                }, { Timber.e(it) })
-
+        launch {
+            startTimer(repeatMillis = 1000L) {
+                val time = convertTime(nextShow.timeInMillis)
+                view?.showTime(time)
+            }
+        }
     }
 
     override fun navigateToPodcasts() {
@@ -81,7 +80,9 @@ class MainPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun playStream() {
-        entryRepository.playStream(STREAM_URL)
+        launch {
+            entryRepository.playStream(STREAM_URL)
+        }
     }
 
     override fun pause() {

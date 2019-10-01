@@ -9,7 +9,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
@@ -23,9 +22,6 @@ class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsC
     lateinit var entryRepository: EntryRepository
 
     @Inject
-    lateinit var scheduler: BaseSchedulerProvider
-
-    @Inject
     lateinit var router: Router
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -34,7 +30,7 @@ class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsC
     }
 
     override fun createPresenter(): DownloadedPodcastsContract.Presenter {
-        return DownloadedPodcastsPresenter(entryRepository, scheduler, router)
+        return DownloadedPodcastsPresenter(entryRepository, router)
     }
 
 

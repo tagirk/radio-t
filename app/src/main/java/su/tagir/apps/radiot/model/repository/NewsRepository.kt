@@ -1,14 +1,13 @@
 package su.tagir.apps.radiot.model.repository
 
-import io.reactivex.Flowable
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
 import su.tagir.apps.radiot.model.entries.Article
 
 interface NewsRepository {
 
-    fun getArticles(): Flowable<out List<Article>>
+    fun getArticles(): Flow<List<Article>>
 
-    fun updateActiveArticle(): Single<Article>
+    suspend fun updateActiveArticle()
 
-    fun updateArticles(): Single<List<Article>>
+    suspend fun updateArticles()
 }

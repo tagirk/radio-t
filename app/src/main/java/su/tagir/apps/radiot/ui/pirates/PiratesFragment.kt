@@ -12,7 +12,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
@@ -27,9 +26,6 @@ class PiratesFragment:
     @Inject
     lateinit var entryRepository: EntryRepository
 
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
-
     private var entryForDownload: Entry? = null
         set(value) {
             field = value
@@ -39,7 +35,7 @@ class PiratesFragment:
         }
 
     override fun createPresenter(): PiratesContract.Presenter {
-        return PiratesPresenter(entryRepository, scheduler)
+        return PiratesPresenter(entryRepository)
     }
 
 

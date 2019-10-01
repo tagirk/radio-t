@@ -14,7 +14,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
-import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import permissions.dispatcher.NeedsPermission
@@ -25,7 +24,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
@@ -45,9 +43,6 @@ class SearchFragment :
 
     @Inject
     lateinit var entryRepository: EntryRepository
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
 
     @Inject
     lateinit var router: Router
@@ -128,16 +123,16 @@ class SearchFragment :
     }
 
     override fun removeQuery(position: Int) {
-        recentQueriesAdapter.currentList?.let { list ->
+        recentQueriesAdapter.items.let { list ->
 
-            list[position]?.let { query ->
+            list[position].let { query ->
                 presenter.removeQuery(query)
             }
         }
     }
 
     override fun createPresenter(): SearchContract.Presenter =
-            SearchPresenter(entryRepository, scheduler, router)
+            SearchPresenter(entryRepository, router)
 
     override fun showDownloadError(error: String?) {
         context?.let { c ->
@@ -151,7 +146,7 @@ class SearchFragment :
     }
 
     override fun showRecentQueries(queries: List<String>) {
-        recentQueriesAdapter.submitList(queries as PagedList<String>)
+        recentQueriesAdapter.replace(queries)
     }
 
     override fun download() {

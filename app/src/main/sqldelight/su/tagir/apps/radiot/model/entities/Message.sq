@@ -10,7 +10,7 @@ CREATE TABLE message(
        sent INTEGER AS Date,
        editedAt INTEGER AS Date,
        fromUserId TEXT,
-       unread INTEGER AS Boolean DEFAULT 0,
+       unread INTEGER AS Boolean DEFAULT 0 NOT NULL,
        readBy INTEGER AS Int,
        urls TEXT AS List<Url>,
        mentions TEXT AS List<Mention>);
@@ -22,3 +22,10 @@ VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 deleteAll:
 DELETE FROM message;
 
+findByIdWithUser:
+SELECT message.*,
+        user.id AS userId,
+        user.username,
+        user.displayName,
+        user.avatarUrlSmall,
+        user.url AS userUrl FROM message LEFT JOIN user ON fromUserId = user.id WHERE message.id IN (?) ORDER BY sent DESC;

@@ -1,8 +1,6 @@
 package su.tagir.apps.radiot.model.repository
 
 import kotlinx.coroutines.flow.Flow
-import su.tagir.apps.radiot.model.entries.Event
-import su.tagir.apps.radiot.model.entries.GitterMessage
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.ui.chat.AuthListener
 
@@ -16,9 +14,9 @@ interface ChatRepository {
 
     suspend fun sendMessage(message: String)
 
-    fun getMessageStream(): Flow<GitterMessage>
+    suspend fun subscribeMessageStream()
 
-    fun getEventsStream(): Flow<Event>
+    suspend fun subscribeEventsStream()
 
     suspend fun loadMessages(lastId: String? = null)
 

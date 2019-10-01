@@ -30,6 +30,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     private val entryQueries = database.entryQueries
     private val timeLabelQueries = database.timeLabelQueries
     private val pageResultQueries = database.pageResultQueries
+    private val searchResultQueries = database.searchResultQueries
 
     override fun getCurrent(): Flow<Entry> =
             entryQueries.findCurrentPlaying(mapper = entryMapper).asFlow().mapToOne()
@@ -91,7 +92,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     override suspend fun search(query: String) {
         val entries = restClient.search(query, 0, PAGE_SIZE)
         database.transaction {
-            pageResultQueries.insert(query, entries.map { it.url }, null, Date())
+            searchResultQueries.insert(query, entries.map { it.url }, Date())
             insertRTEntries(entries)
         }
     }
@@ -99,19 +100,19 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     override suspend fun searchNextPage(query: String, skip: Int): Boolean {
         val entries = restClient.search(query, skip, PAGE_SIZE)
         database.transaction {
-            mergeAndsavePageResult(query, entries)
+            mergeAndSaveSearchResult(query, entries)
         }
         return entries.isNotEmpty()
     }
 
 
     override fun getRecentSearches(): Flow<List<String>> =
-            pageResultQueries.findRecentSearches().asFlow().mapToList()
+            searchResultQueries.findRecentSearches().asFlow().mapToList()
 
 
     @ExperimentalCoroutinesApi
     override fun getForQuery(query: String): Flow<List<Entry>> =
-            pageResultQueries.findByQuery(query, pageResultMapper)
+            searchResultQueries.findByQuery(query, searchResultMapper)
                     .asFlow()
                     .mapToOne()
                     .flatMapLatest { result ->
@@ -180,7 +181,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         AudioService.play(null, url, 0L, application)
     }
 
-    override suspend fun setCurrentEntry(audioUrl: String?, lastProgress: Long) {
+    override fun setCurrentEntry(audioUrl: String?, lastProgress: Long) {
         database.transaction {
             if (lastProgress > 0) {
                 entryQueries.updateCurrentPlayingEntryProgress(lastProgress)
@@ -192,7 +193,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         }
     }
 
-    override suspend fun updateCurrentEntryStateAndProgress(state: Int, progress: Long) {
+    override fun updateCurrentEntryStateAndProgress(state: Int, progress: Long) {
         database.transaction {
             if (state != EntryState.PLAYING && progress > 0) {
                 entryQueries.updateCurrentPlayingEntryProgress(progress)
@@ -220,12 +221,12 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         }
     }
 
-    private fun mergeAndsavePageResult(query: String, entries: List<RTEntry>, totalCount: Int? = null) {
-        val current = pageResultQueries.findByQuery(query, mapper = pageResultMapper).executeAsOneOrNull()
-                ?: PageResult(query, emptyList(), totalCount)
+    private fun mergeAndSaveSearchResult(query: String, entries: List<RTEntry>) {
+        val current = searchResultQueries.findByQuery(query, mapper = searchResultMapper).executeAsOneOrNull()
+                ?: SearchResult(query, emptyList())
         val merged = current.ids.toMutableList()
         merged.addAll(entries.map { it.url })
-        pageResultQueries.insert(query, merged, totalCount, Date())
+        searchResultQueries.insert(query, merged, Date())
         insertRTEntries(entries)
     }
 }

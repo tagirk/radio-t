@@ -31,8 +31,7 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.Node
-import su.tagir.apps.radiot.model.repository.CommentsRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.model.repository.CommentsRepositoryImpl
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
@@ -47,10 +46,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
         Injectable {
 
     @Inject
-    lateinit var commentsRepository: CommentsRepository
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
+    lateinit var commentsRepository: CommentsRepositoryImpl
 
     @Inject
     lateinit var router: Router
@@ -93,7 +89,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
     override fun createPresenter(): CommentsContract.Presenter {
         val postUrl = arguments!!.getString("url")!!
-        return CommentsPresenter(postUrl, commentsRepository, router, scheduler)
+        return CommentsPresenter(postUrl, commentsRepository, router)
     }
 
 

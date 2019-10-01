@@ -2,6 +2,7 @@ package su.tagir.apps.radiot.ui.mvp
 
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 
 abstract class BaseMvpFragment<V: MvpView, P: MvpPresenter<V>>: Fragment(), MvpView {
@@ -21,6 +22,21 @@ abstract class BaseMvpFragment<V: MvpView, P: MvpPresenter<V>>: Fragment(), MvpV
     override fun onPause() {
         presenter.detachView()
         super.onPause()
+    }
+
+    override fun showError(t: Throwable) {
+        context?.let {c ->
+            AlertDialog.Builder(c)
+                    .setTitle("Ошибка")
+                    .setMessage(t.message)
+                    .setPositiveButton("OK", null)
+                    .create()
+                    .show()
+        }
+    }
+
+    override fun showProgress(show: Boolean) {
+
     }
 
     abstract fun createPresenter(): P

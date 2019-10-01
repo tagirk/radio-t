@@ -1,9 +1,8 @@
 package su.tagir.apps.radiot.model.entries
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import su.tagir.apps.radiot.model.entities.MessageQueries
+import su.tagir.apps.radiot.model.entities.UserQueries
 import java.util.*
 
 data class Token(@SerializedName("access_token") val token: String,
@@ -47,23 +46,15 @@ data class Event(
         @SerializedName("fromUser") val fromUser: User)
 
 
-@Entity(tableName = User.TABLE)
 data class User(
-        @PrimaryKey(autoGenerate = false)
         @SerializedName("id") val id: String,
         @SerializedName("username") val username: String? = null,
         @SerializedName("avatarUrl") val avatarUrl: String? = null,
-        @SerializedName("avatarUrlSmall") val avatarUrlSmall: String,
+        @SerializedName("avatarUrlSmall") val avatarUrlSmall: String? = null,
         @SerializedName("displayName") val displayName: String? = null,
         @SerializedName("url") val url: String? = null,
         @SerializedName("avatarUrlMedium") val avatarUrlMedium: String? = null) {
-
-    companion object {
-        const val TABLE = "chat_user"
-        const val ID = "id"
-    }
 }
-
 
 data class Url(val url: String?)
 
@@ -81,23 +72,47 @@ data class Message(
         val urls: List<Url>? = null,
         val mentions: List<Mention>? = null)
 
-data class MessageFull( val message: Message, val user: User?)
+data class MessageFull(val message: Message, val user: User?)
 
-fun Message.insert(messageQueries: MessageQueries){
+fun Message.insert(messageQueries: MessageQueries) {
     messageQueries.insert(id, text, html, sent, editedAt, fromUserId, unread, readBy, urls, mentions)
 }
 
 val messageMapper: (id: String,
-                    text: String? = null,
-                    val html: String? = null,
-                    val sent: Date? = null,
-                    val editedAt: Date? = null,
-                    val fromUserId: String? = null,
-                    val unread: Boolean = false,
-                    val readBy: Int? = null,
-                    val urls: List<Url>? = null,
-                    val mentions: List<Mention>? = null)
+                    text: String?,
+                    html: String?,
+                    sent: Date?,
+                    editedAt: Date?,
+                    fromUserId: String?,
+                    unread: Boolean,
+                    readBy: Int?,
+                    urls: List<Url>?,
+                    mentions: List<Mention>?,
+                    userId: String?,
+                    userName: String?,
+                    displayName: String?,
+                    avatarUrl: String?,
+                    url: String?) -> MessageFull
+    get() = { id,
+              text,
+              html,
+              sent,
+              editedAt,
+              fromUserId,
+              unread,
+              readBy,
+              urls,
+              mentions,
+              userId: String?,
+              userName: String?,
+              displayName: String?,
+              avatarUrl: String?,
+              url: String? ->
+        val message = Message(id, text, html, sent, editedAt, fromUserId, unread, readBy, urls, mentions)
+        val user = userId?.let {User(userId, userName, null, avatarUrl, displayName, url, null)}
+        MessageFull(message, user)
+    }
 
-fun User.insert(userQueries: UserQueries){
+fun User.insert(userQueries: UserQueries) {
     userQueries.insert(id, username, avatarUrl, avatarUrlSmall, displayName, url, avatarUrlMedium)
 }

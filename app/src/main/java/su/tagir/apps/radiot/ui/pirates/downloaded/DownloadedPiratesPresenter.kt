@@ -1,16 +1,23 @@
 package su.tagir.apps.radiot.ui.pirates.downloaded
 
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
-import timber.log.Timber
 
 class DownloadedPiratesPresenter(private val entryRepository: EntryRepository,
-                                 private val scheduler: BaseSchedulerProvider) :
-        BaseListPresenter<Entry, DownloadedPiratesContract.View>(), DownloadedPiratesContract.Presenter {
+                                dispatcher: CoroutineDispatcher = MainDispatcher()) :
+        BaseListPresenter<Entry, DownloadedPiratesContract.View>(dispatcher), DownloadedPiratesContract.Presenter {
 
+    private val deleterErrorHandler by lazy {
+        CoroutineExceptionHandler { _, exception ->
+            view?.showRemoveError(exception.message)
+        }
+    }
 
     override fun doOnAttach(view: DownloadedPiratesContract.View) {
         observePodcasts()
@@ -26,21 +33,16 @@ class DownloadedPiratesPresenter(private val entryRepository: EntryRepository,
 
 
     override fun remove(entry: Entry) {
-        disposables += entryRepository.deleteFile(entry.downloadId)
-                .subscribe({}, { e ->
-                    Timber.e(e)
-                    view?.showRemoveError(e.message)
-                })
+        launch(deleterErrorHandler) {
+            entryRepository.deleteFile(entry.downloadId)
+        }
     }
 
     private fun observePodcasts() {
-        disposables +=
-                entryRepository
-                        .getDownloadedEntries("pirates")
-                        .observeOn(scheduler.ui())
-                        .subscribe({ data ->
-                            state = state.copy(data = data)
-                        }, { Timber.e(it) })
-
+       launch {
+           entryRepository
+                   .getDownloadedEntries("pirates")
+                   .collect{data ->  state = state.copy(data = data)}
+       }
     }
 }

@@ -6,7 +6,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
@@ -20,13 +19,10 @@ class DownloadedPiratesFragment :
     @Inject
     lateinit var entryRepository: EntryRepository
 
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
-
     override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
 
     override fun createPresenter(): DownloadedPiratesContract.Presenter {
-        return DownloadedPiratesPresenter(entryRepository, scheduler)
+        return DownloadedPiratesPresenter(entryRepository)
     }
 
     override fun showRemoveError(error: String?) {

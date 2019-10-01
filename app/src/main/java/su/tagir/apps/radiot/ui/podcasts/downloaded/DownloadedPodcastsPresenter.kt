@@ -1,32 +1,39 @@
 package su.tagir.apps.radiot.ui.podcasts.downloaded
 
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
-import timber.log.Timber
 
 class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
-                                  private val scheduler: BaseSchedulerProvider,
-                                  private val router: Router):
-        BaseListPresenter<Entry, DownloadedPodcastsContract.View>(),
+                                  private val router: Router,
+                                  dispatcher: CoroutineDispatcher = MainDispatcher()):
+        BaseListPresenter<Entry, DownloadedPodcastsContract.View>(dispatcher),
         DownloadedPodcastsContract.Presenter {
 
+    private val deleterErrorHandler by lazy {
+        CoroutineExceptionHandler { _, exception ->
+            view?.showRemoveError(exception.message)
+        }
+    }
 
     override fun doOnAttach(view: DownloadedPodcastsContract.View) {
         observePodcasts()
     }
 
     private fun observePodcasts() {
-        disposables +=
-                entryRepository
-                        .getDownloadedEntries("podcast")
-                        .subscribe({ data ->
-                            state = state.copy(data = data)
-                        }, { Timber.e(it) })
+       launch {
+           entryRepository
+                   .getDownloadedEntries("podcast")
+                   .collect { data ->
+                       state = state.copy(data = data) }
+       }
 
     }
 
@@ -40,12 +47,7 @@ class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
 
 
     override fun remove(entry: Entry) {
-        disposables += entryRepository.deleteFile(entry.downloadId)
-                .observeOn(scheduler.ui())
-                .subscribe({}, { e ->
-                    Timber.e(e)
-                    view?.showRemoveError(e.message)
-                })
+        launch(deleterErrorHandler) {  entryRepository.deleteFile(entry.downloadId) }
     }
 
     override fun openComments(entry: Entry) {

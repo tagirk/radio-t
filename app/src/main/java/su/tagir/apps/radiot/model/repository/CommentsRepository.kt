@@ -1,12 +1,8 @@
 package su.tagir.apps.radiot.model.repository
 
-import su.tagir.apps.radiot.model.api.RemarkClient
-import javax.inject.Inject
+import su.tagir.apps.radiot.model.entries.CommentsTree
 
-class CommentsRepository @Inject constructor(private val remarkClient:RemarkClient) {
+interface CommentsRepository {
 
-
-    fun getComments(url: String) = remarkClient.getComments(postUrl = url)
-
-
+    suspend fun getComments(url: String): CommentsTree
 }

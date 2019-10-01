@@ -5,7 +5,6 @@ import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import javax.inject.Inject
@@ -16,9 +15,6 @@ class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.
 
     @Inject
     lateinit var router: Router
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
 
     @Inject
     lateinit var entryRepository: EntryRepository
@@ -43,7 +39,7 @@ class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.
 
 
     override fun createPresenter(): NewsContract.Presenter =
-            NewsPresenter(entryRepository, scheduler, router)
+            NewsPresenter(entryRepository, router =  router)
 
 
 }

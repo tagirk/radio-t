@@ -1,30 +1,31 @@
 package su.tagir.apps.radiot.model.repository
 
-import androidx.paging.RxPagedListBuilder
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Flowable
-import io.reactivex.Single
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import kotlinx.coroutines.flow.Flow
 import su.tagir.apps.radiot.model.api.NewsRestClient
-import su.tagir.apps.radiot.model.db.NewsDao
+import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.entries.Article
-import su.tagir.apps.radiot.model.repository.EntryRepositoryImpl.Companion.PAGE_SIZE
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.model.entries.articleMapper
+import su.tagir.apps.radiot.model.entries.insert
+
 
 class NewsRepositoryImpl(private val newsRestClient: NewsRestClient,
-                         private val newsDao: NewsDao,
-                         private val scheduler: BaseSchedulerProvider) : NewsRepository {
+                         private val database: RadiotDb) : NewsRepository {
 
-    override fun getArticles(): Flowable<out List<Article>> = RxPagedListBuilder(newsDao.getArticles(), PAGE_SIZE)
-            .setFetchScheduler(scheduler.io())
-            .setNotifyScheduler(scheduler.ui())
-            .buildFlowable(BackpressureStrategy.BUFFER)
+    override fun getArticles(): Flow<List<Article>> =
+            database.articleQueries.findByDeletedAndArchivedStates(deleted = false, archived = false, mapper = articleMapper).asFlow().mapToList()
 
-    override fun updateActiveArticle(): Single<Article> = newsRestClient
-            .getActiveArticle()
-            .doOnSuccess { newsDao.updateActiveArticle(it) }
+    override suspend fun updateActiveArticle() {
+        val article = newsRestClient.getActiveArticle()
+        article.insert(database.articleQueries)
+    }
 
-    override fun updateArticles(): Single<List<Article>> = newsRestClient
-            .getLastArticles(20)
-            .doOnSuccess { newsDao.updateArticles(it) }
+    override suspend fun updateArticles(){
+        val articles = newsRestClient.getLastArticles(50)
+        database.transaction {
+            articles.forEach { a -> a.insert(database.articleQueries) }
+        }
+    }
 
 }

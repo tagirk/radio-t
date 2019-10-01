@@ -1,23 +1,24 @@
 package su.tagir.apps.radiot.ui.comments
 
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Node
-import su.tagir.apps.radiot.model.repository.CommentsRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.model.repository.CommentsRepositoryImpl
+import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
 import timber.log.Timber
 
 class CommentsPresenter(private val postUrl: String,
-                        private val commentsRepository: CommentsRepository,
+                        private val commentsRepository: CommentsRepositoryImpl,
                         private val router: Router,
-                        private val scheduler: BaseSchedulerProvider) : BaseListPresenter<Node, CommentsContract.View>(), CommentsContract.Presenter {
+                        val dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Node, CommentsContract.View>(dispatcher), CommentsContract.Presenter {
 
 
-    private var loadDisposable: Disposable? = null
+    private var loadJob: Job? = null
 
     private val comments = mutableListOf<Node>()
 
@@ -25,22 +26,19 @@ class CommentsPresenter(private val postUrl: String,
         loadData(false)
     }
 
-    override fun loadData(pullToRefresh: Boolean) {
-        loadDisposable?.dispose()
-        loadDisposable = commentsRepository.getComments(postUrl)
-                .observeOn(scheduler.ui())
-                .doOnSubscribe { state = state.copy(Status.LOADING) }
-                .subscribe({
-                    comments.clear()
-                    comments.addAll(it.comments)
-                    state = state.copy(data = it.comments, status = Status.SUCCESS)
-                },
-                        {
-                            Timber.e(it)
-                            state = state.copy(status = Status.ERROR)
-                        })
+    override fun doOnDetach() {
+        loadJob?.cancel()
+    }
 
-        disposables += loadDisposable!!
+    override fun loadData(pullToRefresh: Boolean) {
+        loadJob?.cancel()
+        loadJob = launch{
+            state = state.copy(Status.LOADING)
+            val tree = commentsRepository.getComments(postUrl)
+            comments.clear()
+            comments.addAll(tree.comments)
+            state = state.copy(data = tree.comments, status = Status.SUCCESS)
+        }
     }
 
     override fun showReplies(position: Int, node: Node) {

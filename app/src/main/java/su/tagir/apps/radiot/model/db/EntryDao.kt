@@ -1,8 +1,7 @@
 package su.tagir.apps.radiot.model.db
 
-import androidx.room.Dao
 
-@Dao
+
 abstract class EntryDao {
 
 //    @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -147,36 +146,36 @@ abstract class EntryDao {
 //    abstract fun getTimeLabels(podcastTime: Date?): Flowable<List<TimeLabel>>
 //
 //    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    abstract fun insertSearchResult(searchResult: SearchResult?)
+//    abstract fun insertSearchResult(searchResult: SearchResult.sq?)
 //
-//    @Query("SELECT * FROM ${SearchResult.TABLE_NAME} WHERE ${SearchResult.QUERY} = :query")
-//    abstract fun findSearchResult(query: String?): SearchResult?
+//    @Query("SELECT * FROM ${SearchResult.sq.TABLE_NAME} WHERE ${SearchResult.sq.QUERY} = :query")
+//    abstract fun findSearchResult(query: String?): SearchResult.sq?
 //
-//    @Query("SELECT * FROM ${SearchResult.TABLE_NAME} WHERE ${SearchResult.QUERY} = :query")
-//    abstract fun findSearchResultLive(query: String): Flowable<SearchResult>
+//    @Query("SELECT * FROM ${SearchResult.sq.TABLE_NAME} WHERE ${SearchResult.sq.QUERY} = :query")
+//    abstract fun findSearchResultLive(query: String): Flowable<SearchResult.sq>
 //
 //    @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.URL} IN (:ids) ORDER BY ${Entry.DATE} DESC")
 //    abstract fun loadById(ids: List<String>): Single<List<Entry>>
 //
 //    @Transaction
-//    open fun saveSearchResult(searchResult: SearchResult?, entries: List<RTEntry>) {
+//    open fun saveSearchResult(searchResult: SearchResult.sq?, entries: List<RTEntry>) {
 //        insertSearchResult(searchResult)
 //        saveEntries(entries)
 //    }
 //
 //    @Transaction
 //    open fun mergeAndsaveSearchResult(query: String,  entries: List<RTEntry>) {
-//        val current = findSearchResult(query)?: SearchResult(query, emptyList())
+//        val current = findSearchResult(query)?: SearchResult.sq(query, emptyList())
 //        val merged = current.ids.toMutableList()
 //        merged.addAll(entries.map { it.url })
-//        insertSearchResult(SearchResult(query, merged))
+//        insertSearchResult(SearchResult.sq(query, merged))
 //        saveEntries(entries)
 //    }
 //
-//    @Query("SELECT ${SearchResult.QUERY} FROM ${SearchResult.TABLE_NAME} ORDER BY ${SearchResult.TIME_STAMP} DESC")
+//    @Query("SELECT ${SearchResult.sq.QUERY} FROM ${SearchResult.sq.TABLE_NAME} ORDER BY ${SearchResult.sq.TIME_STAMP} DESC")
 //    abstract fun findRecentSearches(): DataSource.Factory<Int, String>
 //
-//    @Query("DELETE FROM ${SearchResult.TABLE_NAME} WHERE ${SearchResult.QUERY} = :query")
+//    @Query("DELETE FROM ${SearchResult.sq.TABLE_NAME} WHERE ${SearchResult.sq.QUERY} = :query")
 //    abstract fun removeQuery(query: String?)
 //
 //    private fun saveEntries(entries: List<RTEntry>?) {

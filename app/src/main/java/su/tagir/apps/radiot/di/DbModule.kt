@@ -1,9 +1,13 @@
 package su.tagir.apps.radiot.di
 
 import android.app.Application
+import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.squareup.sqldelight.db.SqlDriver
 import dagger.Module
 import dagger.Provides
-import su.tagir.apps.radiot.model.db.AppDatabase
+import su.tagir.apps.radiot.model.db.RadiotDb
+import su.tagir.apps.radiot.model.db.Schema
+import su.tagir.apps.radiot.model.db.createQueryWrapper
 import javax.inject.Singleton
 
 @Module
@@ -11,22 +15,11 @@ class DbModule {
 
     @Singleton
     @Provides
-    fun provideDb(application: Application) = AppDatabase.createPersistentDatabase(application)
+    fun provideDb(application: Application): RadiotDb{
+        val driver: SqlDriver = AndroidSqliteDriver(Schema, application, "radiot.db")
+        return createQueryWrapper(driver)
+    }
 
-    @Singleton
-    @Provides
-    fun provideEntryDao(db: AppDatabase) = db.entryDao()
 
-    @Singleton
-    @Provides
-    fun provideHostsDao(db: AppDatabase) = db.hostDao()
-
-    @Singleton
-    @Provides
-    fun provideNewsDao(db: AppDatabase) = db.newsDao()
-
-    @Singleton
-    @Provides
-    fun providesGitterDao(db: AppDatabase) = db.gitterDao()
 
 }

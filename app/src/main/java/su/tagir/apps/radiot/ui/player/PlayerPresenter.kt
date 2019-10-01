@@ -1,7 +1,11 @@
 package su.tagir.apps.radiot.ui.player
 
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
@@ -9,14 +13,13 @@ import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
-import timber.log.Timber
-import java.util.concurrent.TimeUnit
+import su.tagir.apps.radiot.utils.startTimer
 
 class PlayerPresenter(private val entryRepository: EntryRepository,
-                      private val scheduler: BaseSchedulerProvider,
-                      private val router: Router) : BasePresenter<PlayerContract.View>(), PlayerContract.Presenter {
+                      private val router: Router,
+                      dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
 
     private var currentPodcast: Entry? = null
         set(value) {
@@ -26,6 +29,7 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
             }
         }
 
+    @FlowPreview
     override fun doOnAttach(view: PlayerContract.View) {
         observeCurrent()
         startUpdateProgress()
@@ -68,24 +72,20 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
         }
     }
 
+    @FlowPreview
     private fun observeCurrent() {
-        disposables += entryRepository.getCurrent()
-                .observeOn(scheduler.ui())
-                .doOnNext { entry -> currentPodcast = entry }
-                .flatMap { entry -> entryRepository.getTimeLabels(entry) }
-                .observeOn(scheduler.ui())
-                .subscribe({ labels ->
-                    view?.showTimeLabels(labels)
-                }, {
-                    Timber.e(it)
-                })
+        launch {
+            entryRepository
+                    .getCurrent()
+                    .onEach { entry -> currentPodcast = entry }
+                    .flatMapConcat{ entry -> entryRepository.getTimeLabels(entry) }
+                    .collect{labels -> view?.showTimeLabels(labels)}
+        }
     }
 
     private fun startUpdateProgress() {
-        disposables += Observable
-                .interval(0L, 1L, TimeUnit.SECONDS)
-                .observeOn(scheduler.ui())
-                .subscribe({ view?.requestProgress() },
-                        { Timber.d(it) })
+        launch {
+            startTimer(delayMillis = 0L, repeatMillis = 1000L) { view?.requestProgress() }
+        }
     }
 }

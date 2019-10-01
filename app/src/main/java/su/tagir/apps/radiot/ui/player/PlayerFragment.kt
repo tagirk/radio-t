@@ -23,7 +23,6 @@ import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.service.IAudioService
 import su.tagir.apps.radiot.service.IAudioServiceCallback
@@ -46,9 +45,6 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
     @Inject
     lateinit var entryRepository: EntryRepository
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
 
     @Inject
     lateinit var router: Router
@@ -206,7 +202,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun createPresenter(): PlayerContract.Presenter =
-            PlayerPresenter(entryRepository, scheduler, router)
+            PlayerPresenter(entryRepository, router)
 
     override fun showCurrentPodcast(entry: Entry) {
         btnPause.visibleInvisible(entry.state == EntryState.PLAYING)

@@ -1,24 +1,22 @@
 package su.tagir.apps.radiot.ui.news
 
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
-import timber.log.Timber
 
 class NewsPresenter(private val entryRepository: EntryRepository,
-                    private val scheduler: BaseSchedulerProvider,
-                    private val router: Router): BaseListPresenter<Entry, NewsContract.View>(), NewsContract.Presenter {
+                    dispatcher: CoroutineDispatcher = MainDispatcher(),
+                    private val router: Router) : BaseListPresenter<Entry, NewsContract.View>(dispatcher), NewsContract.Presenter {
 
-
-    private var loadDisposable: Disposable? = null
-
-
+    private var loadJob: Job? = null
 
     override fun doOnAttach(view: NewsContract.View) {
         super.doOnAttach(view)
@@ -27,25 +25,22 @@ class NewsPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun observeNews() {
-        disposables += entryRepository
-                .getEntries("news", "info")
-                .subscribe({
-                   state = state.copy(data = it)
-                }, { Timber.e(it) })
+        launch {
+            entryRepository
+                    .getEntries("news", "info")
+                    .collect {
+                        state = state.copy(data = it)
+                    }
+        }
     }
 
     override fun loadData(pullToRefresh: Boolean) {
-        loadDisposable?.dispose()
-        loadDisposable = entryRepository.refreshNews()
-                .observeOn(scheduler.ui())
-                .doOnSubscribe { state = if (pullToRefresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING) }
-                .subscribe({ state = state.copy(status = Status.SUCCESS) },
-                        {
-                            Timber.e(it)
-                            state = state.copy(status = Status.ERROR)
-                        })
-
-        disposables += loadDisposable!!
+        loadJob?.cancel()
+        loadJob = launch {
+            state = if (pullToRefresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING)
+            entryRepository.refreshNews()
+            state = state.copy(status = Status.SUCCESS)
+        }
     }
 
     override fun select(entry: Entry) {

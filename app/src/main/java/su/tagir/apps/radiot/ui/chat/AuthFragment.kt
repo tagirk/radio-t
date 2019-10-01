@@ -19,10 +19,8 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.repository.ChatRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
-import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
 import javax.inject.Inject
 
@@ -30,9 +28,6 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
 
     @Inject
     lateinit var chatRepository: ChatRepository
-
-    @Inject
-    lateinit var scheduler: BaseSchedulerProvider
 
     @Inject
     lateinit var router: Router
@@ -91,20 +86,15 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
 
     override fun createPresenter(): AuthContract.Presenter {
         val authParams = AuthParams(getString(R.string.oauth_key), getString(R.string.oauth_secret), getString(R.string.redirect_url), "code")
-        return AuthPresenter(authParams, chatRepository, scheduler, router)
+        return AuthPresenter(authParams, chatRepository, router = router)
     }
 
     override fun auth(url: String) {
         webView.loadUrl(url)
     }
 
-    override fun updateState(state: ViewState<Boolean>) {
-        progress.visibleGone(state.loading)
-        error.visibleGone(state.error)
-
-        state.getErrorIfNotHandled()?.let { message ->
-            showToast(message)
-        }
+    override fun showProgress(show: Boolean) {
+        progress.visibleGone(show)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -112,13 +102,13 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-//                progress.visibleGone(true)
+                progress.visibleGone(true)
                 super.onPageStarted(view, url, favicon)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-//                progress.visibleGone(false)
+                progress.visibleGone(false)
             }
 
             @Suppress("OverridingDeprecatedMember")

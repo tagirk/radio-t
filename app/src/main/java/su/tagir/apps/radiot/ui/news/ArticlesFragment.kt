@@ -18,7 +18,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.repository.NewsRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
@@ -34,13 +33,10 @@ class ArticlesFragment : BaseMvpListFragment<Article, ArticlesContract.View, Art
     lateinit var router: Router
 
     @Inject
-    lateinit var scheduler:BaseSchedulerProvider
-
-    @Inject
     lateinit var newsRepository: NewsRepository
 
     override fun createPresenter(): ArticlesContract.Presenter =
-            ArticlesPresenter(newsRepository, scheduler, router)
+            ArticlesPresenter(newsRepository, router)
 
     override fun createAdapter() = ArticlesAdapter(this)
 

@@ -1,25 +1,25 @@
 package su.tagir.apps.radiot.ui.news
 
-import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.plusAssign
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.repository.NewsRepository
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
+import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
-import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 class ArticlesPresenter(private val newsRepository: NewsRepository,
-                        private val scheduler: BaseSchedulerProvider,
-                        private val router: Router) : BaseListPresenter<Article, ArticlesContract.View>(), ArticlesContract.Presenter {
+                        private val router: Router,
+                        dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Article, ArticlesContract.View>(dispatcher), ArticlesContract.Presenter {
 
-    private var loadDisposable: Disposable? = null
+    private var loadJob: Job? = null
 
-    private var activeThemeDisposable: Disposable? = null
+    private var activeThemeJob: Job? = null
 
     override fun doOnAttach(view: ArticlesContract.View) {
         super.doOnAttach(view)
@@ -28,36 +28,38 @@ class ArticlesPresenter(private val newsRepository: NewsRepository,
         updateActiveTheme()
     }
 
+    override fun doOnDetach() {
+        activeThemeJob?.cancel()
+    }
+
     private fun observeArticles() {
-        disposables += newsRepository.getArticles()
-                .subscribe({
-                    state = state.copy(data = it)
-                }, { Timber.e(it) })
+        launch {
+            newsRepository.getArticles()
+                    .collect{list ->
+                        state = state.copy(data = list)
+                    }
+        }
     }
 
     override fun loadData(pullToRefresh: Boolean) {
-        loadDisposable?.dispose()
-        loadDisposable = newsRepository.updateArticles()
-                .observeOn(scheduler.ui())
-                .doOnSubscribe { state = if (pullToRefresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING) }
-                .subscribe({ state = state.copy(status = Status.SUCCESS) },
-                        {
-                            Timber.e(it)
-                            state = state.copy(status = Status.ERROR)
-                        })
-
-        disposables += loadDisposable!!
+        loadJob?.cancel()
+        loadJob = launch {
+            state = if (pullToRefresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING)
+            newsRepository.updateActiveArticle()
+            state = state.copy(status = Status.SUCCESS)
+        }
     }
 
     override fun updateActiveTheme() {
-        activeThemeDisposable?.dispose()
-        activeThemeDisposable = Observable.interval(1L, 1L, TimeUnit.MINUTES)
-                .flatMapSingle { newsRepository.updateActiveArticle().subscribeOn(scheduler.io()) }
-                .observeOn(scheduler.ui())
-                .retry()
-                .subscribe({}, { Timber.e(it) })
+        activeThemeJob?.cancel()
+        activeThemeJob = launch {
+            delay(1000L)
+                while (true) {
+                    newsRepository.updateActiveArticle()
+                    delay(1000L)
+                }
 
-        disposables += activeThemeDisposable!!
+        }
     }
 
     override fun showArticle(article: Article) {
