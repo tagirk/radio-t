@@ -1,5 +1,7 @@
 package su.tagir.apps.radiot.model.entries
 
+import android.database.Cursor
+import android.text.TextUtils
 import su.tagir.apps.radiot.model.entities.EntryQueries
 import java.util.*
 
@@ -42,6 +44,22 @@ data class Entry(
                     downloadId = -1,
                     downloadProgress = -1,
                     commentsCount = 0)
+
+    constructor(c: Cursor) :
+            this(url = c.getString(c.getColumnIndexOrThrow("url")),
+                    title = c.getString(c.getColumnIndexOrThrow("title")),
+                    date = Date(c.getLong(c.getColumnIndexOrThrow("date"))),
+                    categories = TextUtils.split(",", c.getString(c.getColumnIndexOrThrow("categories"))).asList(),
+                    image = c.getString(c.getColumnIndexOrThrow("image")),
+                    fileName = c.getString(c.getColumnIndexOrThrow("fileName")),
+                    body = c.getString(c.getColumnIndexOrThrow("body")),
+                    showNotes = c.getString(c.getColumnIndexOrThrow("showNotes")),
+                    audioUrl = c.getString(c.getColumnIndexOrThrow("audioUrl")),
+                    progress = c.getLong(c.getColumnIndexOrThrow("progress")),
+                    state = c.getInt(c.getColumnIndexOrThrow("state")),
+                    file = c.getString(c.getColumnIndexOrThrow("file")),
+                    downloadProgress = c.getInt(c.getColumnIndexOrThrow("downloadProgress")),
+                    commentsCount = c.getInt(c.getColumnIndexOrThrow("commentsCount")))
 
     val chatUrl
         get() = "https://chat.radio-t.com/logs/radio-t-${title?.substring(8)}.html"

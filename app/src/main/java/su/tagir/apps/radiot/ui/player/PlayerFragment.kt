@@ -206,9 +206,9 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
     override fun showCurrentPodcast(entry: Entry) {
         btnPause.visibleInvisible(entry.state == EntryState.PLAYING)
-        btnPlay.visibleInvisible(entry.state == EntryState.PAUSED)
+        btnPlay.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
         btnPauseBig.visibleInvisible(entry.state == EntryState.PLAYING)
-        btnPlayBig.visibleInvisible(entry.state == EntryState.PAUSED)
+        btnPlayBig.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
 
         GlideApp.with(this@PlayerFragment)
                 .load(entry.image)
@@ -226,6 +226,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun showTimeLabels(timeLabels: List<TimeLabel>) {
+        Timber.d("showTimeLabels: $timeLabels")
         timeLabelsAdapter.update(timeLabels)
     }
 

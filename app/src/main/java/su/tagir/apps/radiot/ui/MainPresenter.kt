@@ -38,7 +38,11 @@ class MainPresenter(private val entryRepository: EntryRepository,
     override fun observeCurrentPodcast() {
         launch {
             entryRepository.getCurrent()
-                    .collect { view?.showCurrentPodcast(it) }
+                    .collect { entry ->
+                        entry?.let {
+                            view?.showCurrentPodcast(it)
+                        }
+                    }
         }
     }
 

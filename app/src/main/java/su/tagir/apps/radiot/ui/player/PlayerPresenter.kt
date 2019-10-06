@@ -1,10 +1,9 @@
 package su.tagir.apps.radiot.ui.player
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.STREAM_URL
@@ -19,7 +18,7 @@ import su.tagir.apps.radiot.utils.startTimer
 
 class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
-                      dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
+                      private val dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
 
     private var currentPodcast: Entry? = null
         set(value) {
@@ -29,6 +28,7 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
             }
         }
 
+    @ExperimentalCoroutinesApi
     @FlowPreview
     override fun doOnAttach(view: PlayerContract.View) {
         observeCurrent()
@@ -72,13 +72,14 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
         }
     }
 
+    @ExperimentalCoroutinesApi
     @FlowPreview
     private fun observeCurrent() {
         launch {
             entryRepository
                     .getCurrent()
                     .onEach { entry -> currentPodcast = entry }
-                    .flatMapConcat{ entry -> entryRepository.getTimeLabels(entry) }
+                    .transform<Entry?, List<TimeLabel>>{ entry -> entryRepository.getTimeLabels(entry) }
                     .collect{labels -> view?.showTimeLabels(labels)}
         }
     }

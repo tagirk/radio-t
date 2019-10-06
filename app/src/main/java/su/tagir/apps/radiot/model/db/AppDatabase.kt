@@ -1,7 +1,12 @@
 package su.tagir.apps.radiot.model.db
 
+import android.content.Context
+
 import android.text.TextUtils
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.squareup.sqldelight.ColumnAdapter
+import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import org.json.JSONArray
 import org.json.JSONObject
@@ -9,6 +14,24 @@ import su.tagir.apps.radiot.model.entities.*
 import su.tagir.apps.radiot.model.entries.Mention
 import su.tagir.apps.radiot.model.entries.Url
 import java.util.*
+
+fun sqlOpenHelperConfiguration(context: Context): SupportSQLiteOpenHelper.Configuration{
+    return SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name("radiot.db")
+            .callback(object : SupportSQLiteOpenHelper.Callback(1){
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    val driver = AndroidSqliteDriver(db)
+                    Schema.create(driver)
+                }
+
+                override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                    val driver = AndroidSqliteDriver(db)
+                    Schema.migrate(driver, oldVersion, newVersion)
+                }
+
+            })
+            .build()
+}
 
 fun createQueryWrapper(driver: SqlDriver): RadiotDb {
     return RadiotDb.invoke(
@@ -32,6 +55,11 @@ object Schema : SqlDriver.Schema by RadiotDb.Schema {
     override fun create(driver: SqlDriver) {
         RadiotDb.Schema.create(driver)
     }
+
+    override fun migrate(driver: SqlDriver, oldVersion: Int, newVersion: Int) {
+
+    }
+
 }
 
 val dateAdapter = object : ColumnAdapter<Date, Long> {

@@ -7,7 +7,7 @@ import su.tagir.apps.radiot.model.entries.TimeLabel
 
 interface EntryRepository {
 
-    fun getCurrent(): Flow<Entry>
+    fun getCurrent(): Flow<Entry?>
 
     fun getTimeLabels(entry: Entry?): Flow<List<TimeLabel>>
 

@@ -5,6 +5,7 @@ import android.text.TextUtils
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -32,8 +33,8 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     private val pageResultQueries = database.pageResultQueries
     private val searchResultQueries = database.searchResultQueries
 
-    override fun getCurrent(): Flow<Entry> =
-            entryQueries.findCurrentPlaying(mapper = entryMapper).asFlow().mapToOne()
+    override fun getCurrent(): Flow<Entry?> =
+            entryQueries.findCurrentPlaying(mapper = entryMapper).asFlow().mapToOneOrNull()
 
     override fun getTimeLabels(entry: Entry?): Flow<List<TimeLabel>> =
             timeLabelQueries.findByPodcastTime(entry?.date, mapper = timeLabelMapper).asFlow().mapToList()

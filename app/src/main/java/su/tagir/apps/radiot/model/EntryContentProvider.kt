@@ -1,13 +1,15 @@
 package su.tagir.apps.radiot.model
 
+import android.annotation.SuppressLint
 import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
 import android.net.Uri
+import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import dagger.android.AndroidInjection
-import su.tagir.apps.radiot.model.db.RadiotDb
-import javax.inject.Inject
+import su.tagir.apps.radiot.model.db.sqlOpenHelperConfiguration
 
 class EntryContentProvider : ContentProvider() {
 
@@ -25,10 +27,10 @@ class EntryContentProvider : ContentProvider() {
         }
     }
 
-    @Inject
-    lateinit var database: RadiotDb
+    private lateinit var sqlHelper: SupportSQLiteOpenHelper
 
     override fun onCreate(): Boolean {
+        sqlHelper = FrameworkSQLiteOpenHelperFactory().create(sqlOpenHelperConfiguration(context!!))
         return false
     }
 
@@ -36,12 +38,12 @@ class EntryContentProvider : ContentProvider() {
         throw UnsupportedOperationException("insert not implemented")
     }
 
+    @SuppressLint("Recycle")
     override fun query(p0: Uri, p1: Array<out String>?, p2: String?, p3: Array<out String>?, p4: String?): Cursor {
         AndroidInjection.inject(this)
         val cursor = when (uriMatcher.match(p0)) {
             CURRENT_ENTRY -> {
-                 database.entryQueries.findCurrentPlaying().execute() as Cursor
-
+                sqlHelper.readableDatabase.query("SELECT * FROM entry WHERE state = 1 OR state = 2 LIMIT 1")
             }
             else -> throw IllegalArgumentException("Unknown uri: $p0")
         }
