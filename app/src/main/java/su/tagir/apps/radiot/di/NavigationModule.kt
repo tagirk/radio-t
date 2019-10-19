@@ -1,22 +1,24 @@
 package su.tagir.apps.radiot.di
 
-import dagger.Module
-import dagger.Provides
 import ru.terrakok.cicerone.Cicerone
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.Router
-import javax.inject.Singleton
 
-@Module
-class NavigationModule {
+interface NavigationModule {
 
-    val cicerone: Cicerone<Router> = Cicerone.create()
+    val cicerone: Cicerone<Router>
 
-    @Provides
-    @Singleton
-    fun provideRouter(): Router = cicerone.router
+    val router: Router
 
-    @Provides
-    @Singleton
-    fun provideNavigatorHolder(): NavigatorHolder = cicerone.navigatorHolder
+    val navigatorHolder: NavigatorHolder
+
+    class Impl: NavigationModule {
+
+        override val cicerone: Cicerone<Router> by lazy { Cicerone.create() }
+
+        override val router : Router = cicerone.router
+
+        override val navigatorHolder: NavigatorHolder = cicerone.navigatorHolder
+
+    }
 }

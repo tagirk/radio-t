@@ -2,19 +2,22 @@ package su.tagir.apps.radiot.model.repository
 
 import android.app.Application
 import android.text.TextUtils
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import com.squareup.sqldelight.runtime.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.invoke
 import su.tagir.apps.radiot.model.api.RemarkClient
 import su.tagir.apps.radiot.model.api.RestClient
 import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.entries.*
+import su.tagir.apps.radiot.model.parser.PiratesParser
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.utils.timeOfDay
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -22,7 +25,8 @@ class EntryRepositoryImpl(private val restClient: RestClient,
                           private val remarkClient: RemarkClient,
                           private val database: RadiotDb,
                           private val downloadManager: DownloadManager,
-                          private val application: Application) : EntryRepository {
+                          private val application: Application,
+                          private val dispatcher: CoroutineDispatcher = Dispatchers.Default) : EntryRepository {
 
     companion object {
         const val PAGE_SIZE = 20
@@ -34,59 +38,58 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     private val searchResultQueries = database.searchResultQueries
 
     override fun getCurrent(): Flow<Entry?> =
-            entryQueries.findCurrentPlaying(mapper = entryMapper).asFlow().mapToOneOrNull()
+            entryQueries.findCurrentPlaying(mapper = entryMapper).asFlow().mapToOneOrNull(dispatcher)
 
     override fun getTimeLabels(entry: Entry?): Flow<List<TimeLabel>> =
-            timeLabelQueries.findByPodcastTime(entry?.date, mapper = timeLabelMapper).asFlow().mapToList()
+            timeLabelQueries.findByPodcastTime(entry?.date, mapper = timeLabelMapper).asFlow().mapToList(dispatcher)
 
 
+    @ExperimentalCoroutinesApi
     override suspend fun refreshPodcasts() {
         val podcasts = restClient.getPosts(PAGE_SIZE, "podcast")
         val commentsCount = remarkClient.getCommentsCount(urls = podcasts.map { it.url })
-        database.transaction {
-            insertRTEntries(podcasts)
-            commentsCount.forEach { info ->
-                entryQueries.updateCommentsCount(info.count, info.url)
+        dispatcher {
+            database.transaction {
+                insertRTEntries(podcasts)
+                commentsCount.forEach { info ->
+                    entryQueries.updateCommentsCount(info.count, info.url)
+                }
             }
         }
-
     }
 
 
+    @ExperimentalCoroutinesApi
     override suspend fun refreshPirates() {
-//        return Single.create(SingleOnSubscribe<List<RTEntry>> { emitter ->
-//            try {
-//                val connection = URL("https://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
-//                connection.requestMethod = "GET"
-//                connection.addRequestProperty("Accept", "application/xml")
-//                connection.doInput = true
-//                connection.connect()
-//                val podcasts = PiratesParser.parsePirates(connection.inputStream)
-//                if (!emitter.isDisposed) {
-//                    emitter.onSuccess(podcasts)
-//                }
-//            } catch (e: Exception) {
-//                Timber.e(e)
-//                if (!emitter.isDisposed) {
-//                    emitter.onError(e)
-//                }
-//            }
-//        })
-//                .doOnSuccess { entryDao.saveRadioTEntries(it) }
-//                .ignoreElement()
+        dispatcher.invoke {
+            val connection = URL("https://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.addRequestProperty("Accept", "application/xml")
+            connection.doInput = true
+            connection.connect()
+            val podcasts = PiratesParser.parsePirates(connection.inputStream)
+            insertRTEntries(podcasts)
+        }
     }
 
-    override fun getEntries(vararg categories: String): Flow<List<Entry>> =
-            entryQueries.findByCategories(categories.asList(), entryMapper).asFlow().mapToList()
+    override fun getEntries(vararg categories: String): Flow<List<Entry>> {
+        val list = categories.map { s -> listOf(s) }
+        return entryQueries.findByCategories(list, entryMapper).asFlow().mapToList(dispatcher)
+    }
 
 
-    override fun getDownloadedEntries(vararg categories: String): Flow<List<Entry>> =
-            entryQueries.findDownloadedByCategories(categories.asList(), mapper = entryMapper).asFlow().mapToList()
+    override fun getDownloadedEntries(vararg categories: String): Flow<List<Entry>> {
+        val list = categories.map { s -> listOf(s) }
+        return entryQueries.findDownloadedByCategories(list, mapper = entryMapper).asFlow().mapToList(dispatcher)
+    }
 
+    @ExperimentalCoroutinesApi
     override suspend fun refreshNews() {
         val news = restClient.getPosts(PAGE_SIZE, "news,info")
-        database.transaction {
-            insertRTEntries(news)
+        dispatcher {
+            database.transaction {
+                insertRTEntries(news)
+            }
         }
     }
 
@@ -98,38 +101,48 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         }
     }
 
+    @ExperimentalCoroutinesApi
     override suspend fun searchNextPage(query: String, skip: Int): Boolean {
         val entries = restClient.search(query, skip, PAGE_SIZE)
-        database.transaction {
-            mergeAndSaveSearchResult(query, entries)
+        return dispatcher {
+            database.transaction {
+                mergeAndSaveSearchResult(query, entries)
+            }
+            entries.isNotEmpty()
         }
-        return entries.isNotEmpty()
     }
 
 
     override fun getRecentSearches(): Flow<List<String>> =
-            searchResultQueries.findRecentSearches().asFlow().mapToList()
+            searchResultQueries.findRecentSearches().asFlow().mapToList(dispatcher)
 
 
     @ExperimentalCoroutinesApi
     override fun getForQuery(query: String): Flow<List<Entry>> =
             searchResultQueries.findByQuery(query, searchResultMapper)
                     .asFlow()
-                    .mapToOne()
+                    .mapToOneOrDefault(SearchResult(query, emptyList(),Date()))
                     .flatMapLatest { result ->
                         val idsStr = "'${TextUtils.join("','", result.ids)}'"
-                        entryQueries.findByIds(idsStr, entryMapper).asFlow().mapToList()
+                        entryQueries.findByIds(idsStr, entryMapper).asFlow().mapToList(dispatcher)
                     }
 
+    @ExperimentalCoroutinesApi
     override suspend fun removeQuery(query: String) {
-        pageResultQueries.removeQuery(query)
+        dispatcher {
+            pageResultQueries.removeQuery(query)
+        }
     }
 
+    @ExperimentalCoroutinesApi
     override suspend fun startDownload(url: String?) {
         val downloadId = downloadManager.startDownload(url)
-        entryQueries.updateDownloadId(downloadId, url)
+        dispatcher {
+            entryQueries.updateDownloadId(downloadId, url)
+        }
     }
 
+    @ExperimentalCoroutinesApi
     override suspend fun checkDownloadStatus() {
         val ids = entryQueries.selectDownloadIds().executeAsList().toMutableList()
         if (ids.isEmpty()) {
@@ -139,26 +152,30 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         val fileNames = HashMap<Long, String>()
         downloadManager.checkDownloadStatus(ids, downloadProgressMap, fileNames)
 
+        dispatcher {
+            database.transaction {
+                ids.forEach { id ->
+                    entryQueries.resetDownloadProgress(id)
+                }
 
-        database.transaction {
-            ids.forEach { id ->
-                entryQueries.resetDownloadProgress(id)
+                downloadProgressMap.forEach {
+                    entryQueries.updateDownloadProgress(it.value, it.key)
+                }
+
+                fileNames
+                        .forEach {
+                            entryQueries.saveFilePath(it.value, it.key)
+                        }
             }
-
-            downloadProgressMap.forEach {
-                entryQueries.updateDownloadProgress(it.value, it.key)
-            }
-
-            fileNames
-                    .forEach {
-                        entryQueries.saveFilePath(it.value, it.key)
-                    }
         }
     }
 
+    @ExperimentalCoroutinesApi
     override suspend fun deleteFile(id: Long) {
         downloadManager.delete(id)
-        entryQueries.deleteFilePath(id)
+        dispatcher {
+            entryQueries.deleteFilePath(id)
+        }
     }
 
     override fun play(podcast: Entry) {
@@ -173,11 +190,14 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         AudioService.resume(application)
     }
 
+    @ExperimentalCoroutinesApi
     override suspend fun playStream(url: String) {
-        database.transaction {
-            entryQueries.resetStates(EntryState.IDLE, EntryState.IDLE)
-            val streamEntry = Entry(url = url, title = "Online вещание", audioUrl = url, state = EntryState.PAUSED, categories = listOf("online_stream"))
-            streamEntry.insert(entryQueries)
+        dispatcher {
+            database.transaction {
+                entryQueries.resetStates(EntryState.IDLE, EntryState.IDLE)
+                val streamEntry = Entry(url = url, title = "Online вещание", audioUrl = url, state = EntryState.PAUSED, categories = listOf("online_stream"))
+                streamEntry.insert(entryQueries)
+            }
         }
         AudioService.play(null, url, 0L, application)
     }

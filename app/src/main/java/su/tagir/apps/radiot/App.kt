@@ -1,9 +1,6 @@
 package su.tagir.apps.radiot
 
-import android.app.Activity
 import android.app.Application
-import android.app.Service
-import android.content.ContentProvider
 import android.content.SharedPreferences
 import android.os.Build
 import android.util.Log
@@ -12,40 +9,18 @@ import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
 import com.facebook.stetho.Stetho
-import com.google.crypto.tink.config.TinkConfig
 import com.squareup.leakcanary.LeakCanary
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
-import dagger.android.HasContentProviderInjector
-import dagger.android.HasServiceInjector
 import io.fabric.sdk.android.Fabric
 import saschpe.android.customtabs.CustomTabsActivityLifecycleCallbacks
 import su.tagir.apps.radiot.di.AppComponent
-import su.tagir.apps.radiot.di.AppInjector
+import su.tagir.apps.radiot.di.AppModule
+import su.tagir.apps.radiot.di.DataModule
+import su.tagir.apps.radiot.di.NavigationModule
 import su.tagir.apps.radiot.ui.notification.createNotificationsChannels
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
 import timber.log.Timber
-import java.security.GeneralSecurityException
-import javax.inject.Inject
 
-class App : Application(),
-        HasActivityInjector,
-        HasServiceInjector,
-        HasContentProviderInjector {
-
-    @Inject
-    lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
-
-    @Inject
-    lateinit var dispatchingServiceInjector: DispatchingAndroidInjector<Service>
-
-    @Inject
-    lateinit var dispatchContentProviderInjector: DispatchingAndroidInjector<ContentProvider>
-
-
-    override fun activityInjector() = dispatchingActivityInjector
-    override fun serviceInjector() = dispatchingServiceInjector
-    override fun contentProviderInjector() = dispatchContentProviderInjector
+class App : Application() {
 
     lateinit var appComponent: AppComponent
         private set
@@ -58,9 +33,9 @@ class App : Application(),
         }
         LeakCanary.install(this)
 
-        initTink()
-
-        appComponent = AppInjector.inject(this)
+        appComponent = AppComponent.Impl(appModule = AppModule.Impl(this),
+                dataModule = DataModule.Impl(this),
+                navigationModule = NavigationModule.Impl())
 
 //        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
@@ -75,7 +50,7 @@ class App : Application(),
     }
 
     private fun setNightMode() {
-        val prefs = appComponent.preferences()
+        val prefs = appComponent.preferences
         val modes = resources.getStringArray(R.array.night_mode)
         val mode = prefs.getString(SettingsFragment.KEY_NIGHT_MODE, modes[0])
         when (mode) {
@@ -86,13 +61,6 @@ class App : Application(),
 
     }
 
-    private fun initTink() {
-        try {
-            TinkConfig.register()
-        } catch (e: GeneralSecurityException) {
-            throw RuntimeException(e)
-        }
-    }
 
     private fun initTools() {
 

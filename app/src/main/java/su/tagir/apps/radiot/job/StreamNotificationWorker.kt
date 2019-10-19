@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 class StreamNotificationWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
 
     override fun doWork(): Result {
-        val prefs = (applicationContext as App).appComponent.preferences()
+        val prefs = (applicationContext as App).appComponent.preferences
 
         val showNotification = prefs.getBoolean(SettingsFragment.KEY_NOTIF_STREAM, false)
 

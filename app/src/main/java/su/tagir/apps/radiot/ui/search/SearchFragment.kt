@@ -19,33 +19,24 @@ import com.bumptech.glide.Glide
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
-import javax.inject.Inject
 
 @RuntimePermissions
 class SearchFragment :
         BaseMvpListFragment<Entry, SearchContract.View, SearchContract.Presenter>(),
         SearchContract.View,
         RecentQueriesAdapter.Callback,
-        Injectable,
         ItemTouchHelper.Callback,
         EntriesAdapter.Callback {
-
-    @Inject
-    lateinit var entryRepository: EntryRepository
-
-    @Inject
-    lateinit var router: Router
 
     private lateinit var recentQueries: RecyclerView
 
@@ -131,8 +122,10 @@ class SearchFragment :
         }
     }
 
-    override fun createPresenter(): SearchContract.Presenter =
-            SearchPresenter(entryRepository, router)
+    override fun createPresenter(): SearchContract.Presenter {
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return SearchPresenter(appComponent.entryRepository, appComponent.router)
+    }
 
     override fun showDownloadError(error: String?) {
         context?.let { c ->

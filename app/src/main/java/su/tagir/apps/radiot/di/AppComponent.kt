@@ -1,34 +1,19 @@
 package su.tagir.apps.radiot.di
 
-import android.app.Application
-import android.content.SharedPreferences
-import dagger.BindsInstance
-import dagger.Component
-import dagger.android.support.AndroidSupportInjectionModule
-import su.tagir.apps.radiot.App
-import javax.inject.Singleton
 
-@Singleton
-@Component(modules =
-[AndroidSupportInjectionModule::class,
-    AppModule::class,
-    DbModule::class,
-    ActivityModule::class,
-    ServiceModule::class,
-    NavigationModule::class])
+interface AppComponent : AppModule, DataModule, NavigationModule {
 
-interface AppComponent {
+    val appModule: AppModule
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
+    val dataModule: DataModule
 
-        fun build(): AppComponent
-    }
+    val navigationModule: NavigationModule
 
-    fun inject(app: App)
-
-    fun preferences(): SharedPreferences
-
+    class Impl(override val appModule: AppModule,
+               override val dataModule: DataModule,
+               override val navigationModule: NavigationModule) :
+            AppComponent,
+            AppModule by appModule,
+            DataModule by dataModule,
+            NavigationModule by navigationModule
 }

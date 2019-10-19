@@ -10,27 +10,20 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.support.HasSupportFragmentInjector
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.commands.Command
 import ru.terrakok.cicerone.commands.Forward
 import saschpe.android.customtabs.CustomTabsHelper
 import saschpe.android.customtabs.WebViewFallback
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
-import su.tagir.apps.radiot.di.Injectable
-import javax.inject.Inject
 
-class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable {
+class ChatActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
-
-    @Inject
     lateinit var navigatorHolder: NavigatorHolder
+        private set
 
     private val currentFragment
         get() = supportFragmentManager.findFragmentById(R.id.fragment_container)
@@ -39,6 +32,9 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+
+        navigatorHolder = (application as App).appComponent.navigatorHolder
+
         initStartFragment()
 
     }
@@ -52,10 +48,6 @@ class ChatActivity : AppCompatActivity(), HasSupportFragmentInjector, Injectable
     override fun onPause() {
         navigatorHolder.removeNavigator()
         super.onPause()
-    }
-
-    override fun supportFragmentInjector(): AndroidInjector<Fragment> {
-        return dispatchingAndroidInjector
     }
 
     private fun initStartFragment() {

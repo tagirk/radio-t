@@ -1,7 +1,6 @@
 package su.tagir.apps.radiot.service;
 
 import su.tagir.apps.radiot.service.IAudioServiceCallback;
-import su.tagir.apps.radiot.model.entries.Progress;
 
 interface IAudioService {
 
@@ -13,7 +12,7 @@ interface IAudioService {
 
     void onActivityStopped();
 
-    void getProgress(out Progress state);
+    void requestProgress();
 
     void seekTo(long secs);
 }

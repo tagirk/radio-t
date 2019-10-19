@@ -3,26 +3,17 @@ package su.tagir.apps.radiot.ui.podcasts.downloaded
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
-import javax.inject.Inject
 
 class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsContract.View, DownloadedPodcastsContract.Presenter>(),
         DownloadedPodcastsContract.View,
-        EntriesAdapter.Callback,
-        Injectable {
-
-    @Inject
-    lateinit var entryRepository: EntryRepository
-
-    @Inject
-    lateinit var router: Router
+        EntriesAdapter.Callback{
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -30,7 +21,8 @@ class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsC
     }
 
     override fun createPresenter(): DownloadedPodcastsContract.Presenter {
-        return DownloadedPodcastsPresenter(entryRepository, router)
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return DownloadedPodcastsPresenter(appComponent.entryRepository, appComponent.router)
     }
 
 

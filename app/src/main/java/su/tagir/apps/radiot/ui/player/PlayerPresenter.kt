@@ -1,10 +1,10 @@
 package su.tagir.apps.radiot.ui.player
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.transform
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
@@ -14,7 +14,6 @@ import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
-import su.tagir.apps.radiot.utils.startTimer
 
 class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
@@ -67,8 +66,8 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun seekTo(timeLabel: TimeLabel) {
-        timeLabel.time?.let{time ->
-            view?.seekTo(time/1000)
+        timeLabel.time?.let { time ->
+            view?.seekTo(time / 1000)
         }
     }
 
@@ -79,14 +78,19 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
             entryRepository
                     .getCurrent()
                     .onEach { entry -> currentPodcast = entry }
-                    .transform<Entry?, List<TimeLabel>>{ entry -> entryRepository.getTimeLabels(entry) }
-                    .collect{labels -> view?.showTimeLabels(labels)}
+                    .transform<Entry?, List<TimeLabel>> { entry -> entryRepository.getTimeLabels(entry) }
+                    .collect { labels -> view?.showTimeLabels(labels) }
         }
     }
 
     private fun startUpdateProgress() {
         launch {
-            startTimer(delayMillis = 0L, repeatMillis = 1000L) { view?.requestProgress() }
+            flow {
+                while (true) {
+                    emit(1)
+                    delay(1000L)
+                }
+            }.collect { view?.requestProgress() }
         }
     }
 }

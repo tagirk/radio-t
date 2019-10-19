@@ -11,22 +11,22 @@ class GitterAuthHolder(private val prefs: SharedPreferences) : AuthHolder {
 
     private var sessionListener: SessionListener? = null
 
-    override var accessToken: String
-        get() = prefs.getString(KEY_GITTER_ACCESS_TOKEN, "initial_token")!!
-        set(value) = prefs.edit().putString(KEY_GITTER_ACCESS_TOKEN, value).apply()
+    override var accessToken: String?
+        get() = prefs.getString(KEY_GITTER_ACCESS_TOKEN, null)
+        set(value) = prefs.modify(true) { putString(KEY_GITTER_ACCESS_TOKEN, value) }
 
     override var tokenType: String?
         get() = prefs.getString(KEY_GITTER_TOKEN_TYPE, null)
-        set(value) = prefs.modify { putString(KEY_GITTER_TOKEN_TYPE, value) }
+        set(value) = prefs.modify(true) { putString(KEY_GITTER_TOKEN_TYPE, value) }
 
     override var refreshToken: String?
         get() = prefs.getString(KEY_GITTER_REFRESH_TOKEN, null)
-        set(value) = prefs.modify { putString(KEY_GITTER_REFRESH_TOKEN, value) }
+        set(value) = prefs.modify(true) { putString(KEY_GITTER_REFRESH_TOKEN, value) }
 
     override var expiresIn: Long
         get() = prefs.getLong(KEY_GITTER_TOKEN_EXPIRES_IN, 0)
         set(value) {
-            prefs.modify { putLong(KEY_GITTER_TOKEN_EXPIRES_IN, value) }
+            prefs.modify(true) { putLong(KEY_GITTER_TOKEN_EXPIRES_IN, value) }
         }
 
     override fun clear() {

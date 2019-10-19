@@ -37,8 +37,8 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
 
     override fun loadData(pullToRefresh: Boolean) {
         loadJob?.cancel()
+        state = state.copy(status = if (pullToRefresh) Status.REFRESHING else Status.LOADING)
         loadJob = launch {
-            state = state.copy(status = if (pullToRefresh) Status.REFRESHING else Status.LOADING)
             entryRepository.refreshPirates()
             state = state.copy(status = Status.SUCCESS)
         }

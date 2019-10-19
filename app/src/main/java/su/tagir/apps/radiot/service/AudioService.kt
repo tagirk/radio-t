@@ -101,10 +101,16 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             }
         }
 
-        override fun getProgress(state: Progress) {
+
+        override fun requestProgress() {
             handler.post {
-                state.duration = player?.duration?.div(1000) ?: 0L
-                state.progress = player?.currentPosition?.div(1000) ?: 0L
+                val duration = player?.duration?.div(1000) ?: 0L
+                val progress = player?.currentPosition?.div(1000) ?: 0L
+                val n = callbackList.beginBroadcast()
+                for (i in 0 until n) {
+                    callbackList.getBroadcastItem(i).progress(Progress(duration, progress))
+                }
+                callbackList.finishBroadcast()
             }
         }
 

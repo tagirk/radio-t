@@ -12,24 +12,22 @@ import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import androidx.work.WorkManager
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.extensions.modify
 import su.tagir.apps.radiot.job.StreamNotificationWorker
-import javax.inject.Inject
 
-class SettingsFragmentRoot: Fragment(), Injectable{
-
-    @Inject
-    lateinit var router: Router
-
+class SettingsFragmentRoot: Fragment(){
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+
         val v = inflater.inflate(R.layout.fragment_toolbar, container, false)
         val toolbar = v.findViewById<Toolbar>(R.id.toolbar)
 
-        toolbar.setNavigationOnClickListener { router.exit() }
+        toolbar.setNavigationOnClickListener { appComponent.router.exit() }
         toolbar.setTitle(R.string.settings)
 
         if (childFragmentManager.findFragmentById(R.id.container) == null){
@@ -43,7 +41,7 @@ class SettingsFragmentRoot: Fragment(), Injectable{
     }
 }
 
-class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener, Injectable {
+class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
         const val KEY_NOTIF_STREAM = "stream_notification"
@@ -51,11 +49,14 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         const val KEY_NIGHT_MODE = "night_mode"
     }
 
-    @Inject
-    lateinit var prefs: SharedPreferences
+
+    private lateinit var prefs: SharedPreferences
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
+
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        prefs = appComponent.preferences
     }
 
     override fun onResume() {

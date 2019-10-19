@@ -20,22 +20,19 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.support.HasSupportFragmentInjector
 import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.Router
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.commands.Command
 import ru.terrakok.cicerone.commands.Forward
 import saschpe.android.customtabs.CustomTabsHelper
 import saschpe.android.customtabs.WebViewFallback
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
-import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpActivity
 import su.tagir.apps.radiot.ui.news.NewsFragment
@@ -46,27 +43,12 @@ import su.tagir.apps.radiot.ui.podcasts.PodcastsTabsFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
-import javax.inject.Inject
 
 class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View,
-        HasSupportFragmentInjector,
         View.OnClickListener,
-        FragmentsInteractionListener,
-        Injectable {
+        FragmentsInteractionListener {
 
-
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
-
-    @Inject
-    lateinit var navigatorHolder: NavigatorHolder
-
-    @Inject
-    lateinit var router: Router
-
-    @Inject
-    lateinit var entryRepository: EntryRepository
-
+    private lateinit var navigatorHolder: NavigatorHolder
     private lateinit var bottomSheet: ViewGroup
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var drawerLayout: DrawerLayout
@@ -87,6 +69,8 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        navigatorHolder = (application as App).appComponent.navigatorHolder
+
         bottomSheet = findViewById(R.id.bottom_sheet)
         fragmentContainer = findViewById(R.id.fragment_container)
         drawerLayout = findViewById(R.id.drawer_layout)
@@ -105,7 +89,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         }
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        bottomSheetBehavior.bottomSheetCallback = BottomSheetCallback()
+        bottomSheetBehavior.addBottomSheetCallback(BottomSheetCallback())
 
         initMainScreen()
         initBottomSheet()
@@ -143,8 +127,6 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
             else -> super.onBackPressed()
         }
     }
-
-    override fun supportFragmentInjector() = dispatchingAndroidInjector
 
     override fun onClick(v: View?) {
         drawerLayout.closeDrawer(GravityCompat.START)
@@ -192,8 +174,13 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         showHideBtnStream(entry.url == STREAM_URL && entry.state == PLAYING)
     }
 
-    override fun createPresenter(): MainContract.Presenter =
-            MainPresenter(entryRepository, router)
+    override fun createPresenter(): MainContract.Presenter {
+        val appComponent: AppComponent = (application as App).appComponent
+        val entryRepository = appComponent.entryRepository
+        val router = appComponent.router
+        return MainPresenter(entryRepository, router)
+    }
+
 
     override fun showTime(time: String) {
         timeLeft.text = time

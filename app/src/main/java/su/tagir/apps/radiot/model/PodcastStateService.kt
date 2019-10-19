@@ -3,11 +3,10 @@ package su.tagir.apps.radiot.model
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import dagger.android.AndroidInjection
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.service.AudioService
-import javax.inject.Inject
 
 class PodcastStateService : IntentService("EntryStateService") {
 
@@ -42,12 +41,11 @@ class PodcastStateService : IntentService("EntryStateService") {
     }
 
 
-    @Inject
-    internal lateinit var entryRepository: EntryRepository
+    private lateinit var entryRepository: EntryRepository
 
     override fun onCreate() {
         super.onCreate()
-        AndroidInjection.inject(this)
+        entryRepository = (application as App).appComponent.entryRepository
     }
 
     override fun onHandleIntent(intent: Intent?) {

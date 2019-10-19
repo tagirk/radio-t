@@ -87,7 +87,7 @@ val mentionsAdapter = object : ColumnAdapter<List<Mention>, String> {
         val list = ArrayList<Mention>(array.length())
         for (i in 0 until array.length()) {
             val obj = array[i] as JSONObject
-            val ids = if (obj.has("ids")) obj.getString("ids")?.split(",") else null
+            val ids = if (obj.has("ids")) obj.getString("ids").split(",") else null
             val screenName = if (obj.has("screenName")) obj.getString("screenName") else null
             val userId = if (obj.has("userId")) obj.getString("userId") else null
             val mention = Mention(screenName = screenName, userId = userId, userIds = ids)

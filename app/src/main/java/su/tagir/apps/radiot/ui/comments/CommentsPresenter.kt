@@ -6,14 +6,14 @@ import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Node
-import su.tagir.apps.radiot.model.repository.CommentsRepositoryImpl
+import su.tagir.apps.radiot.model.repository.CommentsRepository
 import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
 import timber.log.Timber
 
 class CommentsPresenter(private val postUrl: String,
-                        private val commentsRepository: CommentsRepositoryImpl,
+                        private val commentsRepository: CommentsRepository,
                         private val router: Router,
                         val dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Node, CommentsContract.View>(dispatcher), CommentsContract.Presenter {
 

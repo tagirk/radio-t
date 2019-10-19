@@ -24,32 +24,23 @@ import io.noties.markwon.html.HtmlPlugin
 import io.noties.markwon.image.ImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
 import io.noties.markwon.utils.NoCopySpannableFactory
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.Node
-import su.tagir.apps.radiot.model.repository.CommentsRepositoryImpl
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.utils.BetterLinkMovementMethod
 import su.tagir.apps.radiot.utils.visibleGone
-import javax.inject.Inject
 
 class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(),
         CommentsContract.View,
-        Toolbar.OnMenuItemClickListener,
-        Injectable {
-
-    @Inject
-    lateinit var commentsRepository: CommentsRepositoryImpl
-
-    @Inject
-    lateinit var router: Router
+        Toolbar.OnMenuItemClickListener{
 
     private var interactionListener: FragmentsInteractionListener? = null
 
@@ -89,7 +80,8 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
     override fun createPresenter(): CommentsContract.Presenter {
         val postUrl = arguments!!.getString("url")!!
-        return CommentsPresenter(postUrl, commentsRepository, router)
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return CommentsPresenter(postUrl, appComponent.commentsRepository, appComponent.router)
     }
 
 

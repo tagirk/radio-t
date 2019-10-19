@@ -45,7 +45,7 @@ class ArticlesPresenter(private val newsRepository: NewsRepository,
         loadJob?.cancel()
         loadJob = launch {
             state = if (pullToRefresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING)
-            newsRepository.updateActiveArticle()
+            newsRepository.updateArticles()
             state = state.copy(status = Status.SUCCESS)
         }
     }

@@ -2,10 +2,6 @@ package su.tagir.apps.radiot.model.api;
 
 import androidx.annotation.Nullable;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
-
 import okhttp3.Authenticator;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -22,17 +18,18 @@ public class ApiAuthenticator  implements Authenticator {
 
     @Nullable
     @Override
-    public synchronized Request authenticate(@NotNull Route route, Response response) throws IOException {
+    public synchronized Request authenticate(Route route, Response response) {
         String storedToken = authHolder.getAccessToken();
         String authHeader = authHolder.getAuthHeader();
         String requestToken = response.request().header(authHeader);
 
-        Request.Builder requestBuilder = response.request().newBuilder();
 
-        if (storedToken.equals(requestToken)) {
+
+        if (storedToken == null || storedToken.equals(requestToken)) {
             authHolder.refresh();
+            return null;
         }
-
+        Request.Builder requestBuilder = response.request().newBuilder();
         return buildRequest(requestBuilder);
     }
 

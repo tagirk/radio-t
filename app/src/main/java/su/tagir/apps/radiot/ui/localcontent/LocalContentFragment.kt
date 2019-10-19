@@ -8,24 +8,14 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
-import javax.inject.Inject
 
 class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalContentContract.Presenter>(),
-        LocalContentContract.View,
-        Injectable {
-
-    @Inject
-    lateinit var entryRepository: EntryRepository
-
-    @Inject
-    lateinit var router: Router
+        LocalContentContract.View{
 
     lateinit var webView: WebView
 
@@ -66,8 +56,14 @@ class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalCon
 
     }
 
-    override fun createPresenter(): LocalContentContract.Presenter =
-            LocalContentPresenter(arguments!!.getString("entry_id")!!, entryRepository, router)
+    override fun createPresenter(): LocalContentContract.Presenter {
+
+        val appComponent = (activity!!.application as App).appComponent
+
+        return LocalContentPresenter(arguments!!.getString("entry_id")!!,
+                appComponent.entryRepository,
+                appComponent.router)
+    }
 
     override fun showContent(entry: Entry) {
         val sb = "<HTML><HEAD><LINK href=\"material.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>" +

@@ -4,21 +4,23 @@ import android.text.TextUtils
 import com.google.gson.Gson
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import kotlinx.coroutines.FlowPreview
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
 import su.tagir.apps.radiot.model.api.*
 import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.entries.*
 import su.tagir.apps.radiot.ui.chat.AuthListener
+import timber.log.Timber
 
 class ChatRepositoryImpl(private val authClient: GitterAuthClient,
                          private val streamClient: GitterStreamClient,
                          private val gitterClient: GitterClient,
                          private val database: RadiotDb,
                          private val authHolder: AuthHolder,
-                         private val gson: Gson) : ChatRepository {
+                         private val gson: Gson,
+                         private val dispatcher: CoroutineDispatcher = Dispatchers.Default) : ChatRepository {
 
     private val roomId = "5738c079c43b8c6019730ee3"
 //    private val roomId = "5a832dffd73408ce4f8d0021"
@@ -37,17 +39,25 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
         })
     }
 
+    override val isSignedIn: Boolean
+        get() = authHolder.tokenType != null && authHolder.accessToken != null
+
     override fun subcribeAuthNeeded(authListener: AuthListener) {
         this.authListener = authListener
 
     }
 
+    @ExperimentalCoroutinesApi
     override suspend fun getOAuthToken(appId: String?, appKey: String?, code: String, redirectUri: String?) {
         val token = authClient.auth(appId, appKey, code, redirectUri)
-        authHolder.accessToken = token.token
-        authHolder.tokenType = token.type
-        token.expiresIn?.let { time ->
-            authHolder.expiresIn = time
+        Timber.d("token: $token")
+        dispatcher {
+            authHolder.accessToken = token.token
+            authHolder.tokenType = token.type
+            token.expiresIn?.let { time ->
+                authHolder.expiresIn = time
+            }
+            Timber.d("authHolder: ${authHolder.tokenType} ${authHolder.accessToken}")
         }
     }
 
@@ -78,13 +88,16 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
     }
 
 
+    @ExperimentalCoroutinesApi
     override suspend fun loadMessages(lastId: String?) {
         val messages = gitterClient.getRoomMessages(roomId, 50, lastId)
-        database.transaction {
-            if(lastId == null){
-                pageResultQueries.removeQuery("chat")
+        dispatcher {
+            database.transaction {
+                if (lastId == null) {
+                    pageResultQueries.removeQuery("chat")
+                }
+                mergeAndSavePageResult("chat", messages)
             }
-            mergeAndSavePageResult("chat", messages)
         }
     }
 
@@ -92,13 +105,14 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
     override fun getMessages(): Flow<List<MessageFull>> {
         return pageResultQueries.findByQuery("chat", pageResultMapper)
                 .asFlow()
-                .mapToOne()
+                .mapToOneOrDefault(PageResult("chat", emptyList(), 0), dispatcher)
                 .flatMapConcat { page ->
+                    Timber.d("page: $page")
                     val idsStr = "'${TextUtils.join("','", page.ids)}'"
                     messageQueries
                         .findByIdWithUser(idsStr, messageMapper)
                         .asFlow()
-                        .mapToList()}
+                        .mapToList(dispatcher)}
     }
 
 //    private fun events(source: BufferedSource): Flowable<String?> {

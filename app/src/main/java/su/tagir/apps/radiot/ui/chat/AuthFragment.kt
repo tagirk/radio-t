@@ -15,22 +15,14 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
-import su.tagir.apps.radiot.model.repository.ChatRepository
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 import su.tagir.apps.radiot.utils.visibleGone
-import javax.inject.Inject
 
-class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(), AuthContract.View, Injectable, BackClickHandler {
-
-    @Inject
-    lateinit var chatRepository: ChatRepository
-
-    @Inject
-    lateinit var router: Router
+class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(), AuthContract.View, BackClickHandler {
 
     private lateinit var webView: WebView
 
@@ -86,7 +78,12 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
 
     override fun createPresenter(): AuthContract.Presenter {
         val authParams = AuthParams(getString(R.string.oauth_key), getString(R.string.oauth_secret), getString(R.string.redirect_url), "code")
-        return AuthPresenter(authParams, chatRepository, router = router)
+
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+
+        return AuthPresenter(authParams,
+                chatRepository = appComponent.chatRepository,
+                router = appComponent.router)
     }
 
     override fun auth(url: String) {

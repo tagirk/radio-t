@@ -13,16 +13,15 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.model.entries.TimeLabel
-import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.service.IAudioService
 import su.tagir.apps.radiot.service.IAudioServiceCallback
@@ -32,22 +31,14 @@ import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 import timber.log.Timber
 import java.lang.ref.WeakReference
-import javax.inject.Inject
 import kotlin.math.max
 
 class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         PlayerContract.Presenter>(),
         PlayerContract.View,
         ServiceConnection,
-        Injectable,
         View.OnClickListener,
         TimeLabelsAdapter.Callback {
-
-    @Inject
-    lateinit var entryRepository: EntryRepository
-
-    @Inject
-    lateinit var router: Router
 
     private lateinit var btnPlay: View
     private lateinit var btnPause: View
@@ -83,6 +74,11 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
         override fun onError(error: String?) {
             val msg = requestHandler.obtainMessage(1, -1, -1, error)
+            requestHandler.sendMessage(msg)
+        }
+
+        override fun progress(progress: Progress?){
+            val msg = requestHandler.obtainMessage(2, -1, -1, progress)
             requestHandler.sendMessage(msg)
         }
     }
@@ -201,8 +197,10 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         presenter.seekTo(timeLabel)
     }
 
-    override fun createPresenter(): PlayerContract.Presenter =
-            PlayerPresenter(entryRepository, router)
+    override fun createPresenter(): PlayerContract.Presenter {
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return PlayerPresenter(appComponent.entryRepository, appComponent.router)
+    }
 
     override fun showCurrentPodcast(entry: Entry) {
         btnPause.visibleInvisible(entry.state == EntryState.PLAYING)
@@ -231,9 +229,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun requestProgress() {
-        val progress = Progress()
-        audioService?.getProgress(progress)
-        showProgress(progress)
+        audioService?.requestProgress()
     }
 
     override fun seekTo(seek: Long) {
@@ -308,6 +304,11 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
                 1 -> {
                     msg.obj?.let {error ->
                         weakRef.get()?.showError(error as String)
+                    }
+                }
+                2 -> {
+                    msg.obj?.let {progress ->
+                        weakRef.get()?.showProgress(progress as Progress)
                     }
                 }
             }

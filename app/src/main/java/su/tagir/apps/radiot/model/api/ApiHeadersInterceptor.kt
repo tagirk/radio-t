@@ -12,7 +12,7 @@ class ApiHeadersInterceptor(private val authHolder: AuthHolder) : Interceptor {
         val request = chain.request()
         val authHeader = authHolder.authHeader
         val requestBuilder = request.newBuilder()
-        if(request.header(authHeader) == null) {
+        if(request.header(authHeader) == null && authHolder.accessToken != null && authHolder.tokenType != null) {
             requestBuilder.addHeader(authHeader, "${authHolder.tokenType} ${authHolder.accessToken}")
         }
         return chain.proceed(requestBuilder.build())

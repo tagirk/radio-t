@@ -6,6 +6,8 @@ import su.tagir.apps.radiot.ui.chat.AuthListener
 
 interface ChatRepository {
 
+    val isSignedIn: Boolean
+
     fun subcribeAuthNeeded(authListener: AuthListener)
 
     suspend fun getOAuthToken(appId: String?, appKey: String?, code: String, redirectUri: String?)

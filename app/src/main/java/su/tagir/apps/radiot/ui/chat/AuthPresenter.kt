@@ -12,20 +12,20 @@ import java.net.URI
 class AuthPresenter(private val authParams: AuthParams,
                     private val chatRepository: ChatRepository,
                     dispatcher: CoroutineDispatcher = MainDispatcher(),
-                    private val router: Router): BasePresenter<AuthContract.View>(dispatcher), AuthContract.Presenter {
+                    private val router: Router) : BasePresenter<AuthContract.View>(dispatcher), AuthContract.Presenter {
 
     override fun doOnAttach(view: AuthContract.View) {
         startAuth()
     }
 
     override fun startAuth() {
-        val url =  "https://gitter.im/login/oauth/authorize?client_id=${authParams.appId}&" +
+        val url = "https://gitter.im/login/oauth/authorize?client_id=${authParams.appId}&" +
                 "response_type=${authParams.responseType}&redirect_uri=${authParams.redirectUrl}"
         view?.auth(url)
     }
 
     override fun requestToken(redirectString: String) {
-        if(redirectString.startsWith(authParams.redirectUrl)) {
+        if (redirectString.startsWith(authParams.redirectUrl)) {
             launch {
                 val code = getQueryParameterFromUri(redirectString, "code")
                 view?.showProgress(true)

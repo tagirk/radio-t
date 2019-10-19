@@ -18,30 +18,20 @@ import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.model.entries.MessageFull
-import su.tagir.apps.radiot.model.repository.ChatRepository
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.BetterLinkMovementMethod
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
-import javax.inject.Inject
 
 class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatContract.Presenter>(), ChatContract.View,
-        Injectable,
         MessagesAdapter.Callback,
         BackClickHandler {
-
-    @Inject
-    lateinit var chatRepository: ChatRepository
-
-    @Inject
-    lateinit var router: Router
 
     private lateinit var toolbar: Toolbar
 
@@ -112,8 +102,10 @@ class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatCon
         dismissKeyboard(view?.applicationWindowToken)
     }
 
-    override fun createPresenter(): ChatContract.Presenter =
-            ChatPresenter(chatRepository, router)
+    override fun createPresenter(): ChatContract.Presenter {
+        val appComponent = (activity!!.application as App).appComponent
+        return ChatPresenter(appComponent.chatRepository, appComponent.router)
+    }
 
     override fun showSendState(state: ViewState<Void>) {
         sendProgress.visibleInvisible(state.loading)

@@ -13,30 +13,23 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Article
-import su.tagir.apps.radiot.model.repository.NewsRepository
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 import su.tagir.apps.radiot.utils.shortDateFormat
-import javax.inject.Inject
 
 class ArticlesFragment : BaseMvpListFragment<Article, ArticlesContract.View, ArticlesContract.Presenter>(),
         ArticlesContract.View,
-        ArticlesAdapter.Callback,
-        Injectable {
+        ArticlesAdapter.Callback {
 
-    @Inject
-    lateinit var router: Router
-
-    @Inject
-    lateinit var newsRepository: NewsRepository
-
-    override fun createPresenter(): ArticlesContract.Presenter =
-            ArticlesPresenter(newsRepository, router)
+    override fun createPresenter(): ArticlesContract.Presenter {
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return ArticlesPresenter(appComponent.newsRepository, appComponent.router)
+    }
 
     override fun createAdapter() = ArticlesAdapter(this)
 

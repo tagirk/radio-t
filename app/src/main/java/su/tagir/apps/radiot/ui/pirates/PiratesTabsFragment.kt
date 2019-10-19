@@ -12,11 +12,10 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.pirates.downloaded.DownloadedPiratesFragment
 
-class PiratesTabsFragment: Fragment(), Injectable {
+class PiratesTabsFragment: Fragment(){
 
     private lateinit var viewPager: ViewPager
 

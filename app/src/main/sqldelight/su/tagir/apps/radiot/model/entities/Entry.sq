@@ -42,10 +42,10 @@ findByUrl:
 SELECT * FROM entry WHERE url = ? LIMIT 1;
 
 findByCategories:
-SELECT * FROM entry WHERE categories IN(?) ORDER BY date DESC;
+SELECT * FROM entry WHERE categories IN ? ORDER BY date DESC;
 
 findDownloadedByCategories:
-SELECT * FROM entry WHERE file != NULL AND categories IN(?) ORDER BY date DESC;
+SELECT * FROM entry WHERE file != NULL AND categories IN ? ORDER BY date DESC;
 
 resetStates:
 UPDATE entry SET state = ? WHERE state != ?;

@@ -1,23 +1,15 @@
 package su.tagir.apps.radiot.ui.news
 
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.GlideApp
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
-import javax.inject.Inject
 
 class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.Presenter>(),
-        NewsContract.View,
-        Injectable {
+        NewsContract.View{
 
-    @Inject
-    lateinit var router: Router
-
-    @Inject
-    lateinit var entryRepository: EntryRepository
 
     override fun createAdapter() =
             EntriesAdapter(type = EntriesAdapter.TYPE_NEWS,
@@ -38,8 +30,10 @@ class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.
                     })
 
 
-    override fun createPresenter(): NewsContract.Presenter =
-            NewsPresenter(entryRepository, router =  router)
+    override fun createPresenter(): NewsContract.Presenter {
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return NewsPresenter(appComponent.entryRepository, router = appComponent.router)
+    }
 
 
 }

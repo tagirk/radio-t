@@ -1,28 +1,24 @@
 package su.tagir.apps.radiot.ui.pirates.downloaded
 
 import androidx.appcompat.app.AlertDialog
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
-import javax.inject.Inject
 
 class DownloadedPiratesFragment :
         BaseMvpListFragment<Entry, DownloadedPiratesContract.View, DownloadedPiratesContract.Presenter>(),
         DownloadedPiratesContract.View,
-        Injectable,
         EntriesAdapter.Callback {
-
-    @Inject
-    lateinit var entryRepository: EntryRepository
 
     override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
 
     override fun createPresenter(): DownloadedPiratesContract.Presenter {
-        return DownloadedPiratesPresenter(entryRepository)
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return DownloadedPiratesPresenter(appComponent.entryRepository)
     }
 
     override fun showRemoveError(error: String?) {

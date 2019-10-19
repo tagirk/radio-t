@@ -7,24 +7,20 @@ import androidx.appcompat.app.AlertDialog
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
-import javax.inject.Inject
 
 @RuntimePermissions
 class PiratesFragment:
         BaseMvpListFragment<Entry, PiratesContract.View, PiratesContract.Presenter>(),
         PiratesContract.View,
-        Injectable,
         EntriesAdapter.Callback{
 
-    @Inject
-    lateinit var entryRepository: EntryRepository
 
     private var entryForDownload: Entry? = null
         set(value) {
@@ -35,7 +31,8 @@ class PiratesFragment:
         }
 
     override fun createPresenter(): PiratesContract.Presenter {
-        return PiratesPresenter(entryRepository)
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return PiratesPresenter(appComponent.entryRepository)
     }
 
 

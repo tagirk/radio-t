@@ -12,20 +12,16 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
-import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsFragment
-import javax.inject.Inject
 
 class PodcastsTabsFragment: Fragment(),
-        Toolbar.OnMenuItemClickListener,
-        Injectable {
+        Toolbar.OnMenuItemClickListener{
 
-    @Inject
-    lateinit var router: Router
 
     private lateinit var viewPager: ViewPager
 
@@ -68,7 +64,10 @@ class PodcastsTabsFragment: Fragment(),
 
     override fun onMenuItemClick(p0: MenuItem?): Boolean {
         when(p0?.itemId){
-            R.id.search -> router.navigateTo(Screens.SearchScreen)
+            R.id.search -> {
+                val appComponent: AppComponent = (activity!!.application as App).appComponent
+                appComponent.router.navigateTo(Screens.SearchScreen)
+            }
         }
         return false
     }

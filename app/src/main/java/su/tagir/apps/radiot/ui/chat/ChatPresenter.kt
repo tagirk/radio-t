@@ -27,6 +27,11 @@ class ChatPresenter(
         }
 
     override fun doOnAttach(view: ChatContract.View) {
+        if(!chatRepository.isSignedIn){
+            router.newRootScreen(Screens.ChatAuthScreen)
+            return
+        }
+
         chatRepository.subcribeAuthNeeded(object : AuthListener {
             override fun needAuth() {
                 router.newRootScreen(Screens.ChatAuthScreen)
