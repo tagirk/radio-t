@@ -12,6 +12,7 @@ import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
 import su.tagir.apps.radiot.ui.mvp.ViewState
+import timber.log.Timber
 
 class ChatPresenter(
         private val chatRepository: ChatRepository,
@@ -49,7 +50,9 @@ class ChatPresenter(
     override fun observeMessages() {
         launch {
             chatRepository.getMessages()
-                    .collect{list -> state = state.copy(data = list)}
+                    .collect{list ->
+                        Timber.d("messages: $list")
+                        state = state.copy(data = list)}
         }
     }
 

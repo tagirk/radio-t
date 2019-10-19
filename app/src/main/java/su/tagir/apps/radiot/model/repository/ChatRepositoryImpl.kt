@@ -1,13 +1,12 @@
 package su.tagir.apps.radiot.model.repository
 
-import android.text.TextUtils
 import com.google.gson.Gson
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 import su.tagir.apps.radiot.model.api.*
 import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.entries.*
@@ -101,16 +100,15 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
         }
     }
 
+    @ExperimentalCoroutinesApi
     @FlowPreview
     override fun getMessages(): Flow<List<MessageFull>> {
         return pageResultQueries.findByQuery("chat", pageResultMapper)
                 .asFlow()
                 .mapToOneOrDefault(PageResult("chat", emptyList(), 0), dispatcher)
-                .flatMapConcat { page ->
-                    Timber.d("page: $page")
-                    val idsStr = "'${TextUtils.join("','", page.ids)}'"
+                .flatMapLatest { page ->
                     messageQueries
-                        .findByIdWithUser(idsStr, messageMapper)
+                        .findByIdWithUser(page.ids, messageMapper)
                         .asFlow()
                         .mapToList(dispatcher)}
     }

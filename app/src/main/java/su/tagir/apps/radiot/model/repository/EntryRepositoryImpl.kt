@@ -1,7 +1,6 @@
 package su.tagir.apps.radiot.model.repository
 
 import android.app.Application
-import android.text.TextUtils
 import com.squareup.sqldelight.runtime.coroutines.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -123,8 +122,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
                     .asFlow()
                     .mapToOneOrDefault(SearchResult(query, emptyList(),Date()))
                     .flatMapLatest { result ->
-                        val idsStr = "'${TextUtils.join("','", result.ids)}'"
-                        entryQueries.findByIds(idsStr, entryMapper).asFlow().mapToList(dispatcher)
+                        entryQueries.findByIds(result.ids, entryMapper).asFlow().mapToList(dispatcher)
                     }
 
     @ExperimentalCoroutinesApi

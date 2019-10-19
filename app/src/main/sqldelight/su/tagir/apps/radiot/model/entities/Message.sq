@@ -28,4 +28,4 @@ SELECT message.*,
         user.username,
         user.displayName,
         user.avatarUrlSmall,
-        user.url AS userUrl FROM message LEFT JOIN user ON fromUserId = user.id WHERE message.id IN (?) ORDER BY sent DESC;
+        user.url AS userUrl FROM message LEFT JOIN user ON fromUserId = user.id WHERE message.id IN ? ORDER BY sent DESC;

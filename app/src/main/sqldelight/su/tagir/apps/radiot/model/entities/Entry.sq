@@ -81,4 +81,4 @@ resetDownloadProgress:
 UPDATE entry SET downloadProgress = -1, downloadId = -1 WHERE downloadId = ?;
 
 findByIds:
-SELECT * FROM entry WHERE url IN (?) ORDER BY date DESC;
+SELECT * FROM entry WHERE url IN ? ORDER BY date DESC;
