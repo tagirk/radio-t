@@ -112,6 +112,11 @@ class ChatPresenter(
     }
 
     override fun subscribeStream() {
+        launch {
+            chatRepository
+                    .getMessageStream()
+                    .collect{ }
+        }
 //        disposables += chatRepository
 //                .getMessageStream()
 //                .subscribeOn(scheduler.io())

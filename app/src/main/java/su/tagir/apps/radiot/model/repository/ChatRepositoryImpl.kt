@@ -5,24 +5,30 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import su.tagir.apps.radiot.model.api.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
+import kotlinx.coroutines.flow.*
+import okhttp3.*
+import su.tagir.apps.radiot.model.api.AuthHolder
+import su.tagir.apps.radiot.model.api.GitterAuthClient
+import su.tagir.apps.radiot.model.api.GitterClient
+import su.tagir.apps.radiot.model.api.SessionListener
 import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.entries.*
 import su.tagir.apps.radiot.ui.chat.AuthListener
 import timber.log.Timber
+import java.io.IOException
 
 class ChatRepositoryImpl(private val authClient: GitterAuthClient,
-                         private val streamClient: GitterStreamClient,
+                         private val streamClient: OkHttpClient,
                          private val gitterClient: GitterClient,
                          private val database: RadiotDb,
                          private val authHolder: AuthHolder,
                          private val gson: Gson,
                          private val dispatcher: CoroutineDispatcher = Dispatchers.Default) : ChatRepository {
 
-    private val roomId = "5738c079c43b8c6019730ee3"
-//    private val roomId = "5a832dffd73408ce4f8d0021"
+    //    private val roomId = "5738c079c43b8c6019730ee3"
+    private val roomId = "5a832dffd73408ce4f8d0021"
 
     private val messageQueries = database.messageQueries
     private val userQueries = database.userQueries
@@ -67,23 +73,61 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
     override suspend fun sendMessage(message: String) = gitterClient.sendMessage(roomId, message)
 
 
-    override suspend fun subscribeMessageStream() {
-//        val body = streamClient.getRoomMessagesStream(roomId)
-//
-//
-//        return streamClient.getRoomMessagesStream(roomId)
-//                .flatMap { responseBody -> events(responseBody.source()) }
-//                .filter { checkIfValidMessageJson(it) }
-//                .map { gson.fromJson(it, GitterMessage::class.java) }
-//                .observeOn(scheduler.io())
-//                .doOnNext { gitterDao.saveMessage(it) }
+    @ExperimentalCoroutinesApi
+    override fun getMessageStream(): Flow<GitterMessage> {
+        var responseBody: ResponseBody? = null
+        return flow {
+            val channel = Channel<String>(CONFLATED)
+            val request = Request.Builder()
+                    .url("https://stream.gitter.im/v1/rooms/$roomId/chatMessages")
+                    .addHeader(authHolder.authHeader, "${authHolder.tokenType} ${authHolder.accessToken}")
+                    .build()
+
+            val callback = object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Timber.e(e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    responseBody = response.body()
+                    responseBody?.let { body ->
+                        try {
+                            while (!body.source().exhausted()) {
+                                val text = body.source().readUtf8Line()
+                                text?.let {
+                                    channel.offer(text)
+                                }
+                            }
+                        }catch (e: Exception){
+
+                        }
+                    }
+                }
+            }
+            streamClient.newCall(request).enqueue(callback)
+            try {
+                for (item in channel) {
+                    emit(item)
+                }
+            } finally {
+                responseBody?.source()?.close()
+            }
+        }
+                .filter { json -> checkIfValidMessageJson(json) }
+                .map { json -> gson.fromJson(json, GitterMessage::class.java) }
+                .onEach { gm ->
+                    dispatcher {
+                        database.transaction {
+                            mergeAndSavePageResult("chat", listOf(gm))
+                        }
+                    }
+                }
+                .onCompletion { responseBody?.source()?.close() }
+
     }
 
     override suspend fun subscribeEventsStream() {
-//        streamClient.getRoomEventsStream(roomId)
-//                .flatMap { responseBody -> events(responseBody.source()) }
-//                .filter { checkIfValidMessageJson(it) }
-//                .map { gson.fromJson(it, Event::class.java) }
+
     }
 
 
@@ -108,9 +152,10 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
                 .mapToOneOrDefault(PageResult("chat", emptyList(), 0), dispatcher)
                 .flatMapLatest { page ->
                     messageQueries
-                        .findByIdWithUser(page.ids, messageMapper)
-                        .asFlow()
-                        .mapToList(dispatcher)}
+                            .findByIdWithUser(page.ids, messageMapper)
+                            .asFlow()
+                            .mapToList(dispatcher)
+                }
     }
 
 //    private fun events(source: BufferedSource): Flowable<String?> {

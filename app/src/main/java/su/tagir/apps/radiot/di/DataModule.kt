@@ -217,19 +217,12 @@ interface DataModule {
                     .create(GitterClient::class.java)
         }
 
-        private val gitterStreamClient: GitterStreamClient by lazy {
-            val builder = Retrofit.Builder()
-                    .baseUrl("https://stream.gitter.im/")
-                    .addConverterFactory(GsonConverterFactory.create())
-
-            val httpClient = OkHttpClient.Builder()
+        private val gitterStreamClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
                     .addNetworkInterceptor(ApiHeadersInterceptor(gitterAuthHolder))
                     .authenticator(ApiAuthenticator(gitterAuthHolder))
                     .readTimeout(10, TimeUnit.MINUTES)
-
-            builder.client(httpClient.build())
                     .build()
-                    .create(GitterStreamClient::class.java)
         }
     }
 }
