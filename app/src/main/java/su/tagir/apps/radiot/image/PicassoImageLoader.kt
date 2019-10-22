@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.image
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -13,45 +14,45 @@ import java.io.File
 object PicassoImageLoader : IImageLoader {
 
     override fun display(res: Int, imageView: ImageView, config: ImageConfig?) =
-            Picasso.get()
+            getInstance(config?.context)
                     .load(res)
                     .applyConfig(config)
                     .into(imageView)
 
     override fun display(url: String, imageView: ImageView, config: ImageConfig?) =
-            Picasso.get()
+            getInstance(config?.context)
                     .load(url)
                     .applyConfig(config)
                     .into(imageView)
 
     override fun display(file: File, imageView: ImageView, config: ImageConfig?) =
-            Picasso.get()
+            getInstance(config?.context)
                     .load(file)
                     .applyConfig(config)
                     .into(imageView)
 
     override fun display(uri: Uri, imageView: ImageView, config: ImageConfig?) =
-            Picasso.get()
+            getInstance(config?.context)
                     .load(uri)
                     .applyConfig(config).into(imageView)
 
 
     override fun load(url: String, target: Target, config: ImageConfig?) =
-            Picasso.get()
+            getInstance(config?.context)
                     .load(url)
                     .applyConfig(config)
                     .into(createPicassoTarget(target))
 
 
     override fun load(file: File, target: Target, config: ImageConfig?) =
-            Picasso.get()
+            getInstance(config?.context)
                     .load(file)
                     .applyConfig(config)
                     .into(createPicassoTarget(target))
 
 
     override fun load(uri: Uri, target: Target, config: ImageConfig?) =
-            Picasso.get()
+            getInstance(config?.context)
                     .load(uri)
                     .applyConfig(config)
                     .into(createPicassoTarget(target))
@@ -80,6 +81,12 @@ object PicassoImageLoader : IImageLoader {
                 }
 
             }
+
+    private fun getInstance(context: Context?): Picasso =
+            context?.let{ c -> Picasso
+                    .Builder(c.applicationContext)
+                    .build()
+            } ?: Picasso.get()
 
 }
 

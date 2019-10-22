@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.image
 
+import android.content.Context
 import androidx.annotation.DrawableRes
 
 class ImageConfig(@DrawableRes var placeholder: Int? = null,
@@ -20,7 +21,9 @@ class ImageConfig(@DrawableRes var placeholder: Int? = null,
 
                   var fadeIn: Int = 200,
 
-                  vararg transformations: Transformation)
+                  vararg transformations: Transformation,
+
+                  var context: Context? = null)
 
 
 

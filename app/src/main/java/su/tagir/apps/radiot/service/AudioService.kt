@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -25,6 +26,9 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.*
 import com.google.android.exoplayer2.util.Util
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.image.ImageConfig
+import su.tagir.apps.radiot.image.ImageLoader
+import su.tagir.apps.radiot.image.Target
 import su.tagir.apps.radiot.model.EntryContentProvider
 import su.tagir.apps.radiot.model.PodcastStateService
 import su.tagir.apps.radiot.model.entries.Entry
@@ -32,7 +36,6 @@ import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.ui.notification.createMediaNotification
 import timber.log.Timber
-
 
 class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
 
@@ -91,7 +94,15 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
     private var playbackDelayed = false
     private val focusLock = Any()
 
+    private var notificationIcon: Bitmap? = null
+
     private var isForeground = false
+        set(value) {
+            field = value
+            if (!value) {
+                notificationIcon = null
+            }
+        }
 
     private val service = object : IAudioService.Stub() {
         override fun seekTo(secs: Long) {
@@ -117,18 +128,23 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         override fun onActivityStarted() {
             stopForeground(true)
             isForeground = false
+
             updateState()
         }
 
         override fun onActivityStopped() {
-            if (player?.playbackState == Player.STATE_BUFFERING || player?.playbackState == Player.STATE_READY) {
-                if (player?.playWhenReady == true) {
-                    val notif = createMediaNotification(getCurrentEntry(), false, this@AudioService)
-                    startForeground(42, notif)
-                    isForeground = true
+            handler.post {
+                if (player?.playbackState == Player.STATE_BUFFERING || player?.playbackState == Player.STATE_READY) {
+                    if (player?.playWhenReady == true) {
+                        val entry = getCurrentEntry()
+                        val notif = createMediaNotification(entry, false, context = this@AudioService)
+                        startForeground(42, notif)
+                        loadImage(entry)
+                        isForeground = true
+                    }
+                } else {
+                    stopSelf()
                 }
-            } else {
-                stopSelf()
             }
         }
 
@@ -357,7 +373,11 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
 
     private fun updateNotification() {
         val notifManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val notif = createMediaNotification(getCurrentEntry(), player?.playWhenReady != true, this)
+        val entry = getCurrentEntry()
+        val notif = createMediaNotification(entry, player?.playWhenReady != true, notificationIcon, this)
+        if (notificationIcon == null) {
+            loadImage(entry)
+        }
 
         notifManager.notify(42, notif)
     }
@@ -369,6 +389,26 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             callbackList.getBroadcastItem(i).onError(error)
         }
         callbackList.finishBroadcast()
+    }
+
+    private fun loadImage(entry: Entry?) {
+        entry?.image?.let { url ->
+
+            val target = object : Target {
+
+                override fun onLoaded(bitmap: Bitmap) {
+                    notificationIcon = bitmap
+                    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    val paused = player?.playWhenReady != true
+                    val notification = createMediaNotification(entry, paused, bitmap, this@AudioService)
+                    notificationManager.notify(42, notification)
+                }
+            }
+
+            val config = ImageConfig(context = this)
+
+            ImageLoader.load(url, target, config)
+        }
     }
 
     private inner class EventsListener : Player.EventListener {
@@ -394,4 +434,5 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             }
         }
     }
+
 }

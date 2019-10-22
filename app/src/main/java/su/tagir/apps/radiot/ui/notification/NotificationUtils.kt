@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.ui.notification
 
+
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,10 +11,8 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.image.ImageConfig
-import su.tagir.apps.radiot.image.ImageLoader
-import su.tagir.apps.radiot.image.Target
 import su.tagir.apps.radiot.model.PodcastStateService
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.MainActivity
@@ -33,7 +32,7 @@ fun createNotificationsChannels(context: Context) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 private fun createChannel(id: String, name: String, description: String): NotificationChannel {
-    val importance = android.app.NotificationManager.IMPORTANCE_LOW
+    val importance = NotificationManager.IMPORTANCE_LOW
     val channel = NotificationChannel(id, name, importance)
     channel.description = description
     channel.enableLights(true)
@@ -55,14 +54,14 @@ fun createStreamNotification(context: Context): Notification {
 
     val notificationBuilder =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification.Builder(context, NOTIFICATION_CHANNEL)
+                NotificationCompat.Builder(context, NOTIFICATION_CHANNEL)
             } else {
-                Notification.Builder(context)
+                NotificationCompat.Builder(context)
             }
 
     return notificationBuilder
             .setSmallIcon(R.drawable.ic_notification)
-            .setStyle(Notification.BigTextStyle())
+            .setStyle(NotificationCompat.BigTextStyle())
             .setContentIntent(pIntent)
             .setContentTitle("Напоминание о прямом эфире")
             .setContentText("Не пропустите сегодня в 23:00 мск.")
@@ -73,7 +72,7 @@ fun createStreamNotification(context: Context): Notification {
 }
 
 @Suppress("DEPRECATION")
-fun createMediaNotification(entry: Entry?, paused: Boolean, context: Context): Notification {
+fun createMediaNotification(entry: Entry?, paused: Boolean, icon: Bitmap? = null, context: Context): Notification {
 
     val intent = Intent(context, MainActivity::class.java)
     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -81,33 +80,11 @@ fun createMediaNotification(entry: Entry?, paused: Boolean, context: Context): N
 
     val notificationBuilder =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification.Builder(context, SERVICE_CHANNEL)
+                NotificationCompat.Builder(context, SERVICE_CHANNEL)
             } else {
                 @Suppress("DEPRECATION")
-                Notification.Builder(context)
-
+                NotificationCompat.Builder(context)
             }
-
-    entry?.image?.let{url ->
-
-        val target = object : Target{
-            override fun onLoaded(bitmap: Bitmap) {
-                notificationBuilder.setLargeIcon(bitmap)
-            }
-
-        }
-        val config = ImageConfig(retreiveFromCacheOnly = true)
-        ImageLoader.load(url, target, config)
-
-//        val bitmap = GlideApp.with(context.applicationContext)
-//                .asBitmap()
-//                .load(entry.image)
-//                .onlyRetrieveFromCache(true)
-//                .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-//                .get(1, TimeUnit.SECONDS)
-//
-//        notificationBuilder.setLargeIcon(bitmap)
-    }
 
 
     if (!paused) {
@@ -129,10 +106,13 @@ fun createMediaNotification(entry: Entry?, paused: Boolean, context: Context): N
 
     return notificationBuilder
             .setSmallIcon(R.drawable.ic_notification)
-            .setStyle(Notification.MediaStyle().setShowActionsInCompactView(0))
-            .setVisibility(Notification.VISIBILITY_PUBLIC)
+            .setStyle(androidx.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0))
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(pIntent)
             .setContentTitle(entry?.title)
+            .apply {
+                icon?.let { setLargeIcon(icon) }
+            }
             .setContentText(if (entry?.date?.time ?: 0 > 0) entry?.date?.longDateFormat() else Date().longDateFormat())
             .build()
 }
