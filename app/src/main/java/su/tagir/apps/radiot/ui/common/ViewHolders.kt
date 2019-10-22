@@ -14,11 +14,9 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import com.bumptech.glide.RequestManager
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.bumptech.glide.request.RequestOptions
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.image.ImageConfig
+import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.utils.longDateFormat
@@ -44,8 +42,7 @@ class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
     }
 }
 
-class PodcastViewHolder(view: View,
-                        private val glide: RequestManager) : DataBoundViewHolder<Entry>(view){
+class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view){
 
     private val title: TextView = itemView.findViewById(R.id.title)
     private val image: ImageView = itemView.findViewById(R.id.image)
@@ -87,15 +84,10 @@ class PodcastViewHolder(view: View,
         download.visibleInvisible(progress < 0 && t.file == null)
         remove.visibleInvisible(t.file != null)
 
-        glide
-                .load(t.image)
-                .apply(RequestOptions()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .centerCrop()
-                        .transform(RoundedCorners(itemView.resources.getDimensionPixelSize(R.dimen.item_image_corner_radius)))
-                        .placeholder(R.drawable.ic_notification_large)
-                        .error(R.drawable.ic_notification_large))
-                .into(image)
+        t.image?.let{url ->
+            val config = ImageConfig(placeholder = R.drawable.ic_notification_large, error = R.drawable.ic_notification_large)
+            ImageLoader.display(url, image, config)
+        }
 
         blur.visibleGone(t.state == EntryState.PLAYING || t.state == EntryState.PAUSED)
         blur.setImageDrawable(getImageByState(t.state))

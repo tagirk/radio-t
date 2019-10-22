@@ -1,9 +1,6 @@
 package su.tagir.apps.radiot.model.entries
 
-import android.os.Parcelable
-import androidx.room.Ignore
 import com.google.gson.annotations.SerializedName
-import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 
@@ -27,8 +24,7 @@ data class Node(
         val expanded: Boolean = false
 )
 
-@Parcelize
-data class Comment @Ignore constructor(
+data class Comment(
 
         @SerializedName("id")
         val id: String,
@@ -64,9 +60,9 @@ data class Comment @Ignore constructor(
         val pin: Boolean? = null,
 
         @SerializedName("deleted")
-        val deleted: Boolean? = null): Parcelable
+        val deleted: Boolean? = null)
 
-@Parcelize
+
 data class RemarkUser(
         @SerializedName("id")
         val id: String,
@@ -81,23 +77,23 @@ data class RemarkUser(
         val admin: Boolean = false,
 
         @SerializedName("verified")
-        val verified: Boolean = false): Parcelable
+        val verified: Boolean = false)
 
-@Parcelize
+
 data class Locator(
         @SerializedName("site")
         val site: String? = null,
 
         @SerializedName("url")
-        val url: String = ""): Parcelable
+        val url: String = "")
 
-@Parcelize
+
 data class Edit(
         @SerializedName("time")
         val time: Date,
 
         @SerializedName("summary")
-        val summary: String = ""):Parcelable
+        val summary: String = "")
 
 data class PostInfo(
         @SerializedName("url") val url: String = "",

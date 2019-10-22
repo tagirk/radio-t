@@ -34,7 +34,11 @@ class AuthPresenter(private val authParams: AuthParams,
                         code,
                         authParams.redirectUrl)
                 router.newRootScreen(Screens.ChatScreenFragment)
-            }.invokeOnCompletion {  view?.showProgress(false) }
+
+            }.invokeOnCompletion {
+                view?.clearCookies()
+                view?.showProgress(false)
+            }
         }
     }
 

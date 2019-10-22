@@ -1,7 +1,6 @@
 package su.tagir.apps.radiot.ui.news
 
 import su.tagir.apps.radiot.App
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
@@ -13,7 +12,6 @@ class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.
 
     override fun createAdapter() =
             EntriesAdapter(type = EntriesAdapter.TYPE_NEWS,
-                    glide = GlideApp.with(this),
                     actionHandler = object : EntriesAdapter.Callback {
                         override fun select(entry: Entry) {
                             presenter.select(entry)

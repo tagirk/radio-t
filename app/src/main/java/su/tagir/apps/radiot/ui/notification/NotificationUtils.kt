@@ -6,18 +6,19 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.bumptech.glide.request.target.Target
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.image.ImageConfig
+import su.tagir.apps.radiot.image.ImageLoader
+import su.tagir.apps.radiot.image.Target
 import su.tagir.apps.radiot.model.PodcastStateService
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.MainActivity
 import su.tagir.apps.radiot.utils.longDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 const val SERVICE_CHANNEL = "AudioService"
 const val NOTIFICATION_CHANNEL = "Notification"
@@ -87,15 +88,25 @@ fun createMediaNotification(entry: Entry?, paused: Boolean, context: Context): N
 
             }
 
-    if (entry?.image != null) {
-        val bitmap = GlideApp.with(context.applicationContext)
-                .asBitmap()
-                .load(entry.image)
-                .onlyRetrieveFromCache(true)
-                .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                .get(1, TimeUnit.SECONDS)
+    entry?.image?.let{url ->
 
-        notificationBuilder.setLargeIcon(bitmap)
+        val target = object : Target{
+            override fun onLoaded(bitmap: Bitmap) {
+                notificationBuilder.setLargeIcon(bitmap)
+            }
+
+        }
+        val config = ImageConfig(retreiveFromCacheOnly = true)
+        ImageLoader.load(url, target, config)
+
+//        val bitmap = GlideApp.with(context.applicationContext)
+//                .asBitmap()
+//                .load(entry.image)
+//                .onlyRetrieveFromCache(true)
+//                .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+//                .get(1, TimeUnit.SECONDS)
+//
+//        notificationBuilder.setLargeIcon(bitmap)
     }
 
 

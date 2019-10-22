@@ -12,12 +12,12 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import su.tagir.apps.radiot.App
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.di.AppComponent
+import su.tagir.apps.radiot.image.ImageConfig
+import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.model.entries.Progress
@@ -118,9 +118,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         btnForward.setOnClickListener(this)
         btnReplay.setOnClickListener(this)
 
-        GlideApp.with(this)
-                .load(R.drawable.ic_radiot)
-                .into(logo)
+        ImageLoader.display(R.drawable.ic_radiot, logo)
 
         timeLabelsAdapter = TimeLabelsAdapter(emptyList(), this)
         timeLabels.adapter = timeLabelsAdapter
@@ -152,15 +150,20 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         bindService(context)
     }
 
-    override fun onDetach() {
+    override fun onResume() {
+        super.onResume()
+        bindService(context!!)
+    }
+
+    override fun onPause() {
         try {
             audioService?.unregisterCallback(serviceCallback)
             audioService?.onActivityStopped()
         } catch (e: RemoteException) {
             Timber.e(e)
         }
-        context!!.unbindService(this)
-        super.onDetach()
+        context?.unbindService(this)
+        super.onPause()
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
@@ -208,12 +211,11 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         btnPauseBig.visibleInvisible(entry.state == EntryState.PLAYING)
         btnPlayBig.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
 
-        GlideApp.with(this@PlayerFragment)
-                .load(entry.image)
-                .placeholder(R.drawable.ic_notification_large)
-                .error(R.drawable.ic_notification_large)
-                .transform(RoundedCorners(resources.getDimensionPixelSize(R.dimen.item_image_corner_radius)))
-                .into(image)
+        entry.image?.let{url ->
+            val config = ImageConfig(placeholder = R.drawable.ic_notification_large, error = R.drawable.ic_notification_large)
+            ImageLoader.display(url, image, config)
+
+        }
 
         title.text = entry.title
         seekBar.isEnabled = entry.url != STREAM_URL

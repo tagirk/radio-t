@@ -8,7 +8,6 @@ import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
 import su.tagir.apps.radiot.App
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
@@ -47,7 +46,7 @@ class PiratesFragment:
         }
     }
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this), this)
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, this)
 
     override fun download() {
         startDownloadWithPermissionCheck()

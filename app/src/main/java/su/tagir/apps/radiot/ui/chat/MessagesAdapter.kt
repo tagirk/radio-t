@@ -10,21 +10,20 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import io.noties.markwon.Markwon
 import io.noties.markwon.image.ImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
 import io.noties.markwon.utils.NoCopySpannableFactory
-import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.image.ImageConfig
+import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.model.entries.User
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.utils.longDateTimeFormat
 
-class MessagesAdapter(private val glide: GlideRequests?,
-                      private val callback: Callback,
+class MessagesAdapter(private val callback: Callback,
                       private val linkMethod: LinkMovementMethod) : DataBoundListAdapter<MessageFull>() {
 
 
@@ -42,11 +41,10 @@ class MessagesAdapter(private val glide: GlideRequests?,
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<MessageFull> {
         val inflater = LayoutInflater.from(parent.context)
-        return MessageViewHolder(inflater.inflate(R.layout.item_chat_message, parent, false), glide, callback, linkMethod)
+        return MessageViewHolder(inflater.inflate(R.layout.item_chat_message, parent, false), callback, linkMethod)
     }
 
     class MessageViewHolder(itemView: View,
-                            private val glide: GlideRequests?,
                             private val callback: Callback,
                             linkMethod: LinkMovementMethod) : DataBoundViewHolder<MessageFull>(itemView) {
 
@@ -79,12 +77,12 @@ class MessagesAdapter(private val glide: GlideRequests?,
             user = t?.user
             timeText.text = t?.message?.sent?.longDateTimeFormat()
             nicknameText.text = "${user?.displayName} @${user?.username}"
-            glide
-                    ?.load(user?.avatarUrlSmall)
-                    ?.transform(RoundedCorners(cornerRadius))
-                    ?.placeholder(R.drawable.ic_account_box_24dp)
-                    ?.error(R.drawable.ic_account_box_24dp)
-                    ?.into(avatar)
+
+            user?.avatarUrlSmall
+                    ?.let { url ->
+                        val config = ImageConfig(placeholder = R.drawable.ic_account_box_24dp, error = R.drawable.ic_account_box_24dp)
+                        ImageLoader.display(url, avatar, config)
+                    }
 
             val text = t?.message?.text ?: ""
             markwon.setMarkdown(messageText, text)

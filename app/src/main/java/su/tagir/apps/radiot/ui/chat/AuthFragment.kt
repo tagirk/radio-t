@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -14,6 +15,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
@@ -40,6 +42,7 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         webView = view.findViewById(R.id.web_view)
+
         progress = view.findViewById(R.id.progress)
         toolbar = view.findViewById(R.id.toolbar)
         retry = view.findViewById(R.id.btn_retry)
@@ -90,8 +93,27 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
         webView.loadUrl(url)
     }
 
+    override fun showError(t: Throwable) {
+        context?.let {c ->
+            AlertDialog.Builder(c)
+                    .setTitle("Ошибка")
+                    .setMessage("Произошла ошибка. Попробуйте позже.")
+                    .setPositiveButton("OK"){_,_ -> presenter.onBackClick()}
+                    .setCancelable(false)
+                    .create()
+                    .show()
+        }
+    }
+
     override fun showProgress(show: Boolean) {
         progress.visibleGone(show)
+    }
+
+    override fun clearCookies() {
+        CookieManager.getInstance().removeAllCookies(null)
+        CookieManager.getInstance().flush()
+        webView.clearCache(true)
+        webView.clearHistory()
     }
 
     @SuppressLint("SetJavaScriptEnabled")

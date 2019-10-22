@@ -17,7 +17,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.appbar.AppBarLayout
 import io.noties.markwon.Markwon
 import io.noties.markwon.html.HtmlPlugin
@@ -25,10 +24,10 @@ import io.noties.markwon.image.ImagesPlugin
 import io.noties.markwon.linkify.LinkifyPlugin
 import io.noties.markwon.utils.NoCopySpannableFactory
 import su.tagir.apps.radiot.App
-import su.tagir.apps.radiot.GlideApp
-import su.tagir.apps.radiot.GlideRequests
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.AppComponent
+import su.tagir.apps.radiot.image.ImageConfig
+import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.Node
 import su.tagir.apps.radiot.ui.FragmentsInteractionListener
@@ -86,7 +85,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
 
     override fun createAdapter(): DataBoundListAdapter<Node> =
-            CommentsAdapter(GlideApp.with(this),
+            CommentsAdapter(
                     object : CommentsAdapter.Callback {
                         override fun expand(position: Int, node: Node) {
                             presenter.showReplies(position, node)
@@ -116,8 +115,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
         }
     }
 
-    class CommentsAdapter(private val glideRequests: GlideRequests?,
-                          private val callback: Callback,
+    class CommentsAdapter(private val callback: Callback,
                           private val linkMethod: LinkMovementMethod) : DataBoundListAdapter<Node>() {
 
         override val differ: AsyncListDiffer<Node> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Node>() {
@@ -145,7 +143,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<Node> {
             val inflater = LayoutInflater.from(parent.context)
             val v = inflater.inflate(R.layout.item_comment, parent, false)
-            return CommentViewHolder(v, glideRequests, linkMethod)
+            return CommentViewHolder(v, linkMethod)
         }
 
         interface Callback {
@@ -154,9 +152,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
         }
     }
 
-    class CommentViewHolder(view: View,
-                            private val glideRequests: GlideRequests?,
-                            linkMethod: LinkMovementMethod) : DataBoundViewHolder<Node>(view) {
+    class CommentViewHolder(view: View, linkMethod: LinkMovementMethod) : DataBoundViewHolder<Node>(view) {
 
         private val avatar: ImageView = itemView.findViewById(R.id.avatar)
 
@@ -190,12 +186,11 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
             expand.visibleGone(t?.replies != null && t.replies.isNotEmpty())
             expand.text = if (t?.expanded == true) "----------Скрыть ответы----------" else "----------Показать ответы(${t?.replies?.size
                     ?: 0})----------"
-            glideRequests
-                    ?.load(t?.comment?.user?.picture)
-                    ?.transform(RoundedCorners(itemView.resources.getDimensionPixelSize(R.dimen.item_image_corner_radius)))
-                    ?.placeholder(R.drawable.ic_account_box_24dp)
-                    ?.error(R.drawable.ic_account_box_24dp)
-                    ?.into(avatar)
+
+            t?.comment?.user?.picture?.let{url ->
+                val config = ImageConfig(placeholder = R.drawable.ic_account_box_24dp, error = R.drawable.ic_account_box_24dp)
+                ImageLoader.display(url, avatar, config)
+            }
 
             name.text = t?.comment?.user?.name
             date.text = DateUtils.formatDateTime(itemView.context, t?.comment?.time?.time

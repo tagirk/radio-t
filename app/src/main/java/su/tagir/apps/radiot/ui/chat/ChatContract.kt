@@ -9,6 +9,7 @@ interface ChatContract {
 
     interface View: MvpListView<MessageFull>{
         fun showSendState(state: ViewState<Void>)
+        fun logout()
     }
 
     interface Presenter: MvpListPresenter<MessageFull, View>{

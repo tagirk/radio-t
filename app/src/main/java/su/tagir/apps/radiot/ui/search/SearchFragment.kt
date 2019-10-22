@@ -15,7 +15,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.OnPermissionDenied
 import permissions.dispatcher.RuntimePermissions
@@ -106,7 +105,7 @@ class SearchFragment :
     }
 
     override fun createAdapter(): DataBoundListAdapter<Entry> {
-        return SearchAdapter(Glide.with(this), this)
+        return SearchAdapter( this)
     }
 
     override fun onQueryClick(query: String?) {

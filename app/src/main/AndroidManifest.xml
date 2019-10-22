@@ -43,16 +43,6 @@
             android:name=".model.PodcastStateService"
             android:exported="false" />
 
-        <service
-            android:name=".service.MediaPlayerService"
-            android:enabled="true"
-            android:exported="false"
-            android:process=":audio">
-            <intent-filter>
-                <action android:name="su.tagir.apps.radiot.service.IAudioService" />
-            </intent-filter>
-        </service>
-
         <provider
             android:name=".model.EntryContentProvider"
             android:authorities="su.tagir.apps.radiot.contentprovider"

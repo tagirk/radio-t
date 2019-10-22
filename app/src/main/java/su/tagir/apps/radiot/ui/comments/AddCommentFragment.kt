@@ -20,7 +20,7 @@ class AddCommentFragment: BottomSheetDialogFragment(){
 
         fun newInstance(comment: Comment?): AddCommentFragment{
             val args = Bundle()
-            args.putParcelable(KEY_REPLY, comment)
+//            args.putParcelable(KEY_REPLY, comment)
             val fr = AddCommentFragment()
             fr.arguments = args
             return fr

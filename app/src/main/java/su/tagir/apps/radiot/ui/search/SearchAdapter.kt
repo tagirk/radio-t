@@ -4,13 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import com.bumptech.glide.RequestManager
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.*
 
 
-class SearchAdapter(private val glide: RequestManager, private val callback: EntriesAdapter.Callback) : DataBoundListAdapter<Entry>() {
+class SearchAdapter(private val callback: EntriesAdapter.Callback) : DataBoundListAdapter<Entry>() {
 
     override val differ: AsyncListDiffer<Entry> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Entry>(){
         override fun areItemsTheSame(oldItem: Entry, newItem: Entry): Boolean = oldItem.url == newItem.url
@@ -37,7 +36,7 @@ class SearchAdapter(private val glide: RequestManager, private val callback: Ent
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                PodcastViewHolder(view, glide)
+                PodcastViewHolder(view)
             }
         }
 

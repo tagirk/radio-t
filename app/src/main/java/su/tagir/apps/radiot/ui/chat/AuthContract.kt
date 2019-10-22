@@ -7,6 +7,7 @@ interface AuthContract {
 
     interface View: MvpView{
         fun auth(url: String)
+        fun clearCookies()
     }
 
     interface Presenter: MvpPresenter<View>{

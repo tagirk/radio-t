@@ -4,11 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import com.bumptech.glide.RequestManager
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
 
-class EntriesAdapter(private val type: Int, private val glide: RequestManager, private val actionHandler: Callback) :
+class EntriesAdapter(private val type: Int, private val actionHandler: Callback) :
        DataBoundListAdapter<Entry>() {
 
     override val differ: AsyncListDiffer<Entry> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Entry>(){
@@ -48,7 +47,7 @@ class EntriesAdapter(private val type: Int, private val glide: RequestManager, p
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                val holder = PodcastViewHolder(view, glide)
+                val holder = PodcastViewHolder(view)
                 holder.itemView.setOnClickListener {
                     val entry = items[holder.adapterPosition]
                     actionHandler.select(entry)

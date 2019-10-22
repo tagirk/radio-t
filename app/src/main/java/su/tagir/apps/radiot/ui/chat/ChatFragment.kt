@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import su.tagir.apps.radiot.App
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.ui.common.BackClickHandler
@@ -28,6 +27,7 @@ import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.BetterLinkMovementMethod
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
+
 
 class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatContract.Presenter>(), ChatContract.View,
         MessagesAdapter.Callback,
@@ -86,7 +86,7 @@ class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatCon
         })
     }
 
-    override fun createAdapter() = MessagesAdapter(GlideApp.with(this), this,  BetterLinkMovementMethod
+    override fun createAdapter() = MessagesAdapter(this, BetterLinkMovementMethod
             .linkify(Linkify.WEB_URLS, activity)
             .setOnLinkClickListener { _, url ->
                 presenter.onUrlClick(url)
@@ -132,6 +132,10 @@ class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatCon
     override fun showHideViews(viewState: ViewState<List<MessageFull>>) {
         super.showHideViews(viewState)
         loadMoreProgress.visibleGone(false)
+    }
+
+    override fun logout() {
+
     }
 
     private fun initMessages() {

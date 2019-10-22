@@ -27,8 +27,8 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
                          private val gson: Gson,
                          private val dispatcher: CoroutineDispatcher = Dispatchers.Default) : ChatRepository {
 
-    //    private val roomId = "5738c079c43b8c6019730ee3"
-    private val roomId = "5a832dffd73408ce4f8d0021"
+    private val roomId = "5738c079c43b8c6019730ee3"
+//    private val roomId = "5a832dffd73408ce4f8d0021"
 
     private val messageQueries = database.messageQueries
     private val userQueries = database.userQueries
@@ -157,34 +157,6 @@ class ChatRepositoryImpl(private val authClient: GitterAuthClient,
                             .mapToList(dispatcher)
                 }
     }
-
-//    private fun events(source: BufferedSource): Flowable<String?> {
-//        return Flowable.create({ emitter ->
-//            emitter.setCancellable {
-//                try {
-//                    source.close()
-//                } catch (e: Throwable) {
-//                    Timber.e(e)
-//                }
-//            }
-//            try {
-//                while (!source.exhausted()) {
-//                    val string = source.readUtf8Line()
-//                    if (string != null && !emitter.isCancelled) {
-//                        emitter.onNext(string)
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                if (!emitter.isCancelled) {
-//                    emitter.onError(e)
-//                }
-//            }
-//            if (!emitter.isCancelled) {
-//                emitter.onComplete()
-//            }
-//        }, BackpressureStrategy.BUFFER)
-//
-//    }
 
     private fun checkIfValidMessageJson(json: String?): Boolean {
         return json != null && json.contains("{") && json.contains("}")

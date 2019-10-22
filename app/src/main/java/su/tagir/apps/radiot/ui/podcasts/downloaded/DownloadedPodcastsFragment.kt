@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import su.tagir.apps.radiot.App
-import su.tagir.apps.radiot.GlideApp
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
@@ -26,7 +25,7 @@ class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsC
     }
 
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
+    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, this)
 
     override fun showRemoveError(error: String?) {
         context?.let { c ->
