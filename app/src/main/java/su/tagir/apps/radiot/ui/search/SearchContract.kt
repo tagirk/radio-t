@@ -9,7 +9,6 @@ interface SearchContract {
     interface View: MvpListView<Entry> {
         fun showDownloadError(error: String?)
         fun showRecentQueries(queries: List<String>)
-        fun download()
     }
 
     interface Presenter: MvpListPresenter<Entry, View>{

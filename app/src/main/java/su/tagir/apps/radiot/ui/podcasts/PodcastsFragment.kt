@@ -1,20 +1,19 @@
 package su.tagir.apps.radiot.ui.podcasts
 
 import android.Manifest
-import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import permissions.dispatcher.NeedsPermission
-import permissions.dispatcher.OnPermissionDenied
-import permissions.dispatcher.RuntimePermissions
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.REQUEST_WRITE_PERMISSION
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 
-@RuntimePermissions
 class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, PodcastsContract.Presenter>(), PodcastsContract.View,
         EntriesAdapter.Callback {
 
@@ -23,7 +22,7 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
         set(value) {
             field = value
             value?.let {
-                startDownloadWithPermissionCheck()
+                startDownload()
             }
         }
 
@@ -45,25 +44,18 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
         }
     }
 
-    override fun download() {
-        startDownloadWithPermissionCheck()
-    }
 
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    fun startDownload() {
-        entryForDownload?.let {entry ->
-            presenter.download(entry)
-        }
-    }
-
-    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    fun showNeedPermission() {
-        Toast.makeText(context, "Для загрузки подкаста необходимо дать разрешение на запись.", Toast.LENGTH_SHORT).show()
-    }
-
-    @SuppressLint("NeedOnRequestPermissionsResult")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        onRequestPermissionsResult(requestCode, grantResults)
+        if(requestCode != REQUEST_WRITE_PERMISSION){
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            return
+        }
+        if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            startDownload()
+        }else{
+            showNeedPermission()
+        }
+
     }
 
     override fun select(entry: Entry) {
@@ -80,5 +72,38 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
 
     override fun openComments(entry: Entry) {
         presenter.openComments(entry)
+    }
+
+    private fun startDownload() {
+        if (context == null) {
+            return
+        }
+        if (entryForDownload == null) {
+            return
+        }
+        when {
+            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> presenter.download(entryForDownload!!)
+
+            ActivityCompat.shouldShowRequestPermissionRationale(activity!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
+
+            else -> requestWritePermission()
+        }
+    }
+
+    private fun showNeedPermission() {
+        Toast.makeText(context, getString(R.string.write_permission_rationale), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showPermissionRationale() {
+        AlertDialog.Builder(context!!)
+                .setMessage(R.string.write_permission_rationale)
+                .setPositiveButton("OK"){_, _ -> requestWritePermission()}
+                .setNegativeButton(R.string.cancel, null)
+                .create()
+                .show()
+    }
+
+    private fun requestWritePermission(){
+        requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_WRITE_PERMISSION)
     }
 }

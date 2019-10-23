@@ -7,7 +7,6 @@ import su.tagir.apps.radiot.ui.mvp.MvpListView
 interface PiratesContract{
 
     interface View: MvpListView<Entry>{
-        fun download()
         fun showDownloadError(error: String?)
     }
 

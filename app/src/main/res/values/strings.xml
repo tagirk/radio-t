@@ -32,4 +32,6 @@
     <string name="credits">Благодарности</string>
     <string name="pirate_icon_credit"><div>Большое спасибо за иконку черепа <a href="http://www.freepik.com" title="Freepik">Freepik</a> с замечательного сайта <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, лицензия <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div></string>
     <string name="comments">Комментарии</string>
+    <string name="write_permission_rationale">Для загрузки подкаста необходимо дать разрешение на запись.</string>
+    <string name="cancel">Закрыть</string>
 </resources>
