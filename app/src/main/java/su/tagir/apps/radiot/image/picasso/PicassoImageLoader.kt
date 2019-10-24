@@ -1,4 +1,4 @@
-package su.tagir.apps.radiot.image
+package su.tagir.apps.radiot.image.picasso
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,6 +9,10 @@ import com.squareup.picasso.MemoryPolicy
 import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.RequestCreator
+import su.tagir.apps.radiot.image.IImageLoader
+import su.tagir.apps.radiot.image.ImageConfig
+import su.tagir.apps.radiot.image.Target
+import su.tagir.apps.radiot.image.Transformation
 import java.io.File
 
 object PicassoImageLoader : IImageLoader {
@@ -21,7 +25,7 @@ object PicassoImageLoader : IImageLoader {
 
     override fun display(url: String, imageView: ImageView, config: ImageConfig?) =
             getInstance(config?.context)
-                    .load(url)
+                    .load(if(url.isBlank()) "empty" else url)
                     .applyConfig(config)
                     .into(imageView)
 
@@ -39,7 +43,7 @@ object PicassoImageLoader : IImageLoader {
 
     override fun load(url: String, target: Target, config: ImageConfig?) =
             getInstance(config?.context)
-                    .load(url)
+                    .load(if(url.isBlank()) "empty" else url)
                     .applyConfig(config)
                     .into(createPicassoTarget(target))
 
@@ -117,6 +121,13 @@ fun RequestCreator.applyConfig(config: ImageConfig?): RequestCreator {
         if (config.retreiveIngnoringCache) {
             this.networkPolicy(NetworkPolicy.NO_CACHE)
             this.memoryPolicy(MemoryPolicy.NO_CACHE)
+
+        }
+
+        config.transformations?.forEach {t ->
+            when(t){
+                Transformation.Circle -> this.transform(CircleTransform())
+            }
 
         }
 

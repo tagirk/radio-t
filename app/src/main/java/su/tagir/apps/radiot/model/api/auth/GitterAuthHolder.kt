@@ -1,7 +1,8 @@
-package su.tagir.apps.radiot.model.api
+package su.tagir.apps.radiot.model.api.auth
 
 import android.content.SharedPreferences
 import su.tagir.apps.radiot.extensions.modify
+import su.tagir.apps.radiot.model.api.SessionListener
 import su.tagir.apps.radiot.schedulers.AppExecutors
 
 

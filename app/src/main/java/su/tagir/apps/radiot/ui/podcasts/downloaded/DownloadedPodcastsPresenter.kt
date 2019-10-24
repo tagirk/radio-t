@@ -8,8 +8,8 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
+import su.tagir.apps.radiot.ui.mvp.MainDispatcher
 
 class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
                                   private val router: Router,

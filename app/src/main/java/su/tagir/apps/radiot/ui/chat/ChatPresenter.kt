@@ -8,8 +8,8 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.MessageFull
 import su.tagir.apps.radiot.model.repository.ChatRepository
-import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
+import su.tagir.apps.radiot.ui.mvp.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.Status
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import timber.log.Timber

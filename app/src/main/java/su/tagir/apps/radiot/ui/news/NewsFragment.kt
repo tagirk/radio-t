@@ -11,8 +11,7 @@ class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.
 
 
     override fun createAdapter() =
-            EntriesAdapter(type = EntriesAdapter.TYPE_NEWS,
-                    actionHandler = object : EntriesAdapter.Callback {
+            EntriesAdapter(actionHandler = object : EntriesAdapter.Callback {
                         override fun select(entry: Entry) {
                             presenter.select(entry)
                         }

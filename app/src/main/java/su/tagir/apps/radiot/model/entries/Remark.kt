@@ -12,6 +12,11 @@ data class CommentsTree(
         val info: PostInfo? = null
 )
 
+data class CommentsList(
+        @SerializedName("comments")
+        val comments: List<Comment>
+)
+
 data class Node(
         @SerializedName("comment")
         val comment: Comment,

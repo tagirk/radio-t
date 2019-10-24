@@ -1,12 +1,9 @@
 package su.tagir.apps.radiot.ui.podcasts
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -16,45 +13,24 @@ import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.AppComponent
-import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsFragment
 
 class PodcastsTabsFragment: Fragment(),
-        Toolbar.OnMenuItemClickListener{
+        View.OnClickListener{
 
 
     private lateinit var viewPager: ViewPager
 
     private lateinit var tabs: TabLayout
 
-    private var interactionListener: FragmentsInteractionListener? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        interactionListener = context as FragmentsInteractionListener
-    }
-
-    override fun onDetach() {
-        interactionListener = null
-        super.onDetach()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        interactionListener?.unlockDrawer()
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_tabs, container, false)
+            inflater.inflate(R.layout.fragment_tabs_podcasts, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setTitle(R.string.podcasts)
-        toolbar.inflateMenu(R.menu.menu_main)
-        toolbar.setOnMenuItemClickListener(this)
-        toolbar.setNavigationOnClickListener { interactionListener?.showDrawer() }
+        view.findViewById<View>(R.id.search).setOnClickListener(this)
 
         viewPager = view.findViewById(R.id.view_pager)
         tabs = view.findViewById(R.id.tabs)
@@ -62,14 +38,13 @@ class PodcastsTabsFragment: Fragment(),
         initFragments()
     }
 
-    override fun onMenuItemClick(p0: MenuItem?): Boolean {
-        when(p0?.itemId){
+    override fun onClick(p0: View?) {
+        when(p0?.id){
             R.id.search -> {
                 val appComponent: AppComponent = (activity!!.application as App).appComponent
                 appComponent.router.navigateTo(Screens.SearchScreen)
             }
         }
-        return false
     }
 
 

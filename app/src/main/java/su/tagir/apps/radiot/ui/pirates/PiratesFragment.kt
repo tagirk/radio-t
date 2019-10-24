@@ -46,7 +46,7 @@ class PiratesFragment :
         }
     }
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, this)
+    override fun createAdapter() = EntriesAdapter(this)
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if(requestCode != REQUEST_WRITE_PERMISSION){

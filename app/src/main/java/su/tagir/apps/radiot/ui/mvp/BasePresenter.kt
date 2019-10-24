@@ -4,11 +4,11 @@ import kotlinx.coroutines.*
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 
-abstract class BasePresenter<V: MvpView>(private val dispatcher: CoroutineDispatcher): MvpPresenter<V>, CoroutineScope {
+abstract class BasePresenter<V: MvpView>(protected val dispatcher: CoroutineDispatcher): MvpPresenter<V>, CoroutineScope {
 
     protected var view: V? = null
 
-    private lateinit var job: Job
+    protected lateinit var job: Job
 
     protected open var exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Timber.e(throwable)

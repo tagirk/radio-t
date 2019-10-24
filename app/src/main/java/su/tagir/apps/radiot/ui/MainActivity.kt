@@ -5,21 +5,17 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.navigation.NavigationView
 import ru.terrakok.cicerone.NavigatorHolder
 import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.commands.Command
@@ -28,35 +24,33 @@ import saschpe.android.customtabs.CustomTabsHelper
 import saschpe.android.customtabs.WebViewFallback
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
 import su.tagir.apps.radiot.ui.common.BackClickHandler
 import su.tagir.apps.radiot.ui.mvp.BaseMvpActivity
+import su.tagir.apps.radiot.ui.news.ArticlesFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesFragment
+import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsTabsFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
+import su.tagir.apps.radiot.ui.settings.SettingsFragment
+import su.tagir.apps.radiot.ui.settings.SettingsFragmentRoot
 import su.tagir.apps.radiot.utils.visibleGone
-import su.tagir.apps.radiot.utils.visibleInvisible
 
 class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View,
         View.OnClickListener,
-        FragmentsInteractionListener {
+        BottomNavigationView.OnNavigationItemSelectedListener {
+
 
     private lateinit var navigatorHolder: NavigatorHolder
     private lateinit var bottomSheet: ViewGroup
     private lateinit var fragmentContainer: FrameLayout
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var navigationView: NavigationView
+    private lateinit var navigationView: BottomNavigationView
     private lateinit var dim: View
-    private lateinit var timeLeft: TextView
-    private lateinit var playStream: ImageButton
-    private lateinit var pauseStream: ImageButton
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     private val handler = Handler()
@@ -73,20 +67,10 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
 
         bottomSheet = findViewById(R.id.bottom_sheet)
         fragmentContainer = findViewById(R.id.fragment_container)
-        drawerLayout = findViewById(R.id.drawer_layout)
-        navigationView = findViewById(R.id.nav_view)
+        navigationView = findViewById(R.id.navigation_view)
         dim = findViewById(R.id.dim)
-        timeLeft = findViewById(R.id.time_left)
-        playStream = findViewById(R.id.play)
-        playStream.setOnClickListener { presenter.playStream() }
-        pauseStream = findViewById(R.id.pause)
-        pauseStream.setOnClickListener { presenter.pause() }
 
-        val navItems = navigationView.findViewById<LinearLayout>(R.id.nav_items)
-
-        for (i in 0 until navItems.childCount) {
-            navItems.getChildAt(i).setOnClickListener(this)
-        }
+        navigationView.setOnNavigationItemSelectedListener(this)
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.addBottomSheetCallback(BottomSheetCallback())
@@ -101,6 +85,18 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("state", bottomSheetBehavior.state)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        dim.visibleGone(bottomSheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED)
+        navigationView.visibleGone(bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED)
+        when(currentFragment){
+            is PodcastsTabsFragment -> navigationView.selectedItemId = R.id.podcasts
+            is ArticlesFragment -> navigationView.selectedItemId = R.id.news
+            is PiratesTabsFragment -> navigationView.selectedItemId = R.id.pirates
+            is SettingsFragmentRoot -> navigationView.selectedItemId = R.id.settings
+        }
     }
 
 
@@ -122,14 +118,38 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
     override fun onBackPressed() {
         when {
             bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED -> bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
             currentFragment is BackClickHandler -> (currentFragment as BackClickHandler).onBackClick()
             else -> super.onBackPressed()
         }
     }
 
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.podcasts -> {
+                if (currentFragment !is PodcastsFragment) {
+                    presenter.navigateToPodcasts()
+                }
+            }
+            R.id.news -> {
+                if (currentFragment !is NewsFragment) {
+                    presenter.navigateToNews()
+                }
+            }
+            R.id.settings ->
+                if(currentFragment !is SettingsFragment) {
+                    presenter.navigateToSettings()
+                }
+            R.id.chat -> presenter.navigateToChat()
+            R.id.pirates -> {
+                if (currentFragment !is PiratesFragment) {
+                    presenter.navigateToPirates()
+                }
+            }
+        }
+        return true
+    }
+
     override fun onClick(v: View?) {
-        drawerLayout.closeDrawer(GravityCompat.START)
         when (v?.id) {
             R.id.nav_podcats -> {
                 if (currentFragment !is PodcastsFragment) {
@@ -156,22 +176,9 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         }
     }
 
-    override fun showDrawer() {
-        drawerLayout.openDrawer(GravityCompat.START)
-    }
-
-    override fun lockDrawer() {
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-    }
-
-    override fun unlockDrawer() {
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-    }
-
     override fun showCurrentPodcast(entry: Entry) {
         bottomSheet.visibleGone(true)
         setBottomMargin(resources.getDimensionPixelSize(R.dimen.player_peek_height))
-        showHideBtnStream(entry.url == STREAM_URL && entry.state == PLAYING)
     }
 
     override fun createPresenter(): MainContract.Presenter {
@@ -181,15 +188,6 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         return MainPresenter(entryRepository, router)
     }
 
-
-    override fun showTime(time: String) {
-        timeLeft.text = time
-    }
-
-    private fun showHideBtnStream(playing: Boolean) {
-        playStream.visibleInvisible(!playing)
-        pauseStream.visibleInvisible(playing)
-    }
 
     private fun initBottomSheet() {
         var playerFr = supportFragmentManager.findFragmentById(R.id.bottom_sheet)
@@ -219,7 +217,10 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
             if (command is Forward && command.screen is Screens.WebScreen) {
                 val screen = command.screen as Screens.WebScreen
                 openWebPage(screen.url)
-            } else if (command is Forward && command.screen is Screens.ResolveActivityScreen) {
+            } else if (command is Forward && command.screen is Screens.CommentsScreen) {
+                val screen = command.screen as Screens.CommentsScreen
+                openWebPage("${screen.entry.url}/#comments")
+            }else if (command is Forward && command.screen is Screens.ResolveActivityScreen) {
                 val screen = command.screen as Screens.ResolveActivityScreen
                 openWithResolveActivity(screen.url)
             } else {
@@ -268,6 +269,8 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
     inner class BottomSheetCallback : BottomSheetBehavior.BottomSheetCallback() {
 
         override fun onStateChanged(bottomSheet: View, newState: Int) {
+            dim.visibleGone(newState != BottomSheetBehavior.STATE_COLLAPSED)
+            navigationView.visibleGone(newState != BottomSheetBehavior.STATE_EXPANDED)
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -275,6 +278,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
                     .findFragmentById(R.id.bottom_sheet) as? PlayerFragment)?.onSlide(slideOffset)
 
             dim.alpha = slideOffset
+            navigationView.alpha = 1 - slideOffset
         }
     }
 

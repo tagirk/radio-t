@@ -22,12 +22,9 @@ class SettingsFragmentRoot: Fragment(){
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
-
         val v = inflater.inflate(R.layout.fragment_toolbar, container, false)
         val toolbar = v.findViewById<Toolbar>(R.id.toolbar)
 
-        toolbar.setNavigationOnClickListener { appComponent.router.exit() }
         toolbar.setTitle(R.string.settings)
 
         if (childFragmentManager.findFragmentById(R.id.container) == null){

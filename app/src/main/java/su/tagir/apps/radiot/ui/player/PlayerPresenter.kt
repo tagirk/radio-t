@@ -12,12 +12,12 @@ import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
+import su.tagir.apps.radiot.ui.mvp.MainDispatcher
 
 class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
-                      private val dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
+                      dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
 
     private var currentPodcast: Entry? = null
         set(value) {

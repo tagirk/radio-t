@@ -13,6 +13,8 @@ interface EntryRepository {
 
     suspend fun refreshPodcasts()
 
+    suspend fun loadCommentators()
+
     suspend fun refreshPirates()
 
     fun getEntries(vararg categories: String): Flow<List<Entry>>

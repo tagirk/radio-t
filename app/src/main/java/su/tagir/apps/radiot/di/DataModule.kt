@@ -22,6 +22,8 @@ import su.tagir.apps.radiot.BuildConfig
 import su.tagir.apps.radiot.encryption.TinkKeyEncryption
 import su.tagir.apps.radiot.encryption.TinkValueEncryption
 import su.tagir.apps.radiot.model.api.*
+import su.tagir.apps.radiot.model.api.auth.AuthHolder
+import su.tagir.apps.radiot.model.api.auth.GitterAuthHolder
 import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.db.createQueryWrapper
 import su.tagir.apps.radiot.model.db.sqlOpenHelperConfiguration

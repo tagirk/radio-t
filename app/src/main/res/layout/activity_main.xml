@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="su.tagir.apps.radiot.ui.MainActivity"
-    tools:openDrawer="start">
+    tools:context="su.tagir.apps.radiot.ui.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-
 
         <View
             android:id="@+id/dim"
@@ -37,9 +38,15 @@
             app:behavior_peekHeight="@dimen/player_peek_height"
             app:layout_behavior="@string/bottom_sheet_behavior" />
 
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <include layout="@layout/nav_view" />
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/colorPlayerBackground"
+        app:itemIconTint="@color/nav_item_color"
+        app:menu="@menu/navigation_items"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
-</androidx.drawerlayout.widget.DrawerLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -39,7 +39,7 @@ fun createQueryWrapper(driver: SqlDriver): RadiotDb {
             articleAdapter = Article.Adapter(dateAdapter = dateAdapter,
                     addedDateAdapter = dateAdapter),
             entryAdapter = Entry.Adapter(dateAdapter = dateAdapter,
-                    categoriesAdapter = stringListAdapter),
+                    categoriesAdapter = stringListAdapter, commentatorsAdapter = stringListAdapter),
             messageAdapter = Message.Adapter(sentAdapter = dateAdapter,
                     editedAtAdapter = dateAdapter,
                     urlsAdapter = urlsAdapter,

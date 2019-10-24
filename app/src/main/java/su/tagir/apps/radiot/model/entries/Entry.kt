@@ -26,7 +26,8 @@ data class Entry(
         val file: String? = null,
         val downloadId: Long = -1L,
         val downloadProgress: Int = -1,
-        val commentsCount: Int = 0) {
+        val commentsCount: Int = 0,
+        val commentators: List<String>? = null) {
 
     constructor(rtEntry: RTEntry) :
             this(url = rtEntry.url,
@@ -66,7 +67,7 @@ data class Entry(
 }
 
 fun Entry.insert(entryQueries: EntryQueries){
-    entryQueries.insert(url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount)
+    entryQueries.insert(url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount, commentators)
 }
 
 fun Entry.update(entryQueries: EntryQueries){
@@ -87,7 +88,8 @@ val entryMapper: (url: String,
                   file: String?,
                   downloadId: Long,
                   downloadProgress: Int,
-                  commentsCount: Int) -> Entry
+                  commentsCount: Int,
+                  commentators: List<String>?) -> Entry
     get() = { url,
               title,
               date,
@@ -102,5 +104,6 @@ val entryMapper: (url: String,
               file,
               downloadId,
               downloadProgress,
-              commentsCount -> Entry(url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount)
+              commentsCount,
+              commentators -> Entry(url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount, commentators)
     }

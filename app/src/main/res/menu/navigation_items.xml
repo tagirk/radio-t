@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/podcasts"
+        android:icon="@drawable/ic_radio_24dp"
+        android:title="@string/podcasts"/>
+
+    <item
+        android:id="@+id/news"
+        android:icon="@drawable/ic_rss_feed_24dp"
+        android:title="@string/themes"/>
+
+    <item
+        android:id="@+id/pirates"
+        android:icon="@drawable/ic_pirates"
+        android:title="@string/pirates"/>
+
+    <item
+        android:id="@+id/chat"
+        android:icon="@drawable/ic_chat_black_24dp"
+        android:title="@string/chat"/>
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings_24dp"
+        android:title="@string/settings"/>
+
+</menu>

@@ -26,7 +26,7 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
             }
         }
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, this)
+    override fun createAdapter() = EntriesAdapter(this)
 
     override fun createPresenter(): PodcastsContract.Presenter {
         val appComponent: AppComponent = (activity!!.application as App).appComponent

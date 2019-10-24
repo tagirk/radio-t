@@ -18,6 +18,7 @@ import su.tagir.apps.radiot.utils.timeOfDay
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 
 class EntryRepositoryImpl(private val restClient: RestClient,
@@ -28,7 +29,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
                           private val dispatcher: CoroutineDispatcher = Dispatchers.Default) : EntryRepository {
 
     companion object {
-        const val PAGE_SIZE = 20
+        const val PAGE_SIZE = 50
     }
 
     private val entryQueries = database.entryQueries
@@ -45,7 +46,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
 
     @ExperimentalCoroutinesApi
     override suspend fun refreshPodcasts() {
-        val podcasts = restClient.getPosts(PAGE_SIZE, "podcast")
+        val podcasts = restClient.getPosts(PAGE_SIZE, "podcast,prep")
         val commentsCount = remarkClient.getCommentsCount(urls = podcasts.map { it.url })
         dispatcher {
             database.transaction {
@@ -57,6 +58,29 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         }
     }
 
+    @ExperimentalCoroutinesApi
+    override suspend fun loadCommentators() {
+        dispatcher{
+            val preps = database.entryQueries
+                    .findByCategories(listOf(listOf("prep")), entryMapper)
+                    .executeAsList()
+                    .filter { e ->
+                        (e.commentators?.size ?: 0) < 10 ||
+                        TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - (e.date?.time ?: 0)) < 5
+                    }
+            for (e in preps) {
+                val commentators = remarkClient.getCommentsList(postUrl = e.url)
+                        .comments
+                        .mapNotNull { c -> c.user?.picture }
+                        .asSequence()
+                        .filter { s -> s.isNotBlank() }
+                        .distinct()
+                        .toList()
+
+                database.entryQueries.updateCommentators(commentators = commentators, url = e.url)
+            }
+        }
+    }
 
     @ExperimentalCoroutinesApi
     override suspend fun refreshPirates() {
@@ -120,7 +144,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     override fun getForQuery(query: String): Flow<List<Entry>> =
             searchResultQueries.findByQuery(query, searchResultMapper)
                     .asFlow()
-                    .mapToOneOrDefault(SearchResult(query, emptyList(),Date()))
+                    .mapToOneOrDefault(SearchResult(query, emptyList(), Date()))
                     .flatMapLatest { result ->
                         entryQueries.findByIds(result.ids, entryMapper).asFlow().mapToList(dispatcher)
                     }

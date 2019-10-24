@@ -8,15 +8,13 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
+import su.tagir.apps.radiot.image.Transformation
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.utils.longDateFormat
@@ -27,10 +25,18 @@ import su.tagir.apps.radiot.utils.visibleInvisible
 class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
     private val title: TextView = itemView.findViewById(R.id.title)
-
     private val date: TextView = itemView.findViewById(R.id.date)
+    private val comments: TextView = itemView.findViewById(R.id.comments)
+    private val avatars: LinearLayout = itemView.findViewById(R.id.avatars)
+    private lateinit var entry: Entry
 
-    private lateinit var podcast: Entry
+    private val iconSize = itemView.resources.getDimensionPixelSize(R.dimen.commentator_image_size)
+    private val layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+    private val config = ImageConfig(fit = true, error = R.drawable.ic_account_circle_24dp, placeholder = R.drawable.ic_account_circle_24dp, transformations = listOf(Transformation.Circle))
+
+    init {
+        layoutParams.marginEnd =  -iconSize / 3
+    }
 
     override fun bind(t: Entry?) {
         if (t == null) {
@@ -38,11 +44,23 @@ class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
         }
         title.text = t.title
         date.text = t.date?.longDateFormat()
-        podcast = t
+        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
+
+        avatars.removeAllViews()
+        entry = t
+
+        t.commentators?.forEachIndexed { i, avatar ->
+            val icon = ImageView(itemView.context)
+            icon.id = View.generateViewId()
+            icon.alpha = 0.7f
+            avatars.addView(icon, layoutParams)
+
+            ImageLoader.display(avatar, icon, config)
+        }
     }
 }
 
-class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view){
+class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
     private val title: TextView = itemView.findViewById(R.id.title)
     private val image: ImageView = itemView.findViewById(R.id.image)
@@ -84,7 +102,7 @@ class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view){
         download.visibleInvisible(progress < 0 && t.file == null)
         remove.visibleInvisible(t.file != null)
 
-        t.image?.let{url ->
+        t.image?.let { url ->
             val config = ImageConfig(placeholder = R.drawable.ic_notification_large, error = R.drawable.ic_notification_large)
             ImageLoader.display(url, image, config)
         }
@@ -124,6 +142,15 @@ class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
     private lateinit var entry: Entry
 
+    init {
+        progress.visibleGone(false)
+        download.visibleGone(false)
+        remove.visibleGone(false)
+        blur.visibleGone(false)
+        image.visibleGone(false)
+        cancel.visibleGone(false)
+    }
+
     override fun bind(t: Entry?) {
         if (t == null) {
             return
@@ -138,12 +165,7 @@ class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         showNotes.text = sb
 
-        progress.visibleGone(false)
-        download.visibleGone(false)
-        remove.visibleGone(false)
-        blur.visibleGone(false)
-        image.visibleGone(false)
-        cancel.visibleGone(false)
+
         this.entry = t
 
     }

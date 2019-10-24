@@ -1,4 +1,4 @@
-package su.tagir.apps.radiot.ui
+package su.tagir.apps.radiot.ui.mvp
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

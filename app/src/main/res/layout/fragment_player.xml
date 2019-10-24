@@ -10,6 +10,9 @@
         android:id="@+id/elevation"
         android:layout_width="0dp"
         android:layout_height="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:background="@drawable/elevation_drawable" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -50,7 +53,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:src="@drawable/ic_play_arrow_black_24dp"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -63,7 +66,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:src="@drawable/ic_pause_black_24dp"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -73,8 +76,8 @@
             <ImageButton
                 android:id="@+id/btn_chat"
                 style="?actionButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:visibility="invisible"
                 android:src="@drawable/ic_chat_black_24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -85,8 +88,8 @@
             <ImageButton
                 android:id="@+id/btn_web"
                 style="?actionButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginEnd="16dp"
                 android:alpha="0"
                 android:visibility="invisible"
@@ -100,16 +103,14 @@
                 android:id="@+id/image"
                 android:layout_width="@dimen/player_image_size"
                 android:layout_height="@dimen/player_image_size"
-                android:layout_marginBottom="4dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0"
+                app:layout_constraintTop_toBottomOf="parent"
                 tools:ignore="ContentDescription" />
 
 

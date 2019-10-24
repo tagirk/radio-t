@@ -7,7 +7,6 @@ import su.tagir.apps.radiot.ui.mvp.MvpView
 interface MainContract {
 
     interface View: MvpView{
-        fun showTime(time: String)
         fun showCurrentPodcast(entry: Entry)
     }
 
@@ -19,9 +18,6 @@ interface MainContract {
         fun navigateToPirates()
         fun navigateToAbout()
         fun navigateToCredits()
-        fun startTimerToNextShow()
         fun observeCurrentPodcast()
-        fun playStream()
-        fun pause()
     }
 }

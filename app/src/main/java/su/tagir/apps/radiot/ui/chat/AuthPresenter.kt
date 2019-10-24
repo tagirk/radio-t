@@ -5,8 +5,8 @@ import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.repository.ChatRepository
-import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
+import su.tagir.apps.radiot.ui.mvp.MainDispatcher
 import java.net.URI
 
 class AuthPresenter(private val authParams: AuthParams,

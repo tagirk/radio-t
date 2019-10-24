@@ -9,10 +9,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.flow.*
 import okhttp3.*
-import su.tagir.apps.radiot.model.api.AuthHolder
 import su.tagir.apps.radiot.model.api.GitterAuthClient
 import su.tagir.apps.radiot.model.api.GitterClient
 import su.tagir.apps.radiot.model.api.SessionListener
+import su.tagir.apps.radiot.model.api.auth.AuthHolder
 import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.entries.*
 import su.tagir.apps.radiot.ui.chat.AuthListener

@@ -4,11 +4,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
-import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
-import su.tagir.apps.radiot.utils.startTimer
+import su.tagir.apps.radiot.ui.mvp.MainDispatcher
 import java.util.*
 import kotlin.math.floor
 
@@ -17,22 +16,8 @@ class MainPresenter(private val entryRepository: EntryRepository,
                     dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<MainContract.View>(dispatcher), MainContract.Presenter {
 
 
-    private val nextShow: Calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
-
-    init {
-        nextShow.set(Calendar.HOUR_OF_DAY, 23)
-        nextShow.set(Calendar.MINUTE, 0)
-        nextShow.set(Calendar.SECOND, 0)
-        var dayOfWeek = nextShow.get(Calendar.DAY_OF_WEEK)
-        while (dayOfWeek != Calendar.SATURDAY) {
-            nextShow.add(Calendar.DAY_OF_WEEK, 1)
-            dayOfWeek = nextShow.get(Calendar.DAY_OF_WEEK)
-        }
-    }
-
     override fun doOnAttach(view: MainContract.View) {
         observeCurrentPodcast()
-        startTimerToNextShow()
     }
 
     override fun observeCurrentPodcast() {
@@ -43,15 +28,6 @@ class MainPresenter(private val entryRepository: EntryRepository,
                             view?.showCurrentPodcast(it)
                         }
                     }
-        }
-    }
-
-    override fun startTimerToNextShow() {
-        launch {
-            startTimer(repeatMillis = 1000L) {
-                val time = convertTime(nextShow.timeInMillis)
-                view?.showTime(time)
-            }
         }
     }
 
@@ -81,16 +57,6 @@ class MainPresenter(private val entryRepository: EntryRepository,
 
     override fun navigateToCredits() {
         router.navigateTo(Screens.CreditsScreen)
-    }
-
-    override fun playStream() {
-        launch {
-            entryRepository.playStream(STREAM_URL)
-        }
-    }
-
-    override fun pause() {
-        entryRepository.pause()
     }
 
     private fun convertTime(nextShowTime: Long): String {

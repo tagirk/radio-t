@@ -4,8 +4,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
+import su.tagir.apps.radiot.ui.mvp.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.Status
 
 class PiratesPresenter(private val entryRepository: EntryRepository,

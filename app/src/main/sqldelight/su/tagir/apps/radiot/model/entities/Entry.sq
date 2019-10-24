@@ -16,11 +16,12 @@ CREATE TABLE entry(
     file TEXT,
     downloadId INTEGER AS Long NOT NULL,
     downloadProgress INTEGER AS Int NOT NULL,
-    commentsCount INTEGER AS Int NOT NULL);
+    commentsCount INTEGER AS Int NOT NULL,
+    commentators TEXT AS List<String>);
 
 insert:
-INSERT OR REPLACE INTO entry (url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount)
-VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+INSERT OR REPLACE INTO entry (url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount, commentators)
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
 
 update:
 UPDATE entry SET
@@ -34,6 +35,9 @@ UPDATE entry SET
 
 updateCommentsCount:
 UPDATE entry SET commentsCount = ? WHERE url = ?;
+
+updateCommentators:
+UPDATE entry SET commentators = ? WHERE url = ?;
 
 count:
 SELECT COUNT(url) FROM entry WHERE url = ?;

@@ -21,7 +21,7 @@ class ImageConfig(@DrawableRes var placeholder: Int? = null,
 
                   var fadeIn: Int = 200,
 
-                  vararg transformations: Transformation,
+                  var transformations: List<Transformation>? = null,
 
                   var context: Context? = null)
 

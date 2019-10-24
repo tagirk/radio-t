@@ -1,7 +1,6 @@
 package su.tagir.apps.radiot.ui.comments
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
@@ -30,7 +29,6 @@ import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.Node
-import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
@@ -40,23 +38,6 @@ import su.tagir.apps.radiot.utils.visibleGone
 class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(),
         CommentsContract.View,
         Toolbar.OnMenuItemClickListener{
-
-    private var interactionListener: FragmentsInteractionListener? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        interactionListener = context as FragmentsInteractionListener
-    }
-
-    override fun onDetach() {
-        interactionListener = null
-        super.onDetach()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        interactionListener?.lockDrawer()
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

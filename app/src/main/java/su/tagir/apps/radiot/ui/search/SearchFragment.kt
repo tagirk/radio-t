@@ -1,7 +1,6 @@
 package su.tagir.apps.radiot.ui.search
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
@@ -22,7 +21,6 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.REQUEST_WRITE_PERMISSION
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.ui.FragmentsInteractionListener
 import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
 import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
@@ -52,23 +50,6 @@ class SearchFragment :
                 startDownload()
             }
         }
-
-    private var interactionListener: FragmentsInteractionListener? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        interactionListener = context as FragmentsInteractionListener
-    }
-
-    override fun onDetach() {
-        interactionListener = null
-        super.onDetach()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        interactionListener?.lockDrawer()
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

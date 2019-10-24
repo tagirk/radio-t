@@ -1,4 +1,6 @@
-package su.tagir.apps.radiot.model.api
+package su.tagir.apps.radiot.model.api.auth
+
+import su.tagir.apps.radiot.model.api.SessionListener
 
 interface AuthHolder {
     var authHeader: String

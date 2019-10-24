@@ -25,7 +25,7 @@ class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsC
     }
 
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, this)
+    override fun createAdapter() = EntriesAdapter(this)
 
     override fun showRemoveError(error: String?) {
         context?.let { c ->

@@ -13,7 +13,7 @@ class DownloadedPiratesFragment :
         DownloadedPiratesContract.View,
         EntriesAdapter.Callback {
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, this)
+    override fun createAdapter() = EntriesAdapter(this)
 
     override fun createPresenter(): DownloadedPiratesContract.Presenter {
         val appComponent: AppComponent = (activity!!.application as App).appComponent
