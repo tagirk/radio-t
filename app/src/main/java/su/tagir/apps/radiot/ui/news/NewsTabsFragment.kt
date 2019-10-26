@@ -44,17 +44,19 @@ class NewsTabsFragment : Fragment() {
 
         override fun getItem(position: Int): Fragment {
             return when (position) {
-                0 -> ArticlesFragment()
-                else -> NewsFragment()
+                0 -> NewsFragment.newInstance(arrayOf("prep"))
+                1 -> ArticlesFragment()
+                else -> NewsFragment.newInstance(arrayOf("news", "info"))
             }
         }
 
-        override fun getCount() = 2
+        override fun getCount() = 3
 
         override fun getPageTitle(position: Int): CharSequence? {
             when (position) {
-                0 -> return "Темы от авторов"
-                1 -> return "Новости подкаста"
+                0 -> return "Темы"
+                1 -> return "Темы от авторов"
+                2 -> return "Новости подкаста"
             }
             return super.getPageTitle(position)
         }

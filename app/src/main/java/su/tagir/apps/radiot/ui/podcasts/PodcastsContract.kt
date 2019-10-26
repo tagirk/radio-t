@@ -15,6 +15,6 @@ interface PodcastsContract {
         fun download(entry: Entry)
         fun select(entry: Entry)
         fun remove(entry: Entry)
-        fun loadCommentators()
+
     }
 }

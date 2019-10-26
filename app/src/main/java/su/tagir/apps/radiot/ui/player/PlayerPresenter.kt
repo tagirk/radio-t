@@ -2,9 +2,9 @@ package su.tagir.apps.radiot.ui.player
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.transform
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
@@ -14,6 +14,7 @@ import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import timber.log.Timber
 
 class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
@@ -78,8 +79,10 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
             entryRepository
                     .getCurrent()
                     .onEach { entry -> currentPodcast = entry }
-                    .transform<Entry?, List<TimeLabel>> { entry -> entryRepository.getTimeLabels(entry) }
-                    .collect { labels -> view?.showTimeLabels(labels) }
+                    .flatMapLatest { entry -> entryRepository.getTimeLabels(entry) }
+                    .collect { labels ->
+                        Timber.d("$labels")
+                        view?.showTimeLabels(labels) }
         }
     }
 

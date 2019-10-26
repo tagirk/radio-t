@@ -31,11 +31,15 @@ class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
     private lateinit var entry: Entry
 
     private val iconSize = itemView.resources.getDimensionPixelSize(R.dimen.commentator_image_size)
+    private val margin = iconSize/4
+    private val screenMargin = itemView.resources.getDimensionPixelSize(R.dimen.screen_margin)
     private val layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-    private val config = ImageConfig(fit = true, error = R.drawable.ic_account_circle_24dp, placeholder = R.drawable.ic_account_circle_24dp, transformations = listOf(Transformation.Circle))
+    private val config = ImageConfig(fit = true, error = R.drawable.ic_account_circle_24dp, transformations = listOf(Transformation.Circle))
+
+    private val maxCount = (itemView.resources.displayMetrics.widthPixels - 2 * screenMargin) / (iconSize - margin) - 1
 
     init {
-        layoutParams.marginEnd =  -iconSize / 3
+        layoutParams.marginEnd = -margin
     }
 
     override fun bind(t: Entry?) {
@@ -49,13 +53,18 @@ class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
         avatars.removeAllViews()
         entry = t
 
-        t.commentators?.forEachIndexed { i, avatar ->
-            val icon = ImageView(itemView.context)
-            icon.id = View.generateViewId()
-            icon.alpha = 0.7f
-            avatars.addView(icon, layoutParams)
+        t.commentators?.let { list ->
+            for (i in list.indices) {
+                if (i > maxCount) {
+                    break
+                }
+                val icon = ImageView(itemView.context)
+                icon.id = View.generateViewId()
+                icon.alpha = 0.7f
+                avatars.addView(icon, layoutParams)
 
-            ImageLoader.display(avatar, icon, config)
+                ImageLoader.display(list[i], icon, config)
+            }
         }
     }
 }

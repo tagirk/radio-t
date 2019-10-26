@@ -17,7 +17,6 @@ import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, PodcastsContract.Presenter>(), PodcastsContract.View,
         EntriesAdapter.Callback {
 
-
     private var entryForDownload: Entry? = null
         set(value) {
             field = value
@@ -33,6 +32,14 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
         return PodcastsPresenter(appComponent.entryRepository, appComponent.router)
     }
 
+    override fun onResume() {
+        super.onResume()
+        entryForDownload?.let {
+            presenter.download(entryForDownload!!)
+            entryForDownload = null
+        }
+    }
+
     override fun showDownloadError(error: String?) {
         context?.let { c ->
             AlertDialog.Builder(c)
@@ -46,13 +53,11 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
 
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if(requestCode != REQUEST_WRITE_PERMISSION){
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != REQUEST_WRITE_PERMISSION) {
             return
         }
-        if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            startDownload()
-        }else{
+
+        if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
             showNeedPermission()
         }
 
@@ -78,11 +83,13 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
         if (context == null) {
             return
         }
-        if (entryForDownload == null) {
-            return
-        }
         when {
-            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> presenter.download(entryForDownload!!)
+            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                entryForDownload?.let {
+                    presenter.download(entryForDownload!!)
+                    entryForDownload = null
+                }
+            }
 
             ActivityCompat.shouldShowRequestPermissionRationale(activity!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
 
@@ -97,13 +104,13 @@ class PodcastsFragment : BaseMvpListFragment<Entry, PodcastsContract.View, Podca
     private fun showPermissionRationale() {
         AlertDialog.Builder(context!!)
                 .setMessage(R.string.write_permission_rationale)
-                .setPositiveButton("OK"){_, _ -> requestWritePermission()}
+                .setPositiveButton("OK") { _, _ -> requestWritePermission() }
                 .setNegativeButton(R.string.cancel, null)
                 .create()
                 .show()
     }
 
-    private fun requestWritePermission(){
+    private fun requestWritePermission() {
         requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_WRITE_PERMISSION)
     }
 }

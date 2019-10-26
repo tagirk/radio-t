@@ -14,7 +14,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/screen_margin"
         android:maxLines="1"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/comments"
@@ -26,7 +26,7 @@
         android:id="@+id/comments"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="@dimen/screen_margin"
         android:textSize="11sp"
         android:gravity="bottom"
         android:textColor="@color/colorAccent"
@@ -54,8 +54,8 @@
         android:layout_width="match_parent"
         android:orientation="horizontal"
         android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="@dimen/screen_margin"
+        android:layout_marginEnd="@dimen/screen_margin"
         app:layout_constraintTop_toBottomOf="@+id/date"
         android:layout_height="wrap_content"/>
 
@@ -67,7 +67,7 @@
         android:background="@color/colorDivider"
         app:layout_constraintTop_toBottomOf="@+id/avatars"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/screen_margin"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

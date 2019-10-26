@@ -1,5 +1,6 @@
 package su.tagir.apps.radiot.ui.news
 
+import android.os.Bundle
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
@@ -29,8 +30,19 @@ class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.
 
     override fun createPresenter(): NewsContract.Presenter {
         val appComponent: AppComponent = (activity!!.application as App).appComponent
-        return NewsPresenter(appComponent.entryRepository, router = appComponent.router)
+        val categories = arguments!!.getStringArray("categories")!!
+        return NewsPresenter(categories, appComponent.entryRepository, router = appComponent.router)
     }
 
+    companion object{
+
+        fun newInstance(categories: Array<String>): NewsFragment{
+            val bundle = Bundle()
+            bundle.putStringArray("categories", categories)
+            val fr = NewsFragment()
+            fr.arguments = bundle
+            return fr
+        }
+    }
 
 }

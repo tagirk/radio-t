@@ -72,6 +72,14 @@ class SearchFragment :
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_search, container, false)
 
+    override fun onResume() {
+        super.onResume()
+        entryForDownload?.let {
+            presenter.download(entryForDownload!!)
+            entryForDownload = null
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         handler.removeCallbacksAndMessages(null)
@@ -126,9 +134,7 @@ class SearchFragment :
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
             return
         }
-        if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            startDownload()
-        }else{
+        if(grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED){
             showNeedPermission()
         }
     }
@@ -184,7 +190,12 @@ class SearchFragment :
             return
         }
         when {
-            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> presenter.download(entryForDownload!!)
+            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ->{
+                entryForDownload?.let {
+                    presenter.download(entryForDownload!!)
+                    entryForDownload = null
+                }
+            }
 
             ActivityCompat.shouldShowRequestPermissionRationale(activity!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
 

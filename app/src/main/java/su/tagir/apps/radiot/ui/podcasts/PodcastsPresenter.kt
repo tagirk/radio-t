@@ -16,14 +16,12 @@ class PodcastsPresenter(private val entryRepository: EntryRepository,
                         private val router: Router,
                         dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Entry, PodcastsContract.View>(dispatcher), PodcastsContract.Presenter {
 
+    private val categories = arrayOf("podcast")
+
     private var loadJob: Job? = null
 
     private val downloadContext: CoroutineContext by lazy {
         job + dispatcher + CoroutineExceptionHandler { _, exception -> view?.showDownloadError(exception.message) }
-    }
-
-    private val commentatorsContext: CoroutineContext by lazy {
-        job + dispatcher + CoroutineExceptionHandler { _, e -> Timber.e(e) }
     }
 
     override fun doOnAttach(view: PodcastsContract.View) {
@@ -35,7 +33,7 @@ class PodcastsPresenter(private val entryRepository: EntryRepository,
     private fun observePodcasts() {
         launch {
             entryRepository
-                    .getEntries("podcast", "prep")
+                    .getEntries(categories)
                     .collect { data ->
                         state = state.copy(data = data)
                     }
@@ -55,24 +53,13 @@ class PodcastsPresenter(private val entryRepository: EntryRepository,
         loadJob?.cancel()
         loadJob = launch {
             state = if (pullToRefresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING)
-            entryRepository.refreshPodcasts()
+            entryRepository.refreshEntries(categories, pullToRefresh)
             state = state.copy(status = Status.SUCCESS)
-        }
-
-        loadJob?.invokeOnCompletion { t ->
-            if (t == null) {
-                loadCommentators()
-            }
-        }
-    }
-
-    override fun loadCommentators() {
-        launch(commentatorsContext) {
-            entryRepository.loadCommentators()
         }
     }
 
     override fun download(entry: Entry) {
+        Timber.d("download: $entry")
         launch(downloadContext) {
             entryRepository
                     .startDownload(entry.audioUrl)

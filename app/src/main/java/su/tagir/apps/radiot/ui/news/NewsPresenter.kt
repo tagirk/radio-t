@@ -1,6 +1,7 @@
 package su.tagir.apps.radiot.ui.news
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -11,12 +12,19 @@ import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
 import su.tagir.apps.radiot.ui.mvp.Status
+import timber.log.Timber
+import kotlin.coroutines.CoroutineContext
 
-class NewsPresenter(private val entryRepository: EntryRepository,
+class NewsPresenter(private val categories: Array<String>,
+                    private val entryRepository: EntryRepository,
                     dispatcher: CoroutineDispatcher = MainDispatcher(),
                     private val router: Router) : BaseListPresenter<Entry, NewsContract.View>(dispatcher), NewsContract.Presenter {
 
     private var loadJob: Job? = null
+
+    private val commentatorsContext: CoroutineContext by lazy {
+        job + dispatcher + CoroutineExceptionHandler { _, e -> Timber.e(e) }
+    }
 
     override fun doOnAttach(view: NewsContract.View) {
         super.doOnAttach(view)
@@ -27,10 +35,16 @@ class NewsPresenter(private val entryRepository: EntryRepository,
     override fun observeNews() {
         launch {
             entryRepository
-                    .getEntries("news", "info")
+                    .getEntries(categories = categories)
                     .collect {
                         state = state.copy(data = it)
                     }
+        }
+    }
+
+    override fun loadCommentators() {
+        launch(commentatorsContext) {
+            entryRepository.loadCommentators()
         }
     }
 
@@ -38,8 +52,13 @@ class NewsPresenter(private val entryRepository: EntryRepository,
         loadJob?.cancel()
         loadJob = launch {
             state = if (pullToRefresh) state.copy(status = Status.REFRESHING) else state.copy(status = Status.LOADING)
-            entryRepository.refreshNews()
+            entryRepository.refreshEntries(categories, pullToRefresh)
             state = state.copy(status = Status.SUCCESS)
+        }
+        loadJob?.invokeOnCompletion { t ->
+            if (t == null) {
+                loadCommentators()
+            }
         }
     }
 

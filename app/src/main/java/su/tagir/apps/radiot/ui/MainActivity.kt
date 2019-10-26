@@ -40,6 +40,7 @@ import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
 import su.tagir.apps.radiot.ui.settings.SettingsFragmentRoot
 import su.tagir.apps.radiot.utils.visibleGone
+import timber.log.Timber
 
 class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View,
         View.OnClickListener,
@@ -186,6 +187,11 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
         val entryRepository = appComponent.entryRepository
         val router = appComponent.router
         return MainPresenter(entryRepository, router)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        Timber.d("onRequestPermissionsResult: $requestCode")
     }
 
 

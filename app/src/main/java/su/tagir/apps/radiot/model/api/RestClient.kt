@@ -9,7 +9,7 @@ interface RestClient {
 
     @GET("last/{posts}")
     suspend fun getPosts(@Path("posts") posts: Int,
-                 @Query("categories") vararg categories: String): List<RTEntry>
+                 @Query("categories") categories: String): List<RTEntry>
 
     @GET("search")
     suspend fun search(@Query("q") query: String,

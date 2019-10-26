@@ -40,7 +40,7 @@ class MainPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun navigateToSettings() {
-        router.navigateTo(Screens.SettingsScreen)
+        router.newRootScreen(Screens.SettingsScreen)
     }
 
     override fun navigateToChat() {
@@ -48,7 +48,7 @@ class MainPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun navigateToPirates() {
-        router.navigateTo(Screens.PiratesScreen)
+        router.newRootScreen(Screens.PiratesScreen)
     }
 
     override fun navigateToAbout() {

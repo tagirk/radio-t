@@ -14,6 +14,7 @@ interface NewsContract {
         fun observeNews()
         fun select(entry: Entry)
         fun openComments(entry: Entry)
+        fun loadCommentators()
     }
 
 }

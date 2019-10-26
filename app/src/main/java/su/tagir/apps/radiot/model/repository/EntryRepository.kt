@@ -11,17 +11,15 @@ interface EntryRepository {
 
     fun getTimeLabels(entry: Entry?): Flow<List<TimeLabel>>
 
-    suspend fun refreshPodcasts()
+    suspend fun refreshEntries(categories: Array<String>, force: Boolean = false)
 
     suspend fun loadCommentators()
 
-    suspend fun refreshPirates()
+    suspend fun refreshPirates(force: Boolean = false)
 
-    fun getEntries(vararg categories: String): Flow<List<Entry>>
+    fun getEntries(categories: Array<String>): Flow<List<Entry>>
 
     fun getDownloadedEntries(vararg categories: String): Flow<List<Entry>>
-
-    suspend fun refreshNews()
 
     suspend fun search(query: String)
 

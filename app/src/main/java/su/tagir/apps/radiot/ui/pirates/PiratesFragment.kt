@@ -48,17 +48,22 @@ class PiratesFragment :
 
     override fun createAdapter() = EntriesAdapter(this)
 
+    override fun onResume() {
+        super.onResume()
+        entryForDownload?.let {
+            presenter.download(entryForDownload!!)
+            entryForDownload = null
+        }
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if(requestCode != REQUEST_WRITE_PERMISSION){
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
             return
         }
-        if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            startDownload()
-        }else{
+        if(grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED){
             showNeedPermission()
         }
-
     }
 
     override fun select(entry: Entry) {
@@ -85,7 +90,12 @@ class PiratesFragment :
             return
         }
         when {
-            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> presenter.download(entryForDownload!!)
+            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                entryForDownload?.let {
+                    presenter.download(entryForDownload!!)
+                    entryForDownload = null
+                }
+            }
 
             ActivityCompat.shouldShowRequestPermissionRationale(activity!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
 

@@ -15,6 +15,7 @@ import su.tagir.apps.radiot.model.entries.*
 import su.tagir.apps.radiot.model.parser.PiratesParser
 import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.utils.timeOfDay
+import timber.log.Timber
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
@@ -37,6 +38,8 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     private val pageResultQueries = database.pageResultQueries
     private val searchResultQueries = database.searchResultQueries
 
+    private val refreshLimiter = RateLimiter<String>(5, TimeUnit.MINUTES)
+
     override fun getCurrent(): Flow<Entry?> =
             entryQueries.findCurrentPlaying(mapper = entryMapper).asFlow().mapToOneOrNull(dispatcher)
 
@@ -45,8 +48,12 @@ class EntryRepositoryImpl(private val restClient: RestClient,
 
 
     @ExperimentalCoroutinesApi
-    override suspend fun refreshPodcasts() {
-        val podcasts = restClient.getPosts(PAGE_SIZE, "podcast,prep")
+    override suspend fun refreshEntries(categories: Array<String>, force: Boolean) {
+        val categoriesString = categories.joinToString(separator = ",")
+        if(!refreshLimiter.shouldFetch(categoriesString) && !force){
+            return
+        }
+        val podcasts = restClient.getPosts(PAGE_SIZE, categories.joinToString(separator = ","))
         val commentsCount = remarkClient.getCommentsCount(urls = podcasts.map { it.url })
         dispatcher {
             database.transaction {
@@ -60,6 +67,9 @@ class EntryRepositoryImpl(private val restClient: RestClient,
 
     @ExperimentalCoroutinesApi
     override suspend fun loadCommentators() {
+        if(!refreshLimiter.shouldFetch("commentators")){
+            return
+        }
         dispatcher{
             val preps = database.entryQueries
                     .findByCategories(listOf(listOf("prep")), entryMapper)
@@ -83,7 +93,10 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     }
 
     @ExperimentalCoroutinesApi
-    override suspend fun refreshPirates() {
+    override suspend fun refreshPirates(force: Boolean) {
+        if(!refreshLimiter.shouldFetch("pirates") && !force){
+            return
+        }
         dispatcher.invoke {
             val connection = URL("https://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
@@ -95,7 +108,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         }
     }
 
-    override fun getEntries(vararg categories: String): Flow<List<Entry>> {
+    override fun getEntries(categories: Array<String>): Flow<List<Entry>> {
         val list = categories.map { s -> listOf(s) }
         return entryQueries.findByCategories(list, entryMapper).asFlow().mapToList(dispatcher)
     }
@@ -106,15 +119,6 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         return entryQueries.findDownloadedByCategories(list, mapper = entryMapper).asFlow().mapToList(dispatcher)
     }
 
-    @ExperimentalCoroutinesApi
-    override suspend fun refreshNews() {
-        val news = restClient.getPosts(PAGE_SIZE, "news,info")
-        dispatcher {
-            database.transaction {
-                insertRTEntries(news)
-            }
-        }
-    }
 
     override suspend fun search(query: String) {
         val entries = restClient.search(query, 0, PAGE_SIZE)
@@ -160,6 +164,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
     override suspend fun startDownload(url: String?) {
         val downloadId = downloadManager.startDownload(url)
         dispatcher {
+            Timber.d("startDownload: $downloadId")
             entryQueries.updateDownloadId(downloadId, url)
         }
     }
@@ -259,7 +264,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
             podcast
                     .timeLabels
                     ?.forEach { timeLabel ->
-                        timeLabelQueries.insert(timeLabel.topic, timeLabel.time?.timeOfDay(), timeLabel.duration, timeLabel.time)
+                        timeLabelQueries.insert(timeLabel.topic, timeLabel.time?.timeOfDay(), timeLabel.duration, podcastTime = podcast.date)
                     }
         }
     }
