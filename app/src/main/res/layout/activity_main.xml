@@ -35,6 +35,7 @@
             android:layout_height="match_parent"
             android:elevation="8dp"
             android:visibility="gone"
+            android:layout_marginBottom="?actionBarSize"
             app:behavior_peekHeight="@dimen/player_peek_height"
             app:layout_behavior="@string/bottom_sheet_behavior" />
 

@@ -35,6 +35,10 @@ class EntriesAdapter(private val actionHandler: Callback) :
                     val entry = items[holder.adapterPosition]
                     actionHandler.select(entry)
                 }
+                holder.comments.setOnClickListener {
+                    val entry = items[holder.adapterPosition]
+                    actionHandler.openComments(entry)
+                }
                 return holder
             }
             TYPE_PREP -> {

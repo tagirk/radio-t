@@ -66,7 +66,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
     private val requestHandler = RequestHandler(this)
 
-    private val serviceCallback = object : IAudioServiceCallback.Stub(){
+    private val serviceCallback = object : IAudioServiceCallback.Stub() {
         override fun onStateChanged(loading: Boolean, state: Int) {
             val msg = requestHandler.obtainMessage(0, -1, -1, loading)
             requestHandler.sendMessage(msg)
@@ -77,7 +77,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
             requestHandler.sendMessage(msg)
         }
 
-        override fun progress(progress: Progress?){
+        override fun progress(progress: Progress?) {
             val msg = requestHandler.obtainMessage(2, -1, -1, progress)
             requestHandler.sendMessage(msg)
         }
@@ -186,7 +186,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun onClick(p0: View?) {
-        when(p0?.id){
+        when (p0?.id) {
             R.id.btn_pause, R.id.btn_pause_big -> presenter.pause()
             R.id.btn_play, R.id.btn_play_big -> presenter.resume()
             R.id.chat -> presenter.showChat()
@@ -211,11 +211,8 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         btnPauseBig.visibleInvisible(entry.state == EntryState.PLAYING)
         btnPlayBig.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
 
-        entry.image?.let{url ->
-            val config = ImageConfig(placeholder = R.drawable.ic_notification_large, error = R.drawable.ic_notification_large)
-            ImageLoader.display(url, image, config)
-
-        }
+        val config = ImageConfig(placeholder = R.drawable.ic_notification_large, error = R.drawable.ic_notification_large)
+        ImageLoader.display(entry.image ?: "empty", image, config)
 
         title.text = entry.title
         seekBar.isEnabled = entry.url != STREAM_URL
@@ -297,19 +294,19 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
 
-    class RequestHandler(playerFragment: PlayerFragment): Handler() {
+    class RequestHandler(playerFragment: PlayerFragment) : Handler() {
         private val weakRef = WeakReference(playerFragment)
 
         override fun handleMessage(msg: Message) {
-            when(msg.what){
-                0 ->  weakRef.get()?.showLoading(msg.obj as Boolean)
+            when (msg.what) {
+                0 -> weakRef.get()?.showLoading(msg.obj as Boolean)
                 1 -> {
-                    msg.obj?.let {error ->
+                    msg.obj?.let { error ->
                         weakRef.get()?.showError(error as String)
                     }
                 }
                 2 -> {
-                    msg.obj?.let {progress ->
+                    msg.obj?.let { progress ->
                         weakRef.get()?.showProgress(progress as Progress)
                     }
                 }

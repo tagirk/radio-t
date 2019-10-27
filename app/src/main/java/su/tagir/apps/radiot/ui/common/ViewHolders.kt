@@ -148,6 +148,7 @@ class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
     private val download: ImageButton = itemView.findViewById(R.id.btn_download)
     private val remove: ImageButton = itemView.findViewById(R.id.btn_remove)
     private val showNotes: TextView = itemView.findViewById(R.id.show_notes)
+    val comments: TextView = itemView.findViewById(R.id.comments)
 
     private lateinit var entry: Entry
 
@@ -173,7 +174,7 @@ class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
         sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length?.plus(3)
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         showNotes.text = sb
-
+        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
 
         this.entry = t
 

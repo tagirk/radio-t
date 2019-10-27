@@ -2,11 +2,11 @@
 <resources>
 
     <plurals name="days">
-        <item quantity="one">день</item>
-        <item quantity="few">дня</item>
-        <item quantity="many">дней</item>
-        <item quantity="zero">дней</item>
-        <item quantity="other">дней</item>
+        <item quantity="one">Один день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="zero">%d дней</item>
+        <item quantity="other">%d дней</item>
     </plurals>
 
     <plurals name="hours">

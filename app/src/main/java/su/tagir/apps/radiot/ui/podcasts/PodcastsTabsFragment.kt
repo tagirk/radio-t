@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -13,16 +14,19 @@ import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.di.AppComponent
+import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 import su.tagir.apps.radiot.ui.podcasts.downloaded.DownloadedPodcastsFragment
+import su.tagir.apps.radiot.utils.visibleGone
 
-class PodcastsTabsFragment: Fragment(),
+class PodcastsTabsFragment: BaseMvpFragment<PodcastsTabsContract.View, PodcastsTabsContract.Presenter>(), PodcastsTabsContract.View,
         View.OnClickListener{
-
 
     private lateinit var viewPager: ViewPager
 
     private lateinit var tabs: TabLayout
 
+    private lateinit var streamView: View
+    private lateinit var streamTime: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_tabs_podcasts, container, false)
@@ -34,7 +38,9 @@ class PodcastsTabsFragment: Fragment(),
 
         viewPager = view.findViewById(R.id.view_pager)
         tabs = view.findViewById(R.id.tabs)
-
+        streamView = view.findViewById(R.id.stream_layout)
+        streamTime = view.findViewById(R.id.stream_time)
+        streamView.setOnClickListener { presenter.playStream() }
         initFragments()
     }
 
@@ -52,6 +58,19 @@ class PodcastsTabsFragment: Fragment(),
         val fragmentAdapter = FragmentAdapter(childFragmentManager)
         viewPager.adapter = fragmentAdapter
         tabs.setupWithViewPager(viewPager)
+    }
+
+    override fun createPresenter(): PodcastsTabsContract.Presenter {
+        val entryRepository = (activity!!.application as App).appComponent.entryRepository
+        return PodcastTabsPresenter(entryRepository, application = activity!!.application)
+    }
+
+    override fun showOrHideStream(show: Boolean) {
+        streamView.visibleGone(show)
+    }
+
+    override fun showStreamTime(time: String?) {
+        streamTime.text = time
     }
 
     private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {

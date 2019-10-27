@@ -34,4 +34,5 @@
     <string name="comments">Комментарии</string>
     <string name="write_permission_rationale">Для загрузки подкаста необходимо дать разрешение на запись.</string>
     <string name="cancel">Закрыть</string>
+    <string name="formatted_time">%1$02d:%2$02d:%3$02d</string>
 </resources>
