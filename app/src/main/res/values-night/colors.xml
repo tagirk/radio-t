@@ -14,4 +14,5 @@
     <color name="colorUrl">#2196F3</color>
     <color name="colorBlur">#cc111111</color>
     <color name="colorTabTextColor">#99ababab</color>
+    <color name="colorStreamView">#22999999</color>
 </resources>

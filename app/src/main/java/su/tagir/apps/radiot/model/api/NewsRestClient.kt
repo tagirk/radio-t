@@ -14,4 +14,6 @@ interface NewsRestClient {
 
     @GET("news/active")
     suspend fun getActiveArticle():Article
+
+
 }

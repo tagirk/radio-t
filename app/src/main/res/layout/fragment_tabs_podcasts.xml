@@ -52,7 +52,7 @@
                 android:paddingEnd="16dp"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
-                android:background="@color/colorPlayerBackground"
+                android:background="@color/colorStreamView"
                 android:visibility="gone">
 
                 <TextView

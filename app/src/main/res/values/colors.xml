@@ -17,5 +17,6 @@
     <color name="colorBlur">#ccffffff</color>
     <color name="colorTabTextColor">#99FFFFFF</color>
     <color name="colorPositiveComment">#259e06</color>"
+    <color name="colorStreamView">#eeeeee</color>
 
 </resources>
