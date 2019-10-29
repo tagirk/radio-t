@@ -68,7 +68,7 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
 
     override fun seekTo(timeLabel: TimeLabel) {
         timeLabel.time?.let { time ->
-            view?.seekTo(time / 1000)
+            view?.seekTo(time.toInt() / 1000)
         }
     }
 

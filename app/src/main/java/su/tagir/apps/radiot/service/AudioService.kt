@@ -11,10 +11,7 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.net.Uri
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.RemoteCallbackList
+import android.os.*
 import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
@@ -33,22 +30,32 @@ import su.tagir.apps.radiot.model.EntryContentProvider
 import su.tagir.apps.radiot.model.PodcastStateService
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
-import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.ui.notification.createMediaNotification
 import timber.log.Timber
+import java.lang.ref.WeakReference
+
+const val ACTION_PLAY = "action_play"
+const val ACTION_RESUME = "action_resume"
+const val ACTION_PAUSE = "action_pause"
+const val ACTION_STOP = "action_stop"
+const val MSG_REGISTER_CLIENT = 1
+const val MSG_UNREGISTER_CLIENT = 2
+const val MSG_SEEK_TO = 3
+const val MSG_REQUEST_PROGRESS = 4
+const val MSG_PROGRESS = 5
+const val MSG_ACTIVITY_STARTED = 6
+const val MSG_ACTIVITY_STOPPED = 7
+const val MSG_STATE_CHANGED = 8
+const val MSG_ERROR = 9
+
+const val KEY_ERROR = "key_error"
+const val KEY_URL = "key_url"
+const val KEY_FILE = "key_file"
+const val KEY_PROGRESS = "key_progress"
 
 class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
 
     companion object {
-
-        const val ACTION_PLAY = "action_play"
-        const val ACTION_RESUME = "action_resume"
-        const val ACTION_PAUSE = "action_pause"
-        const val ACTION_STOP = "action_stop"
-
-        const val KEY_URL = "key_url"
-        const val KEY_FILE = "key_file"
-        const val KEY_PROGRESS = "key_progress"
 
         fun play(filePath: String?, url: String?, progress: Long, context: Context) {
             val i = newIntent(context)
@@ -80,11 +87,58 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         private fun newIntent(context: Context) = Intent(context, AudioService::class.java)
     }
 
+    internal class IncomingHandler(audioService: AudioService) : Handler() {
+
+        private val serviceRef = WeakReference<AudioService>(audioService)
+
+        override fun handleMessage(msg: Message) {
+            val audioService = serviceRef.get() ?: return
+            when (msg.what) {
+                MSG_REGISTER_CLIENT -> {
+                    audioService.client = msg.replyTo
+                }
+                MSG_UNREGISTER_CLIENT -> {
+                    audioService.client = null
+                }
+                MSG_SEEK_TO ->{
+                    audioService.resumePlay()
+                    audioService.player?.seekTo(msg.arg1.toLong() * 1000)
+                }
+                MSG_REQUEST_PROGRESS ->{
+                    val duration = audioService.player?.duration?.div(1000) ?: 0L
+                    val progress = audioService.player?.currentPosition?.div(1000) ?: 0L
+                    audioService.client?.send(Message.obtain(null, MSG_PROGRESS, duration.toInt(), progress.toInt()))
+                }
+                MSG_ACTIVITY_STARTED ->{
+                    audioService.stopForeground(true)
+                    audioService.isForeground = false
+                    audioService.updateState()
+                }
+                MSG_ACTIVITY_STOPPED -> {
+                    val player = audioService.player
+                    if (player?.playbackState == Player.STATE_BUFFERING || player?.playbackState == Player.STATE_READY) {
+                        if (player.playWhenReady) {
+                            val entry = audioService.getCurrentEntry()
+                            val notif = createMediaNotification(entry, false, context = audioService)
+                            audioService.startForeground(42, notif)
+                            audioService.loadImage(entry)
+                            audioService.isForeground = true
+                        }
+                    } else {
+                        audioService.stopSelf()
+                    }
+                }
+
+                else -> super.handleMessage(msg)
+            }
+        }
+    }
+
+    private lateinit var messenger: Messenger
+    private var client: Messenger? = null
+
     private var player: SimpleExoPlayer? = null
     private var trackSelector: DefaultTrackSelector? = null
-    private val callbackList = RemoteCallbackList<IAudioServiceCallback>()
-
-    private val handler = Handler()
 
     private val becomingNoisyReceiver = BecomingNoisyReceiver()
     private lateinit var audioManager: AudioManager
@@ -103,59 +157,6 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
                 notificationIcon = null
             }
         }
-
-    private val service = object : IAudioService.Stub() {
-        override fun seekTo(secs: Long) {
-            handler.post {
-                resumePlay()
-                player?.seekTo(secs * 1000)
-            }
-        }
-
-
-        override fun requestProgress() {
-            handler.post {
-                val duration = player?.duration?.div(1000) ?: 0L
-                val progress = player?.currentPosition?.div(1000) ?: 0L
-                val n = callbackList.beginBroadcast()
-                for (i in 0 until n) {
-                    callbackList.getBroadcastItem(i).progress(Progress(duration, progress))
-                }
-                callbackList.finishBroadcast()
-            }
-        }
-
-        override fun onActivityStarted() {
-            stopForeground(true)
-            isForeground = false
-
-            updateState()
-        }
-
-        override fun onActivityStopped() {
-            handler.post {
-                if (player?.playbackState == Player.STATE_BUFFERING || player?.playbackState == Player.STATE_READY) {
-                    if (player?.playWhenReady == true) {
-                        val entry = getCurrentEntry()
-                        val notif = createMediaNotification(entry, false, context = this@AudioService)
-                        startForeground(42, notif)
-                        loadImage(entry)
-                        isForeground = true
-                    }
-                } else {
-                    stopSelf()
-                }
-            }
-        }
-
-        override fun registerCallback(callback: IAudioServiceCallback?) {
-            callbackList.register(callback)
-        }
-
-        override fun unregisterCallback(callback: IAudioServiceCallback?) {
-            callbackList.unregister(callback)
-        }
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -179,7 +180,6 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             audioManager.abandonAudioFocus(this)
         }
         unregisterReceiver(becomingNoisyReceiver)
-        handler.removeCallbacksAndMessages(null)
         releasePlayer()
     }
 
@@ -203,7 +203,8 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
     }
 
     override fun onBind(p0: Intent): IBinder? {
-        return service.asBinder()
+        messenger = Messenger(IncomingHandler(this))
+        return messenger.binder
     }
 
     override fun onAudioFocusChange(p0: Int) {
@@ -214,7 +215,6 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
                     playbackDelayed = false
                     player?.playWhenReady = false
                 }
-
             }
 
             AudioManager.AUDIOFOCUS_GAIN -> {
@@ -252,7 +252,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
 
             audioFocusRequest = AudioFocusRequest
                     .Builder(AudioManager.AUDIOFOCUS_GAIN)
-                    .setOnAudioFocusChangeListener(this, handler)
+                    .setOnAudioFocusChangeListener(this)
                     .setWillPauseWhenDucked(true)
                     .setAudioAttributes(playbackAttributes)
                     .build()
@@ -344,11 +344,12 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         }
         val progress = player?.currentPosition ?: 0
         PodcastStateService.updateCurrentPodcastStateAndProgress(state, progress, this)
-        val n = callbackList.beginBroadcast()
-        for (i in 0 until n) {
-            callbackList.getBroadcastItem(i).onStateChanged(loading, state)
+
+        client?.let {
+            val message = Message.obtain(null, MSG_STATE_CHANGED, if(loading) 1 else 0, -1)
+            client?.send(message)
         }
-        callbackList.finishBroadcast()
+
         if (isForeground) {
             updateNotification()
         }
@@ -384,11 +385,12 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
 
 
     private fun broadcastError(error: String?) {
-        val n = callbackList.beginBroadcast()
-        for (i in 0 until n) {
-            callbackList.getBroadcastItem(i).onError(error)
+        client?.let {
+            val data = Bundle()
+            data.putString(KEY_ERROR, error)
+            val message = Message.obtain(null, MSG_ERROR, data)
+            client?.send(message)
         }
-        callbackList.finishBroadcast()
     }
 
     private fun loadImage(entry: Entry?) {

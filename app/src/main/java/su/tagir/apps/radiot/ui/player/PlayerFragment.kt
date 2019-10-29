@@ -20,11 +20,8 @@ import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
-import su.tagir.apps.radiot.model.entries.Progress
 import su.tagir.apps.radiot.model.entries.TimeLabel
-import su.tagir.apps.radiot.service.AudioService
-import su.tagir.apps.radiot.service.IAudioService
-import su.tagir.apps.radiot.service.IAudioServiceCallback
+import su.tagir.apps.radiot.service.*
 import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 import su.tagir.apps.radiot.utils.convertSeconds
 import su.tagir.apps.radiot.utils.visibleGone
@@ -62,29 +59,40 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
     private var seeking = false
 
-    private var audioService: IAudioService? = null
+    private lateinit var messenger: Messenger
+    private var service: Messenger? = null
 
-    private val requestHandler = RequestHandler(this)
+    internal class IncomingHandler(playerFragment: PlayerFragment) : Handler() {
 
-    private val serviceCallback = object : IAudioServiceCallback.Stub() {
-        override fun onStateChanged(loading: Boolean, state: Int) {
-            val msg = requestHandler.obtainMessage(0, -1, -1, loading)
-            requestHandler.sendMessage(msg)
-        }
+        private val playerFragmentRef = WeakReference<PlayerFragment>(playerFragment)
 
-        override fun onError(error: String?) {
-            val msg = requestHandler.obtainMessage(1, -1, -1, error)
-            requestHandler.sendMessage(msg)
-        }
-
-        override fun progress(progress: Progress?) {
-            val msg = requestHandler.obtainMessage(2, -1, -1, progress)
-            requestHandler.sendMessage(msg)
+        override fun handleMessage(msg: Message) {
+            val playerFragment = playerFragmentRef.get() ?: return
+            when (msg.what) {
+                MSG_PROGRESS -> {
+                    val duration = msg.arg1
+                    val progress = msg.arg2
+                    playerFragment.showProgress(duration, progress)
+                }
+                MSG_STATE_CHANGED -> {
+                    val loading = msg.arg1 == 1
+                    playerFragment.showLoading(loading)
+                }
+                MSG_ERROR -> {
+                    val error = (msg.obj as? Bundle)?.getString(KEY_ERROR)
+                    error?.let {
+                        playerFragment.showError(error)
+                    }
+                }
+            }
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_player, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val v = inflater.inflate(R.layout.fragment_player, container, false)
+        messenger = Messenger(IncomingHandler(this))
+        return v
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -138,7 +146,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                seekTo(seekBar.progress.toLong())
+                seekTo(seekBar.progress)
                 seeking = false
             }
         })
@@ -157,8 +165,8 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
     override fun onPause() {
         try {
-            audioService?.unregisterCallback(serviceCallback)
-            audioService?.onActivityStopped()
+            val message = Message.obtain(null, MSG_ACTIVITY_STOPPED)
+            service?.send(message)
         } catch (e: RemoteException) {
             Timber.e(e)
         }
@@ -167,22 +175,22 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
-        try {
-            audioService?.unregisterCallback(serviceCallback)
-        } catch (e: RemoteException) {
-            Timber.e(e)
-        }
-        audioService = null
+        service = null
     }
 
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        audioService = IAudioService.Stub.asInterface(service)
+    override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+        service = Messenger(binder)
         try {
-            audioService?.registerCallback(serviceCallback)
-            audioService?.onActivityStarted()
+            var message = Message.obtain(null, MSG_REGISTER_CLIENT)
+            message.replyTo = messenger
+            service?.send(message)
+
+            message = Message.obtain(null, MSG_ACTIVITY_STARTED)
+            service?.send(message)
         } catch (e: RemoteException) {
             Timber.e(e)
         }
+
     }
 
     override fun onClick(p0: View?) {
@@ -191,8 +199,8 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
             R.id.btn_play, R.id.btn_play_big -> presenter.resume()
             R.id.chat -> presenter.showChat()
             R.id.btn_web -> presenter.openWebPage()
-            R.id.btn_forward -> seekTo(seekBar.progress.toLong() + 30L)
-            R.id.btn_replay -> seekTo(max(0L, seekBar.progress.toLong() - 30L))
+            R.id.btn_forward -> seekTo(seekBar.progress + 30)
+            R.id.btn_replay -> seekTo(max(0, seekBar.progress - 30))
         }
     }
 
@@ -223,17 +231,22 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun showTimeLabels(timeLabels: List<TimeLabel>) {
-        Timber.d("showTimeLabels: $timeLabels")
         timeLabelsAdapter.update(timeLabels)
     }
 
     override fun requestProgress() {
-        audioService?.requestProgress()
+        try {
+            val message = Message.obtain(null, MSG_REQUEST_PROGRESS)
+            service?.send(message)
+        } catch (e: RemoteException) {
+            Timber.e(e)
+        }
     }
 
-    override fun seekTo(seek: Long) {
+    override fun seekTo(seek: Int) {
         try {
-            audioService?.seekTo(seek)
+            val message = Message.obtain(null, MSG_SEEK_TO, seek)
+            service?.send(message)
         } catch (e: RemoteException) {
             Timber.e(e)
         }
@@ -258,10 +271,9 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
                 .show()
     }
 
-    private fun bindService(context: Context) {
-        val intent = Intent(context, AudioService::class.java)
-        intent.action = IAudioService::class.java.name
-        context.bindService(intent, this, Context.BIND_AUTO_CREATE)
+    private fun bindService(context: Context?) {
+        context?.bindService(Intent(context,
+                AudioService::class.java), this, Context.BIND_AUTO_CREATE)
     }
 
 
@@ -278,40 +290,18 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         btnWeb.visibleInvisible(btnWeb.alpha > 0)
     }
 
-    private fun showProgress(progress: Progress?) {
+    private fun showProgress(duration: Int, progress: Int) {
         if (seeking) {
             return
         }
-        val duration = progress?.duration?.toInt() ?: 0
         if (seekBar.max != duration) {
             seekBar.max = duration
         }
-        seekBar.progress = progress?.progress?.toInt() ?: 0
-        progressTime.text = progress?.progress?.convertSeconds()
+        seekBar.progress = progress
+        progressTime.text = progress.convertSeconds()
 
-        val leftTime = progress?.duration?.minus(progress.progress) ?: 0
+        val leftTime = duration - progress
         this.leftTime.text = (if (leftTime >= 0) leftTime else 0).convertSeconds()
-    }
-
-
-    class RequestHandler(playerFragment: PlayerFragment) : Handler() {
-        private val weakRef = WeakReference(playerFragment)
-
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                0 -> weakRef.get()?.showLoading(msg.obj as Boolean)
-                1 -> {
-                    msg.obj?.let { error ->
-                        weakRef.get()?.showError(error as String)
-                    }
-                }
-                2 -> {
-                    msg.obj?.let { progress ->
-                        weakRef.get()?.showProgress(progress as Progress)
-                    }
-                }
-            }
-        }
     }
 
 }

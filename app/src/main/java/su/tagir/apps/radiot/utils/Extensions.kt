@@ -73,6 +73,20 @@ fun Long?.convertSeconds(): String {
     }
     return String.format("%02d:%02d", m, s)
 }
+fun Int?.convertSeconds(): String {
+    if (this == null || this == 0) {
+        return "00:00"
+    }
+    val h = this / 3600
+    var s = this % 3600
+    val m = s / 60
+    s %= 60
+    if (h > 0) {
+        return String.format("%d:%02d:%02d", h, m, s)
+    }
+    return String.format("%02d:%02d", m, s)
+}
+
 
 
 

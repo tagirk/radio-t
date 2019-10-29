@@ -12,7 +12,7 @@ interface PlayerContract {
         fun showCurrentPodcast(entry: Entry)
         fun showTimeLabels(timeLabels: List<TimeLabel>)
         fun requestProgress()
-        fun seekTo(seek: Long)
+        fun seekTo(seek: Int)
         fun showError(error: String)
         fun showLoading(loading: Boolean)
         fun onSlide(offset: Float)
