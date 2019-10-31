@@ -9,7 +9,6 @@ import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
 import com.facebook.stetho.Stetho
-import com.squareup.leakcanary.LeakCanary
 import io.fabric.sdk.android.Fabric
 import saschpe.android.customtabs.CustomTabsActivityLifecycleCallbacks
 import su.tagir.apps.radiot.di.AppComponent
@@ -27,12 +26,6 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            return
-        }
-        LeakCanary.install(this)
-
         appComponent = AppComponent.Impl(appModule = AppModule.Impl(this),
                 dataModule = DataModule.Impl(this),
                 navigationModule = NavigationModule.Impl())

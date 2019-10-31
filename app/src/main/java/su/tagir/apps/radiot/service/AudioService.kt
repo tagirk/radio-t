@@ -19,6 +19,7 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.*
 import com.google.android.exoplayer2.util.Util
+import leakcanary.AppWatcher
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
@@ -171,6 +172,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         }
         unregisterReceiver(becomingNoisyReceiver)
         releasePlayer()
+        AppWatcher.objectWatcher.watch(this) //leakcanary
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
