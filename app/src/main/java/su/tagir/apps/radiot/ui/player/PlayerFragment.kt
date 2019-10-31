@@ -75,6 +75,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
                     playerFragment.showProgress(duration, progress)
                 }
                 MSG_STATE_CHANGED -> {
+                    playerFragment.presenter.update()
                     val loading = msg.arg1 == 1
                     playerFragment.showLoading(loading)
                 }
@@ -214,6 +215,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun showCurrentPodcast(entry: Entry) {
+//        Timber.d("entry: $entry")
         btnPause.visibleInvisible(entry.state == EntryState.PLAYING)
         btnPlay.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
         btnPauseBig.visibleInvisible(entry.state == EntryState.PLAYING)
@@ -245,7 +247,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
     override fun seekTo(seek: Int) {
         try {
-            val message = Message.obtain(null, MSG_SEEK_TO, seek)
+            val message = Message.obtain(null, MSG_SEEK_TO, seek, -1)
             service?.send(message)
         } catch (e: RemoteException) {
             Timber.e(e)

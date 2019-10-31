@@ -2,10 +2,7 @@ package su.tagir.apps.radiot.service
 
 import android.app.NotificationManager
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
@@ -27,7 +24,6 @@ import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.image.Target
 import su.tagir.apps.radiot.model.EntryContentProvider
-import su.tagir.apps.radiot.model.PodcastStateService
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.ui.notification.createMediaNotification
@@ -75,12 +71,6 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         fun resume(context: Context) {
             val i = newIntent(context)
             i.action = ACTION_RESUME
-            context.startService(i)
-        }
-
-        fun stop(context: Context) {
-            val i = newIntent(context)
-            i.action = ACTION_STOP
             context.startService(i)
         }
 
@@ -305,7 +295,11 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             }
         }
 
-        PodcastStateService.saveCurrent(url!!, player?.currentPosition ?: 0, this)
+//        PodcastStateService.saveCurrent(url!!, player?.currentPosition ?: 0, this)
+        val cv = ContentValues()
+        cv.put("audioUrl", url)
+        cv.put("lastProgress", player?.currentPosition ?: 0)
+        contentResolver.update(Uri.parse(EntryContentProvider.ENTRY_URI), cv, null, null)
 
         player?.prepare(dataSource)
         if (progress > 0) {
@@ -325,7 +319,6 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         val loading = player?.playbackState == Player.STATE_BUFFERING
 
         val isPlaying = (true == player?.isLoading || player?.playbackState == Player.STATE_READY || player?.playbackState == Player.STATE_BUFFERING)
-
         val state: Int
 
         when {
@@ -343,8 +336,12 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             }
         }
         val progress = player?.currentPosition ?: 0
-        PodcastStateService.updateCurrentPodcastStateAndProgress(state, progress, this)
 
+        val cv = ContentValues()
+        cv.put("state", state)
+        cv.put("progress", progress)
+        contentResolver.update(Uri.parse(EntryContentProvider.UPDATE_ENTRY_URI), cv, null, null)
+        Timber.d("state: $state")
         client?.let {
             val message = Message.obtain(null, MSG_STATE_CHANGED, if(loading) 1 else 0, -1)
             client?.send(message)

@@ -14,11 +14,12 @@ import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
-import timber.log.Timber
 
 class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
                       dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
+
+    private var observeCurrentJob: Job? = null
 
     private var currentPodcast: Entry? = null
         set(value) {
@@ -31,7 +32,7 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
     @ExperimentalCoroutinesApi
     @FlowPreview
     override fun doOnAttach(view: PlayerContract.View) {
-        observeCurrent()
+        update()
         startUpdateProgress()
     }
 
@@ -74,14 +75,14 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
 
     @ExperimentalCoroutinesApi
     @FlowPreview
-    private fun observeCurrent() {
-        launch {
+    override fun update()  {
+        observeCurrentJob?.cancel()
+        observeCurrentJob = launch {
             entryRepository
                     .getCurrent()
                     .onEach { entry -> currentPodcast = entry }
                     .flatMapLatest { entry -> entryRepository.getTimeLabels(entry) }
                     .collect { labels ->
-                        Timber.d("$labels")
                         view?.showTimeLabels(labels) }
         }
     }

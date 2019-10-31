@@ -1,6 +1,5 @@
 package su.tagir.apps.radiot.ui.notification
 
-
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -13,8 +12,11 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.model.PodcastStateService
 import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.service.ACTION_PAUSE
+import su.tagir.apps.radiot.service.ACTION_RESUME
+import su.tagir.apps.radiot.service.ACTION_STOP
+import su.tagir.apps.radiot.service.AudioService
 import su.tagir.apps.radiot.ui.MainActivity
 import su.tagir.apps.radiot.utils.longDateFormat
 import java.util.*
@@ -86,21 +88,20 @@ fun createMediaNotification(entry: Entry?, paused: Boolean, icon: Bitmap? = null
                 NotificationCompat.Builder(context)
             }
 
-
     if (!paused) {
-        val pause = Intent(context, PodcastStateService::class.java)
-        pause.action = PodcastStateService.ACTION_PAUSE
+        val pause = Intent(context, AudioService::class.java)
+        pause.action = ACTION_PAUSE
         val pausePIntent = PendingIntent.getService(context, 42, pause, PendingIntent.FLAG_UPDATE_CURRENT)
         notificationBuilder.addAction(R.drawable.ic_pause_black_png, "Pause", pausePIntent)
     } else {
-        val play = Intent(context, PodcastStateService::class.java)
-        play.action = PodcastStateService.ACTION_RESUME
+        val play = Intent(context, AudioService::class.java)
+        play.action = ACTION_RESUME
         val playPIntent = PendingIntent.getService(context, 41, play, PendingIntent.FLAG_UPDATE_CURRENT)
         notificationBuilder.addAction(R.drawable.ic_play_black_png, "Play", playPIntent)
     }
 
-    val stop = Intent(context, PodcastStateService::class.java)
-    stop.action = PodcastStateService.ACTION_STOP
+    val stop = Intent(context, AudioService::class.java)
+    stop.action = ACTION_STOP
     val stopPIntent = PendingIntent.getService(context, 42, stop, PendingIntent.FLAG_UPDATE_CURRENT)
     notificationBuilder.addAction(R.drawable.ic_clear_black_png, "Stop", stopPIntent)
 

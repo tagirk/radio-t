@@ -19,6 +19,7 @@ interface PlayerContract {
     }
 
     interface Presenter: MvpPresenter<View>{
+        fun update()
         fun pause()
         fun resume()
         fun onArticleClick(article: Article?)

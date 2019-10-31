@@ -229,27 +229,6 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         AudioService.play(null, url, 0L, application)
     }
 
-    override fun setCurrentEntry(audioUrl: String?, lastProgress: Long) {
-        database.transaction {
-            if (lastProgress > 0) {
-                entryQueries.updateCurrentPlayingEntryProgress(lastProgress)
-            }
-            entryQueries.resetStates(EntryState.IDLE, EntryState.IDLE)
-            if (audioUrl != null) {
-                entryQueries.updateState(state = EntryState.PAUSED, audioUrl = audioUrl)
-            }
-        }
-    }
-
-    override fun updateCurrentEntryStateAndProgress(state: Int, progress: Long) {
-        database.transaction {
-            if (state != EntryState.PLAYING && progress > 0) {
-                entryQueries.updateCurrentPlayingEntryProgress(progress)
-            }
-            entryQueries.updateCurrentPlayingEntryState(state)
-        }
-    }
-
     override fun getEntry(id: String): Flow<Entry> = entryQueries.findByUrl(id, entryMapper).asFlow().mapToOne()
 
     private fun insertRTEntries(rtEntries: List<RTEntry>) {

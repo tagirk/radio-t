@@ -40,10 +40,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name=".model.PodcastStateService"
-            android:exported="false" />
-
         <provider
             android:name=".model.EntryContentProvider"
             android:authorities="su.tagir.apps.radiot.contentprovider"
