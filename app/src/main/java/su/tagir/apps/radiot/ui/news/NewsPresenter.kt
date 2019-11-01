@@ -15,7 +15,7 @@ import su.tagir.apps.radiot.ui.mvp.Status
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 
-class NewsPresenter(private val categories: Array<String>,
+class NewsPresenter(private val categories: List<String>,
                     private val entryRepository: EntryRepository,
                     dispatcher: CoroutineDispatcher = MainDispatcher(),
                     private val router: Router) : BaseListPresenter<Entry, NewsContract.View>(dispatcher), NewsContract.Presenter {

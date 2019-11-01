@@ -30,7 +30,7 @@ class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
     private fun observePodcasts() {
        launch {
            entryRepository
-                   .getDownloadedEntries("podcast")
+                   .getDownloadedEntries(listOf("podcast"))
                    .collect { data ->
                        state = state.copy(data = data) }
        }

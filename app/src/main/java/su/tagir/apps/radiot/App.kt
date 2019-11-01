@@ -47,7 +47,7 @@ class App : Application() {
         val modes = resources.getStringArray(R.array.night_mode)
         val mode = prefs.getString(SettingsFragment.KEY_NIGHT_MODE, modes[0])
         when (mode) {
-            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
+            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
             modes[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }

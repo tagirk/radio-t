@@ -16,7 +16,7 @@ class PodcastsPresenter(private val entryRepository: EntryRepository,
                         private val router: Router,
                         dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Entry, PodcastsContract.View>(dispatcher), PodcastsContract.Presenter {
 
-    private val categories = arrayOf("podcast")
+    private val categories = listOf("podcast")
 
     private var loadJob: Job? = null
 

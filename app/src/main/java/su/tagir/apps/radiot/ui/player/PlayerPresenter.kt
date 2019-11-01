@@ -19,8 +19,6 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
                       dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
 
-    private var observeCurrentJob: Job? = null
-
     private var currentPodcast: Entry? = null
         set(value) {
             field = value
@@ -76,8 +74,7 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
     @ExperimentalCoroutinesApi
     @FlowPreview
     override fun update()  {
-        observeCurrentJob?.cancel()
-        observeCurrentJob = launch {
+       launch {
             entryRepository
                     .getCurrent()
                     .onEach { entry -> currentPodcast = entry }

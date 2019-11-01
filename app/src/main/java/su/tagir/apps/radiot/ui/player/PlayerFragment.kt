@@ -75,7 +75,6 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
                     playerFragment.showProgress(duration, progress)
                 }
                 MSG_STATE_CHANGED -> {
-                    playerFragment.presenter.update()
                     val loading = msg.arg1 == 1
                     playerFragment.showLoading(loading)
                 }

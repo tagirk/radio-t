@@ -67,7 +67,7 @@ data class Entry(
 }
 
 fun Entry.insert(entryQueries: EntryQueries){
-    entryQueries.insert(url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount, commentators)
+    entryQueries.insert(url, title, date, categories?.joinToString(","), image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount, commentators)
 }
 
 fun Entry.update(entryQueries: EntryQueries){
@@ -77,7 +77,7 @@ fun Entry.update(entryQueries: EntryQueries){
 val entryMapper: (url: String,
                   title: String?,
                   date: Date?,
-                  categories: List<String>?,
+                  categories: String?,
                   image: String?,
                   fileName: String?,
                   body: String?,
@@ -105,5 +105,5 @@ val entryMapper: (url: String,
               downloadId,
               downloadProgress,
               commentsCount,
-              commentators -> Entry(url, title, date, categories, image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount, commentators)
+              commentators -> Entry(url, title, date, categories?.split(","), image, fileName, body, showNotes, audioUrl, progress, state, file, downloadId, downloadProgress, commentsCount, commentators)
     }

@@ -28,7 +28,7 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
     private fun observePodcasts() {
         launch {
             entryRepository
-                    .getEntries(arrayOf("pirates"))
+                    .getEntries(listOf("pirates"))
                     .collect {
                         state = state.copy(data = it)
                     }

@@ -67,7 +67,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         }
 
         val crashNotif: SwitchPreference? = findPreference(KEY_CRASH_REPORTS)
-        crashNotif?.summary = if (prefs.getBoolean(KEY_CRASH_REPORTS, false)) getString(R.string.send) else getString(R.string.not_send)
+        crashNotif?.summary = if (prefs.getBoolean(KEY_CRASH_REPORTS, true)) getString(R.string.send) else getString(R.string.not_send)
         crashNotif?.setOnPreferenceChangeListener { _, newValue ->
             prefs.modify { putBoolean(KEY_CRASH_REPORTS, newValue as Boolean) }
             true
@@ -101,7 +101,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             }
             KEY_CRASH_REPORTS -> {
                 val crashNotif: SwitchPreference? = findPreference(key)
-                crashNotif?.summary = if (prefs.getBoolean(key, false)) getString(R.string.send) else getString(R.string.not_send)
+                crashNotif?.summary = if (prefs.getBoolean(key, true)) getString(R.string.send) else getString(R.string.not_send)
             }
             KEY_NIGHT_MODE -> {
                 val modes = resources.getStringArray(R.array.night_mode)
@@ -109,7 +109,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 val nightMode: ListPreference? = findPreference(key)
                 nightMode?.summary = mode
                 when (mode) {
-                    modes[2] -> setDefaultNightMode(MODE_NIGHT_AUTO_BATTERY)
+                    modes[2] -> setDefaultNightMode(MODE_NIGHT_FOLLOW_SYSTEM)
                     modes[1] -> setDefaultNightMode(MODE_NIGHT_YES)
                     else -> setDefaultNightMode(MODE_NIGHT_NO)
                 }

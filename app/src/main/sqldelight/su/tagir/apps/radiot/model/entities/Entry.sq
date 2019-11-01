@@ -5,7 +5,7 @@ CREATE TABLE entry(
     url TEXT NOT NULL PRIMARY KEY,
     title TEXT,
     date INTEGER AS Date,
-    categories TEXT AS List<String>,
+    categories TEXT,
     image TEXT,
     fileName TEXT,
     body TEXT,

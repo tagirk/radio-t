@@ -5,14 +5,12 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
-import android.database.SQLException
 import android.net.Uri
-import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.model.db.sqlOpenHelperConfiguration
 import su.tagir.apps.radiot.model.entries.EntryState
-import timber.log.Timber
 
 class EntryContentProvider : ContentProvider() {
 
@@ -48,7 +46,7 @@ class EntryContentProvider : ContentProvider() {
     override fun query(p0: Uri, p1: Array<out String>?, p2: String?, p3: Array<out String>?, p4: String?): Cursor {
         val cursor = when (uriMatcher.match(p0)) {
             CURRENT_ENTRY -> {
-                sqlHelper.readableDatabase.query("SELECT * FROM entry WHERE state = 1 OR state = 2 LIMIT 1")
+                sqlHelper.readableDatabase.query("SELECT * FROM entry WHERE state = ? OR state = ? LIMIT 1", arrayOf(EntryState.PLAYING, EntryState.PAUSED))
             }
             else -> throw IllegalArgumentException("Unknown uri: $p0")
         }
@@ -60,18 +58,35 @@ class EntryContentProvider : ContentProvider() {
         if (p1 == null) {
             return -1
         }
+        val app = context?.applicationContext as? App
+        val database = app?.appComponent?.dataModule?.database
+        val entryQueries = database?.entryQueries
 
         when (uriMatcher.match(p0)) {
             CURRENT_ENTRY -> {
                 val lastProgress = p1.getAsLong("lastProgress")
                 val audioUrl = p1.getAsString("audioUrl")
-                setCurrentEntry(audioUrl, lastProgress, sqlHelper.writableDatabase)
+                database?.transaction {
+                    if (lastProgress > 0) {
+                        entryQueries?.updateCurrentPlayingEntryProgress(lastProgress)
+                    }
+                    entryQueries?.resetStates(EntryState.IDLE, EntryState.IDLE)
+                    if (audioUrl != null) {
+                        entryQueries?.updateState(EntryState.PAUSED, audioUrl)
+                    }
+                }
             }
             UPDATE_CURRENT_ENTRY -> {
                 val state = p1.getAsInteger("state")
                 val progress = p1.getAsLong("progress")
-                updateCurrentEntryStateAndProgress(state, progress, sqlHelper.writableDatabase)
+                database?.transaction {
+                    if (state != EntryState.PLAYING && progress > 0) {
+                        entryQueries?.updateCurrentPlayingEntryProgress(progress)
+                    }
+                   entryQueries?.updateCurrentPlayingEntryState(state)
+                }
             }
+            else -> throw IllegalArgumentException("Unknown uri: $p0")
         }
         context?.contentResolver?.notifyChange(p0, null)
         return 1
@@ -83,37 +98,4 @@ class EntryContentProvider : ContentProvider() {
     }
 
     override fun getType(p0: Uri): String? = null
-
-    private fun setCurrentEntry(audioUrl: String?, lastProgress: Long, database: SupportSQLiteDatabase) {
-        database.beginTransaction()
-        try {
-            if (lastProgress > 0) {
-                database.execSQL("UPDATE entry SET progress = ? WHERE state = ? OR state = ?", arrayOf(lastProgress, EntryState.PLAYING, EntryState.PAUSED))
-            }
-            database.execSQL("UPDATE entry SET state = ? WHERE state != ?", arrayOf(EntryState.IDLE, EntryState.IDLE))
-            if (audioUrl != null) {
-                database.execSQL("UPDATE entry SET state = ? WHERE audioUrl = ?", arrayOf(EntryState.PAUSED, audioUrl))
-            }
-            database.setTransactionSuccessful()
-        } catch (e: SQLException) {
-            Timber.e(e)
-        } finally {
-            database.endTransaction()
-        }
-    }
-
-    private fun updateCurrentEntryStateAndProgress(state: Int, progress: Long, database: SupportSQLiteDatabase) {
-        database.beginTransaction()
-        try {
-            if (state != EntryState.PLAYING && progress > 0) {
-                database.execSQL("UPDATE entry SET progress = ? WHERE state = ? OR state = ?", arrayOf(progress, EntryState.PLAYING, EntryState.PAUSED))
-            }
-            database.execSQL("UPDATE entry SET state = ? WHERE state != ?", arrayOf(state, EntryState.IDLE))
-            database.setTransactionSuccessful()
-        } catch (e: SQLException) {
-            Timber.e(e)
-        } finally {
-            database.endTransaction()
-        }
-    }
 }

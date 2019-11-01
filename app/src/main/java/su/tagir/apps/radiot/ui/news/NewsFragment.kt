@@ -30,7 +30,7 @@ class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.
 
     override fun createPresenter(): NewsContract.Presenter {
         val appComponent: AppComponent = (activity!!.application as App).appComponent
-        val categories = arguments!!.getStringArray("categories")!!
+        val categories = arguments!!.getStringArray("categories")!!.toList()
         return NewsPresenter(categories, appComponent.entryRepository, router = appComponent.router)
     }
 

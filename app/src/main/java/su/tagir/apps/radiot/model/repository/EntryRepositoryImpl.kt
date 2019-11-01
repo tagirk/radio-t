@@ -48,9 +48,8 @@ class EntryRepositoryImpl(private val restClient: RestClient,
 
 
     @ExperimentalCoroutinesApi
-    override suspend fun refreshEntries(categories: Array<String>, force: Boolean) {
-        val categoriesString = categories.joinToString(separator = ",")
-        if(!refreshLimiter.shouldFetch(categoriesString) && !force){
+    override suspend fun refreshEntries(categories: List<String>, force: Boolean) {
+        if(!refreshLimiter.shouldFetch(categories.toString()) && !force){
             return
         }
         val podcasts = restClient.getPosts(PAGE_SIZE, categories.joinToString(separator = ","))
@@ -72,7 +71,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         }
         dispatcher{
             val preps = database.entryQueries
-                    .findByCategories(listOf(listOf("prep")), entryMapper)
+                    .findByCategories(listOf("prep"), entryMapper)
                     .executeAsList()
                     .filter { e ->
                         (e.commentators?.size ?: 0) < 10 ||
@@ -108,15 +107,13 @@ class EntryRepositoryImpl(private val restClient: RestClient,
         }
     }
 
-    override fun getEntries(categories: Array<String>): Flow<List<Entry>> {
-        val list = categories.map { s -> listOf(s) }
-        return entryQueries.findByCategories(list, entryMapper).asFlow().mapToList(dispatcher)
+    override fun getEntries(categories: List<String>): Flow<List<Entry>> {
+        return entryQueries.findByCategories(categories, entryMapper).asFlow().mapToList(dispatcher)
     }
 
 
-    override fun getDownloadedEntries(vararg categories: String): Flow<List<Entry>> {
-        val list = categories.map { s -> listOf(s) }
-        return entryQueries.findDownloadedByCategories(list, mapper = entryMapper).asFlow().mapToList(dispatcher)
+    override fun getDownloadedEntries(categories: List<String>): Flow<List<Entry>> {
+        return entryQueries.findDownloadedByCategories(categories, mapper = entryMapper).asFlow().mapToList(dispatcher)
     }
 
 

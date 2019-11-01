@@ -2,8 +2,8 @@
 <resources>
 
     <string-array name="night_mode">
-        <item>Disabled</item>
-        <item>Enabled</item>
-        <item>System</item>
+        <item>Отключен</item>
+        <item>Включен</item>
+        <item>Система</item>
     </string-array>
 </resources>

@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Радио-Т</string>
+    <string name="error_occurred">Произошла ошибка.</string>
+    <string name="retry">Повторить</string>
+    <string name="no_data">Ничего нет.</string>
+    <string name="error">Ошибка</string>
+    <string name="error_source">Ошибка аудиопотока.</string>
+    <string name="search">Поиск</string>
+    <string name="chat">Чат</string>
+    <string name="chat_log">Лог чата</string>
+    <string name="settings">Настройки</string>
+    <string name="send">Отправлять</string>
+    <string name="not_send">Не отправлять</string>
+    <string name="show">Показывать</string>
+    <string name="not_show">Не показывать</string>
+    <string name="web">Открыть в браузере</string>
+    <string name="quote">Цитата</string>
+    <string name="message_deleted">Сообщение удалено</string>
+    <string name="download_gitter"><a href="https://play.google.com/store/apps/details?id=im.gitter.gitter">Скачать клиент для Gitter</a></string>
+    <string name="listen">Прослушать</string>
+    <string name="download">Загрузить</string>
+    <string name="delete">Удалить</string>
+    <string name="night_mode">Ночной режим</string>
+    <string name="disabled">Отключен</string>
+    <string name="night_mode_auto">Автоматический ночной режим</string>
+    <string name="enabled">Включен</string>
+    <string name="podcasts">Подкасты</string>
+    <string name="themes">Темы от авторов</string>
+    <string name="news">Новости</string>
+    <string name="pirates">Пираты</string>
+    <string name="about">О приложении</string>
+    <string name="credits">Благодарности</string>
+    <string name="pirate_icon_credit"><div>Большое спасибо за иконку черепа <a href="http://www.freepik.com" title="Freepik">Freepik</a> с замечательного сайта <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, лицензия <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div></string>
+    <string name="comments">Комментарии</string>
+    <string name="write_permission_rationale">Для загрузки подкаста необходимо дать разрешение на запись.</string>
+    <string name="cancel">Закрыть</string>
+    <string name="crash_reports">Отчеты о сбоях</string>
+    <string name="reports">Отчеты</string>
+    <string name="notifications">Уведомления</string>
+    <string name="live_show_notification">Напоминание о прямом эфире</string>
+</resources>
