@@ -39,6 +39,8 @@ class PiratesTabsFragment: Fragment(){
         val fragmentAdapter = FragmentAdapter(childFragmentManager)
         viewPager.adapter = fragmentAdapter
         tabs.setupWithViewPager(viewPager)
+        tabs.getTabAt(0)?.setText(R.string.all)
+        tabs.getTabAt(1)?.setText(R.string.downloaded)
     }
 
 
@@ -53,14 +55,6 @@ class PiratesTabsFragment: Fragment(){
         }
 
         override fun getCount() = 2
-
-        override fun getPageTitle(position: Int): CharSequence? {
-            when (position) {
-                0 -> return "Все"
-                1 -> return "Загруженные"
-            }
-            return super.getPageTitle(position)
-        }
 
     }
 }

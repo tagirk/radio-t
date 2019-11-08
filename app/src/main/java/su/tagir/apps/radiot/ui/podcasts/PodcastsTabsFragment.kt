@@ -58,6 +58,8 @@ class PodcastsTabsFragment: BaseMvpFragment<PodcastsTabsContract.View, PodcastsT
         val fragmentAdapter = FragmentAdapter(childFragmentManager)
         viewPager.adapter = fragmentAdapter
         tabs.setupWithViewPager(viewPager)
+        tabs.getTabAt(0)?.setText(R.string.all)
+        tabs.getTabAt(1)?.setText(R.string.downloaded)
     }
 
     override fun createPresenter(): PodcastsTabsContract.Presenter {
@@ -73,7 +75,7 @@ class PodcastsTabsFragment: BaseMvpFragment<PodcastsTabsContract.View, PodcastsT
         streamTime.text = time
     }
 
-    private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
+    private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
 
         override fun getItem(position: Int): Fragment {
@@ -84,14 +86,5 @@ class PodcastsTabsFragment: BaseMvpFragment<PodcastsTabsContract.View, PodcastsT
         }
 
         override fun getCount() = 2
-
-        override fun getPageTitle(position: Int): CharSequence? {
-            when (position) {
-                0 -> return "Все"
-                1 -> return "Загруженные"
-            }
-            return super.getPageTitle(position)
-        }
-
     }
 }

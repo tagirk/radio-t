@@ -25,7 +25,8 @@
     <string name="night_mode_auto">Night mode auto</string>
     <string name="enabled">Enabled</string>
     <string name="podcasts">Podcasts</string>
-    <string name="themes">Themes from authors</string>
+    <string name="themes">Themes</string>
+    <string name="themes_from_authors">Themes from authors</string>
     <string name="news">News</string>
     <string name="pirates">Pirates</string>
     <string name="about">About</string>
@@ -38,5 +39,9 @@
     <string name="crash_reports">Crash reports</string>
     <string name="reports">Reports</string>
     <string name="notifications">Notifications</string>
-    <string name="live_show_notification">Notify about live show</string>
+    <string name="live_show_notification">Notify about stream</string>
+    <string name="authorization">Authorization</string>
+    <string name="online">Stream</string>
+    <string name="all">All</string>
+    <string name="downloaded">Downloaded</string>
 </resources>

@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Авторизация"
+            app:title="@string/authorization"
             app:navigationIcon="@drawable/ic_arrow_back_24dp"
             android:theme="@style/AppTheme.AppBarOverlay"/>
 

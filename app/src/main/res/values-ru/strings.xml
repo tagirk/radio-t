@@ -25,7 +25,8 @@
     <string name="night_mode_auto">Автоматический ночной режим</string>
     <string name="enabled">Включен</string>
     <string name="podcasts">Подкасты</string>
-    <string name="themes">Темы от авторов</string>
+    <string name="themes">Темы</string>
+    <string name="themes_from_authors">Темы от авторов</string>
     <string name="news">Новости</string>
     <string name="pirates">Пираты</string>
     <string name="about">О приложении</string>
@@ -38,4 +39,8 @@
     <string name="reports">Отчеты</string>
     <string name="notifications">Уведомления</string>
     <string name="live_show_notification">Напоминание о прямом эфире</string>
+    <string name="authorization">Авторизация</string>
+    <string name="online">Online-вещание</string>
+    <string name="all">Все</string>
+    <string name="downloaded">Downloaded</string>
 </resources>
