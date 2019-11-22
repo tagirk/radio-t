@@ -1,16 +1,16 @@
 import java.lang.Long;
 import java.util.Date;
 
-CREATE TABLE timeLabel(
+CREATE TABLE time_label(
     topic TEXT NOT NULL,
     time INTEGER AS Long,
     duration INTEGER AS Long,
-    podcastTime INTEGER AS Date,
-    PRIMARY KEY(topic, podcastTime));
+    podcast_time INTEGER AS Date,
+    PRIMARY KEY(topic, podcast_time));
 
 insert:
-INSERT OR REPLACE INTO timeLabel(topic, time, duration, podcastTime) VALUES(?,?,?,?);
+INSERT OR REPLACE INTO time_label(topic, time, duration, podcast_time) VALUES(?,?,?,?);
 
 findByPodcastTime:
-SELECT * FROM timeLabel WHERE podcastTime = ? ORDER BY time DESC;
+SELECT * FROM time_label WHERE podcast_time = ? ORDER BY time DESC;
 

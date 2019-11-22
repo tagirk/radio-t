@@ -1,0 +1,4 @@
+import kotlin.collections.List;
+
+ALTER TABLE entry ADD COLUMN commentsCount INTEGER AS Int NOT NULL;
+ALTER TABLE entry ADD COLUMN commentators TEXT AS List<String>;

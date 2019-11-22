@@ -240,7 +240,7 @@ class EntryRepositoryImpl(private val restClient: RestClient,
             podcast
                     .timeLabels
                     ?.forEach { timeLabel ->
-                        timeLabelQueries.insert(timeLabel.topic, timeLabel.time?.timeOfDay(), timeLabel.duration, podcastTime = podcast.date)
+                        timeLabelQueries.insert(timeLabel.topic, timeLabel.time?.timeOfDay(), timeLabel.duration, podcast_time = podcast.date)
                     }
         }
     }

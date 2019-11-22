@@ -18,15 +18,15 @@ import java.util.*
 fun sqlOpenHelperConfiguration(context: Context): SupportSQLiteOpenHelper.Configuration{
     return SupportSQLiteOpenHelper.Configuration.builder(context)
             .name("radiot.db")
-            .callback(object : SupportSQLiteOpenHelper.Callback(1){
+            .callback(object : SupportSQLiteOpenHelper.Callback(18){
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     val driver = AndroidSqliteDriver(db)
-                    Schema.create(driver)
+                    RadiotDb.Schema.create(driver)
                 }
 
                 override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
                     val driver = AndroidSqliteDriver(db)
-                    Schema.migrate(driver, oldVersion, newVersion)
+                    RadiotDb.Schema.migrate(driver, oldVersion, newVersion)
                 }
 
             })
@@ -45,21 +45,10 @@ fun createQueryWrapper(driver: SqlDriver): RadiotDb {
                     mentionsAdapter = mentionsAdapter),
             pageResultAdapter = PageResult.Adapter(idsAdapter = stringListAdapter),
             searchResultAdapter = SearchResult.Adapter(idsAdapter = stringListAdapter, timeStampAdapter = dateAdapter),
-            timeLabelAdapter = TimeLabel.Adapter(podcastTimeAdapter = dateAdapter)
+            time_labelAdapter = Time_label.Adapter(podcast_timeAdapter = dateAdapter)
     )
 }
 
-object Schema : SqlDriver.Schema by RadiotDb.Schema {
-
-    override fun create(driver: SqlDriver) {
-        RadiotDb.Schema.create(driver)
-    }
-
-    override fun migrate(driver: SqlDriver, oldVersion: Int, newVersion: Int) {
-
-    }
-
-}
 
 val dateAdapter = object : ColumnAdapter<Date, Long> {
     override fun decode(databaseValue: Long): Date = Date(databaseValue)
@@ -112,3 +101,5 @@ val mentionsAdapter = object : ColumnAdapter<List<Mention>, String> {
     }
 
 }
+
+

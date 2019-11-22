@@ -8,6 +8,7 @@ import su.tagir.apps.radiot.ui.notification.notify
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
 
 
 class StreamNotificationWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
@@ -33,10 +34,28 @@ class StreamNotificationWorker(context: Context, params: WorkerParameters) : Wor
     companion object {
 
         const val TAG = "StreamNotificationWorker"
+        private const val SELF_REMINDER_HOUR = 23
 
         fun schedule(context: Context) {
-            val request = PeriodicWorkRequest.Builder(StreamNotificationWorker::class.java, 1L, TimeUnit.DAYS, 4L, TimeUnit.HOURS).build()
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.KEEP, request)
+
+            val calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
+            val hours = calendar.get(Calendar.HOUR_OF_DAY)
+            calendar.timeInMillis = 0
+            if(hours < SELF_REMINDER_HOUR){
+                calendar.add(Calendar.HOUR, SELF_REMINDER_HOUR)
+            }else{
+                calendar.add(Calendar.DAY_OF_YEAR, 1)
+                calendar.add(Calendar.HOUR, SELF_REMINDER_HOUR)
+            }
+
+            val request = PeriodicWorkRequest.Builder(StreamNotificationWorker::class.java,
+                    24L,
+                    TimeUnit.HOURS,
+                    PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS,
+                    TimeUnit.MILLISECONDS)
+                    .setInitialDelay(calendar.timeInMillis, TimeUnit.MILLISECONDS)
+                    .build()
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
         }
     }
 }
