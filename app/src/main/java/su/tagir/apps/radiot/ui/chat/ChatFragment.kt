@@ -35,13 +35,13 @@ class ChatFragment : BaseMvpListFragment<MessageFull, ChatContract.View, ChatCon
 
     private lateinit var toolbar: Toolbar
 
-    lateinit var btnDownward: FloatingActionButton
+    private lateinit var btnDownward: FloatingActionButton
 
-    lateinit var btnSend: ImageButton
+    private lateinit var btnSend: ImageButton
 
-    lateinit var sendProgress: ProgressBar
+    private lateinit var sendProgress: ProgressBar
 
-    lateinit var message: EditText
+    private lateinit var message: EditText
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_chat, container, false)

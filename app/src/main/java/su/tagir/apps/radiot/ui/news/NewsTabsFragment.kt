@@ -29,6 +29,7 @@ class NewsTabsFragment : Fragment() {
         view.findViewById<View>(R.id.search).visibleGone(false)
 
         viewPager = view.findViewById(R.id.view_pager)
+        viewPager.offscreenPageLimit = 2
         tabs = view.findViewById(R.id.tabs)
         initFragments()
     }
@@ -37,6 +38,9 @@ class NewsTabsFragment : Fragment() {
         val fragmentAdapter = FragmentAdapter(childFragmentManager)
         viewPager.adapter = fragmentAdapter
         tabs.setupWithViewPager(viewPager)
+        tabs.getTabAt(0)?.setText(R.string.themes)
+        tabs.getTabAt(1)?.setText(R.string.themes_from_authors)
+        tabs.getTabAt(2)?.setText(R.string.news)
     }
 
     private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
@@ -51,15 +55,6 @@ class NewsTabsFragment : Fragment() {
         }
 
         override fun getCount() = 3
-
-        override fun getPageTitle(position: Int): CharSequence? {
-            when (position) {
-                0 -> return "Темы"
-                1 -> return "Темы от авторов"
-                2 -> return "Новости подкаста"
-            }
-            return super.getPageTitle(position)
-        }
 
     }
 }

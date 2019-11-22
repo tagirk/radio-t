@@ -96,8 +96,8 @@ class AuthFragment : BaseMvpFragment<AuthContract.View, AuthContract.Presenter>(
     override fun showError(t: Throwable) {
         context?.let {c ->
             AlertDialog.Builder(c)
-                    .setTitle("Ошибка")
-                    .setMessage("Произошла ошибка. Попробуйте позже.")
+                    .setTitle(R.string.error)
+                    .setMessage(R.string.error_occurred)
                     .setPositiveButton("OK"){_,_ -> presenter.onBackClick()}
                     .setCancelable(false)
                     .create()
