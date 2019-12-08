@@ -114,5 +114,5 @@ val messageMapper: (id: String,
     }
 
 fun User.insert(userQueries: UserQueries) {
-    userQueries.insert(id, username, avatarUrl, avatarUrlSmall, displayName, url, avatarUrlMedium)
+    userQueries.insert(id, username, avatarUrl, avatarUrlSmall ?: "", displayName, url, avatarUrlMedium)
 }

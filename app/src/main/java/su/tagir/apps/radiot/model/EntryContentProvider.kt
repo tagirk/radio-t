@@ -7,9 +7,8 @@ import android.content.UriMatcher
 import android.database.Cursor
 import android.net.Uri
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import su.tagir.apps.radiot.App
-import su.tagir.apps.radiot.model.db.sqlOpenHelperConfiguration
+import su.tagir.apps.radiot.model.db.sqlOpenHelper
 import su.tagir.apps.radiot.model.entries.EntryState
 
 class EntryContentProvider : ContentProvider() {
@@ -34,7 +33,7 @@ class EntryContentProvider : ContentProvider() {
     private lateinit var sqlHelper: SupportSQLiteOpenHelper
 
     override fun onCreate(): Boolean {
-        sqlHelper = FrameworkSQLiteOpenHelperFactory().create(sqlOpenHelperConfiguration(context!!))
+        sqlHelper = sqlOpenHelper(context!!)
         return false
     }
 

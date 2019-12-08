@@ -2,7 +2,6 @@ package su.tagir.apps.radiot.di
 
 import android.app.Application
 import android.content.SharedPreferences
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import com.google.crypto.tink.aead.AeadFactory
 import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.config.TinkConfig
@@ -26,7 +25,7 @@ import su.tagir.apps.radiot.model.api.auth.AuthHolder
 import su.tagir.apps.radiot.model.api.auth.GitterAuthHolder
 import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.db.createQueryWrapper
-import su.tagir.apps.radiot.model.db.sqlOpenHelperConfiguration
+import su.tagir.apps.radiot.model.db.sqlOpenHelper
 import su.tagir.apps.radiot.model.repository.*
 import java.security.GeneralSecurityException
 import java.util.concurrent.TimeUnit
@@ -99,7 +98,7 @@ interface DataModule {
         }
 
         override val database: RadiotDb by lazy {
-            val helper = FrameworkSQLiteOpenHelperFactory().create(sqlOpenHelperConfiguration(application))
+            val helper = sqlOpenHelper(application)
             val driver: SqlDriver = AndroidSqliteDriver(helper)
             createQueryWrapper(driver)
         }

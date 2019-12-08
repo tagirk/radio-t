@@ -59,8 +59,8 @@ data class Entry(
                     progress = c.getLong(c.getColumnIndexOrThrow("progress")),
                     state = c.getInt(c.getColumnIndexOrThrow("state")),
                     file = c.getString(c.getColumnIndexOrThrow("file")),
-                    downloadProgress = c.getInt(c.getColumnIndexOrThrow("downloadProgress")),
-                    commentsCount = c.getInt(c.getColumnIndexOrThrow("commentsCount")))
+                    downloadProgress = c.getInt(c.getColumnIndex("downloadProgress")),
+                    commentsCount = c.getInt(c.getColumnIndex("commentsCount")))
 
     val chatUrl
         get() = "https://chat.radio-t.com/logs/radio-t-${title?.substring(8)}.html"

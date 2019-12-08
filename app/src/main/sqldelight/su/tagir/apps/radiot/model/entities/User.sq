@@ -2,7 +2,7 @@ CREATE TABLE user(
     id TEXT NOT NULL PRIMARY KEY,
     username TEXT,
     avatarUrl TEXT,
-    avatarUrlSmall TEXT,
+    avatarUrlSmall TEXT NOT NULL,
     displayName TEXT,
     url TEXT,
     avatarUrlMedium TEXT);

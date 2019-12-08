@@ -1,0 +1,14 @@
+
+ALTER TABLE entry ADD COLUMN commentsCount INTEGER DEFAULT 0 NOT NULL;
+ALTER TABLE entry ADD COLUMN commentators TEXT;
+
+CREATE TABLE pageResult(query TEXT NOT NULL PRIMARY KEY, ids TEXT DEFAULT '' NOT NULL, totalCount INTEGER);
+
+CREATE TABLE user(
+    id TEXT NOT NULL PRIMARY KEY,
+    username TEXT,
+    avatarUrl TEXT,
+    avatarUrlSmall TEXT NOT NULL,
+    displayName TEXT,
+    url TEXT,
+    avatarUrlMedium TEXT);
