@@ -1,32 +1,33 @@
 package su.tagir.apps.radiot.ui.player
 
 import android.annotation.SuppressLint
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import butterknife.BindView
-import butterknife.ButterKnife
+import androidx.recyclerview.widget.RecyclerView
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.utils.convertMillis
 
-class TimeLabelsAdapter(private var items: List<TimeLabel>,
-                        private val callback:Callback) : RecyclerView.Adapter<TimeLabelViewHolder>() {
+class TimeLabelsAdapter(private var items: List<TimeLabel>, private val callback: Callback) : RecyclerView.Adapter<TimeLabelViewHolder>() {
 
     override fun getItemCount() = items.size
 
     override fun onBindViewHolder(holder: TimeLabelViewHolder, position: Int) {
         val timeLabel = items[position]
         holder.bind(timeLabel)
-        holder.itemView?.setOnClickListener { callback.onItemClick(timeLabel) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimeLabelViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.item_time_label, parent, false)
-        return TimeLabelViewHolder(view)
+        val holder = TimeLabelViewHolder(view)
+        holder.itemView.setOnClickListener {
+            val item = items[holder.adapterPosition]
+            callback.onTimeLabelClick(item)
+        }
+        return holder
     }
 
     fun update(items: List<TimeLabel>?) {
@@ -34,19 +35,14 @@ class TimeLabelsAdapter(private var items: List<TimeLabel>,
         notifyDataSetChanged()
     }
 
-    interface Callback {
-        fun onItemClick(item: TimeLabel)
+    interface Callback{
+        fun onTimeLabelClick(timeLabel: TimeLabel)
     }
 }
 
 class TimeLabelViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-    @BindView(R.id.title)
-    lateinit var title: TextView
-
-    init {
-        ButterKnife.bind(this, view)
-    }
+    private val title: TextView = itemView.findViewById(R.id.title)
 
     @SuppressLint("SetTextI18n")
     fun bind(timeLabel: TimeLabel) {

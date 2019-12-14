@@ -1,100 +1,122 @@
 package su.tagir.apps.radiot.ui.pirates
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
-import android.os.Bundle
+import android.content.pm.PackageManager
 import android.widget.Toast
-import permissions.dispatcher.NeedsPermission
-import permissions.dispatcher.OnPermissionDenied
-import permissions.dispatcher.RuntimePermissions
-import su.tagir.apps.radiot.di.Injectable
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import su.tagir.apps.radiot.App
+import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.REQUEST_WRITE_PERMISSION
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.PagedListFragment
-import su.tagir.apps.radiot.ui.player.PlayerViewModel
-import javax.inject.Inject
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 
-@RuntimePermissions
-class PiratesFragment :PagedListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+class PiratesFragment :
+        BaseMvpListFragment<Entry, PiratesContract.View, PiratesContract.Presenter>(),
+        PiratesContract.View,
+        EntriesAdapter.Callback {
 
-    private lateinit var playerViewModel: PlayerViewModel
 
     private var entryForDownload: Entry? = null
+        set(value) {
+            field = value
+            value?.let {
+               startDownload()
+            }
+        }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
-        observeViewModel()
+    override fun createPresenter(): PiratesContract.Presenter {
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return PiratesPresenter(appComponent.entryRepository)
     }
+
+
+    override fun showDownloadError(error: String?) {
+        context?.let { c ->
+            AlertDialog.Builder(c)
+                    .setTitle(R.string.error)
+                    .setMessage(error)
+                    .setPositiveButton("OK", null)
+                    .create()
+                    .show()
+        }
+    }
+
+    override fun createAdapter() = EntriesAdapter(this)
 
     override fun onResume() {
         super.onResume()
-        (listViewModel as PiratesViewModel).startStatusTimer()
+        entryForDownload?.let {
+            presenter.download(entryForDownload!!)
+            entryForDownload = null
+        }
     }
 
-    override fun onPause() {
-        super.onPause()
-        (listViewModel as PiratesViewModel).stopStatusTimer()
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if(requestCode != REQUEST_WRITE_PERMISSION){
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            return
+        }
+        if(grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED){
+            showNeedPermission()
+        }
     }
 
-    override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(PiratesViewModel::class.java)
-
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PIRATES, GlideApp.with(this), this)
-
-    override fun onClick(entry: Entry) {
-        playerViewModel.onPlayClick(entry)
+    override fun select(entry: Entry) {
+        presenter.select(entry)
     }
 
     override fun download(entry: Entry) {
         entryForDownload = entry
-        startDownloadWithPermissionCheck()
-    }
-
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    fun startDownload(){
-        if(entryForDownload!=null) {
-            (listViewModel as PiratesViewModel).onDownloadClick(entryForDownload!!)
-        }
-    }
-
-    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    fun showNeedPermission(){
-        Toast.makeText(context, "Для загрузки подкаста необходимо дать разрешение на запись.", Toast.LENGTH_SHORT).show()
     }
 
     override fun remove(entry: Entry) {
-        (listViewModel as PiratesViewModel).onRemoveClick(entry)
+        presenter.remove(entry)
     }
 
-    override fun openWebSite(entry: Entry) {
-//        (listViewModel as PodcastsViewModel).openWebSite(entry)
+    override fun openComments(entry: Entry) {
+
     }
 
-    override fun openChatLog(entry: Entry) {
-//        (listViewModel as PodcastsViewModel).openChatLog(entry)
+    private fun startDownload() {
+        if (context == null) {
+            return
+        }
+        if (entryForDownload == null) {
+            return
+        }
+        when {
+            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+                entryForDownload?.let {
+                    presenter.download(entryForDownload!!)
+                    entryForDownload = null
+                }
+            }
+
+            ActivityCompat.shouldShowRequestPermissionRationale(activity!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
+
+            else -> requestWritePermission()
+        }
     }
 
-
-    @SuppressLint("NeedOnRequestPermissionsResult")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        onRequestPermissionsResult(requestCode, grantResults)
+    private fun showNeedPermission() {
+        Toast.makeText(context, getString(R.string.write_permission_rationale), Toast.LENGTH_SHORT).show()
     }
 
-    private fun observeViewModel() {
-        (listViewModel as PiratesViewModel)
-                .getDownloadError()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            if (it != null) {
-                                showToast(it)
-                            }
-                        })
+    private fun showPermissionRationale() {
+        AlertDialog.Builder(context!!)
+                .setMessage(R.string.write_permission_rationale)
+                .setPositiveButton("OK"){_, _ -> requestWritePermission()}
+                .setNegativeButton(R.string.cancel, null)
+                .create()
+                .show()
     }
 
+    private fun requestWritePermission(){
+        requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_WRITE_PERMISSION)
+    }
 }

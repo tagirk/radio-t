@@ -24,7 +24,6 @@ class RestClientsTest {
 
     private lateinit var restClient: RestClient
 
-    private lateinit var firebaseRestClient: FirebaseRestClient
 
     private lateinit var mockWebServer: MockWebServer
 
@@ -38,13 +37,6 @@ class RestClientsTest {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
                 .create(RestClient::class.java)
-
-        firebaseRestClient = Retrofit.Builder()
-                .baseUrl(mockWebServer.url("/"))
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build()
-                .create(FirebaseRestClient::class.java)
     }
 
     @After
@@ -78,17 +70,6 @@ class RestClientsTest {
         assertThat(entries.size, `is`(limit))
     }
 
-    @Test
-    fun getHostsTest(){
-        enqueueResponse("hosts.json")
-        val hosts = getValue(firebaseRestClient.getHosts())
-
-        val request = mockWebServer.takeRequest()
-        assertThat(request.path, `is`("/hosts.json"))
-        assertThat(hosts, notNullValue())
-        assertThat(hosts.size, `is`(4))
-    }
-
     @Throws(IOException::class)
     private fun enqueueResponse(fileName: String) {
         enqueueResponse(fileName, Collections.emptyMap())
@@ -96,8 +77,7 @@ class RestClientsTest {
 
     @Throws(IOException::class)
     private fun enqueueResponse(fileName: String, headers: Map<String, String>) {
-        val inputStream = javaClass.classLoader
-                .getResourceAsStream("api_response/" + fileName)
+        val inputStream = javaClass.classLoader!!.getResourceAsStream("api_response/$fileName")
         val source = Okio.buffer(Okio.source(inputStream))
         val mockResponse = MockResponse()
         for ((key, value) in headers) {

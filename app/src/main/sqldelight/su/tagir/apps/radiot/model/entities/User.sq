@@ -1,0 +1,15 @@
+CREATE TABLE user(
+    id TEXT NOT NULL PRIMARY KEY,
+    username TEXT,
+    avatarUrl TEXT,
+    avatarUrlSmall TEXT NOT NULL,
+    displayName TEXT,
+    url TEXT,
+    avatarUrlMedium TEXT);
+
+insert:
+INSERT OR REPLACE INTO user(id, username, avatarUrl, avatarUrlSmall, displayName, url, avatarUrlMedium)
+VALUES(?, ?, ?, ?, ?, ?, ?);
+
+findById:
+SELECT * FROM user WHERE id = ? LIMIT 1;

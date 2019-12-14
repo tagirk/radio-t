@@ -1,0 +1,56 @@
+package su.tagir.apps.radiot.ui.podcasts.downloaded
+
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import ru.terrakok.cicerone.Router
+import su.tagir.apps.radiot.Screens
+import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.model.repository.EntryRepository
+import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
+import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+
+class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
+                                  private val router: Router,
+                                  dispatcher: CoroutineDispatcher = MainDispatcher()):
+        BaseListPresenter<Entry, DownloadedPodcastsContract.View>(dispatcher),
+        DownloadedPodcastsContract.Presenter {
+
+    private val deleterErrorHandler by lazy {
+        CoroutineExceptionHandler { _, exception ->
+            view?.showRemoveError(exception.message)
+        }
+    }
+
+    override fun doOnAttach(view: DownloadedPodcastsContract.View) {
+        observePodcasts()
+    }
+
+    private fun observePodcasts() {
+       launch {
+           entryRepository
+                   .getDownloadedEntries(listOf("podcast"))
+                   .collect { data ->
+                       state = state.copy(data = data) }
+       }
+
+    }
+
+    override fun loadData(pullToRefresh: Boolean) {
+
+    }
+
+    override fun select(entry: Entry) {
+        entryRepository.play(entry)
+    }
+
+
+    override fun remove(entry: Entry) {
+        launch(deleterErrorHandler) {  entryRepository.deleteFile(entry.downloadId) }
+    }
+
+    override fun openComments(entry: Entry) {
+        router.navigateTo(Screens.CommentsScreen(entry = entry))
+    }
+}

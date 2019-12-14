@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <dimen name="screen_margin">16dp</dimen>
     <dimen name="item_image_size">40dp</dimen>
     <dimen name="item_image_corner_radius">4dp</dimen>
-    <dimen name="player_image_size">56dp</dimen>
+    <dimen name="player_image_size">40dp</dimen>
     <dimen name="load_progress_padding">8dp</dimen>
-    <dimen name="player_peek_height">67dp</dimen>
+    <dimen name="player_peek_height">112dp</dimen>
 
     <dimen name="button_inset_vertical_material">6dp</dimen>
     <dimen name="button_inset_horizontal_material">@dimen/control_inset_material</dimen>
@@ -15,4 +15,7 @@
     <dimen name="control_padding_material">4dp</dimen>
     <dimen name="control_corner_material">2dp</dimen>
 
+    <dimen name="comment_padding">16dp</dimen>
+    <dimen name="message_image_height">56dp</dimen>
+    <dimen name="commentator_image_size">24dp</dimen>
 </resources>

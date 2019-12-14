@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scroll_view"
@@ -10,9 +10,12 @@
         android:id="@+id/elevation"
         android:layout_width="0dp"
         android:layout_height="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:background="@drawable/elevation_drawable" />
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -20,7 +23,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/elevation">
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/player_root"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -50,7 +53,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:src="@drawable/ic_play_arrow_black_24dp"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -63,7 +66,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:src="@drawable/ic_pause_black_24dp"
                 android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -73,8 +76,8 @@
             <ImageButton
                 android:id="@+id/btn_chat"
                 style="?actionButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:visibility="invisible"
                 android:src="@drawable/ic_chat_black_24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -85,8 +88,8 @@
             <ImageButton
                 android:id="@+id/btn_web"
                 style="?actionButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginEnd="16dp"
                 android:alpha="0"
                 android:visibility="invisible"
@@ -100,16 +103,14 @@
                 android:id="@+id/image"
                 android:layout_width="@dimen/player_image_size"
                 android:layout_height="@dimen/player_image_size"
-                android:layout_marginBottom="4dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0"
+                app:layout_constraintTop_toBottomOf="parent"
                 tools:ignore="ContentDescription" />
 
 
@@ -117,7 +118,6 @@
                 android:id="@+id/progress"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:background="@drawable/rect_round_corners"
                 android:padding="@dimen/load_progress_padding"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@+id/image"
@@ -133,7 +133,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ImageView
             android:id="@+id/logo"
@@ -147,7 +147,7 @@
             app:layout_constraintTop_toTopOf="@+id/time_labels"
             tools:ignore="ContentDescription" />
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/time_labels"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -159,7 +159,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/player_root" />
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/player_bottom"
             android:layout_width="0dp"
             android:layout_height="72dp"
@@ -241,7 +241,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="ContentDescription" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <SeekBar
             android:id="@+id/seek_bar"
@@ -264,6 +264,6 @@
             app:layout_constraintEnd_toEndOf="@+id/seek_bar"
             app:layout_constraintStart_toStartOf="@+id/seek_bar" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

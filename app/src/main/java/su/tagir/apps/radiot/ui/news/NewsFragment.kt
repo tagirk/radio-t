@@ -1,43 +1,48 @@
 package su.tagir.apps.radiot.ui.news
 
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import su.tagir.apps.radiot.di.Injectable
+import su.tagir.apps.radiot.App
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.PagedListFragment
-import javax.inject.Inject
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 
-class NewsFragment : PagedListFragment<Entry>(), Injectable, EntriesAdapter.Callback {
+class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.Presenter>(),
+        NewsContract.View{
 
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    override fun createAdapter() =
+            EntriesAdapter(actionHandler = object : EntriesAdapter.Callback {
+                        override fun select(entry: Entry) {
+                            presenter.select(entry)
+                        }
 
-    private lateinit var mainViewModel: MainViewModel
+                        override fun download(entry: Entry) {}
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
+                        override fun remove(entry: Entry) {}
+
+                        override fun openComments(entry: Entry) {
+                            presenter.openComments(entry)
+                        }
+
+                    })
+
+
+    override fun createPresenter(): NewsContract.Presenter {
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val categories = arguments!!.getStringArray("categories")!!.toList()
+        return NewsPresenter(categories, appComponent.entryRepository, router = appComponent.router)
     }
 
-    override fun createViewModel() = ViewModelProviders.of(this, viewModelFactory).get(NewsViewModel::class.java)
+    companion object{
 
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_NEWS, null, this)
-
-    override fun onClick(entry: Entry) {
-        (listViewModel as NewsViewModel).onEntryClick(entry)
+        fun newInstance(categories: Array<String>): NewsFragment{
+            val bundle = Bundle()
+            bundle.putStringArray("categories", categories)
+            val fr = NewsFragment()
+            fr.arguments = bundle
+            return fr
+        }
     }
 
-    override fun download(entry: Entry) {}
-
-    override fun remove(entry: Entry) {}
-
-    override fun openWebSite(entry: Entry) {
-    }
-
-    override fun openChatLog(entry: Entry) {
-    }
 }

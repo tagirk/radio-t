@@ -1,180 +1,49 @@
 package su.tagir.apps.radiot.model.repository
 
-import android.app.Application
-import android.arch.paging.PagedList
-import android.arch.paging.RxPagedListBuilder
-import io.reactivex.*
-import su.tagir.apps.radiot.model.api.RestClient
-import su.tagir.apps.radiot.model.db.EntryDao
+import kotlinx.coroutines.flow.Flow
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.model.entries.RTEntry
-import su.tagir.apps.radiot.model.entries.SearchResult
+
 import su.tagir.apps.radiot.model.entries.TimeLabel
-import su.tagir.apps.radiot.model.parser.PiratesParser
-import su.tagir.apps.radiot.schedulers.BaseSchedulerProvider
-import su.tagir.apps.radiot.service.AudioService
-import java.net.HttpURLConnection
-import java.net.URL
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class EntryRepository @Inject constructor(private val restClient: RestClient,
-                                          private val entryDao: EntryDao,
-                                          private val downloadManager: DownloadManager,
-                                          private val application: Application,
-                                          private val scheduler: BaseSchedulerProvider) {
+interface EntryRepository {
 
-    companion object {
-        const val PAGE_SIZE = 20
-    }
+    fun getCurrent(): Flow<Entry?>
 
-    fun getCurrent(): Flowable<Entry> =
-            entryDao.getCurrentEntryLive().distinctUntilChanged().subscribeOn(scheduler.diskIO())
+    fun getTimeLabels(entry: Entry?): Flow<List<TimeLabel>>
 
-    fun getTimeLabels(entry: Entry?): Flowable<List<TimeLabel>> =
-            entryDao.getTimeLabels(entry?.date).distinctUntilChanged().subscribeOn(scheduler.diskIO())
+    suspend fun refreshEntries(categories: List<String>, force: Boolean = false)
 
+    suspend fun loadCommentators()
 
-    fun refreshPodcasts(): Completable =
-            restClient
-                    .getPosts(PAGE_SIZE, "podcast")
-                    .observeOn(scheduler.diskIO())
-                    .doOnSuccess { entryDao.saveRadioTEntries(it) }
-                    .toCompletable()
+    suspend fun refreshPirates(force: Boolean = false)
 
-    fun refreshPirates(): Completable {
-        return Single.create(SingleOnSubscribe<List<RTEntry>> { emitter ->
-            try {
-                val connection = URL("http://feeds.feedburner.com/pirate-radio-t").openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.addRequestProperty("Accept", "application/xml")
-                connection.doInput = true
-                connection.connect()
-                val podcasts = PiratesParser.parsePirates(connection.inputStream)
-                if(!emitter.isDisposed) {
-                    emitter.onSuccess(podcasts)
-                }
-            } catch (e: Exception) {
-                if(!emitter.isDisposed) {
-                    emitter.onError(e)
-                }
-            }
-        })
-                .subscribeOn(scheduler.networkIO())
-                .observeOn(scheduler.diskIO())
-                .doOnSuccess { entryDao.saveRadioTEntries(it) }
-                .toCompletable()
-    }
+    fun getEntries(categories: List<String>): Flow<List<Entry>>
 
-    fun getEntries(vararg categories: String) =
-            RxPagedListBuilder(entryDao.getEntries(categories), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.diskIO())
-                    .setNotifyScheduler(scheduler.ui())
-                    .buildFlowable(BackpressureStrategy.LATEST)
+    fun getDownloadedEntries(categories: List<String>): Flow<List<Entry>>
 
-    fun getDownloadedEntries(vararg categories: String): Flowable<PagedList<Entry>> =
-            RxPagedListBuilder(entryDao.getDownloadedEntries(categories), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.diskIO())
-                    .setNotifyScheduler(scheduler.ui())
-                    .buildFlowable(BackpressureStrategy.LATEST)
-                    .distinctUntilChanged()
+    suspend fun search(query: String)
 
-    fun refreshNews(): Completable =
-            restClient
-                    .getPosts(PAGE_SIZE, "news,info")
-                    .observeOn(scheduler.diskIO())
-                    .doOnSuccess { entryDao.saveRadioTEntries(it) }
-                    .toCompletable()
+    suspend fun searchNextPage(query: String, skip: Int): Boolean
 
+    fun getRecentSearches(): Flow<List<String>>
 
-    fun search(query: String): Completable =
-            restClient
-                    .search(query, 0, PAGE_SIZE)
-                    .observeOn(scheduler.diskIO())
-                    .doOnSuccess { entryDao.saveSearchResult(SearchResult(query, it.map { it.url }), it) }
-                    .toCompletable()
+    fun getForQuery(query: String): Flow<List<Entry>>
 
-    fun searchNextPage(query: String, skip: Int): Single<Boolean> =
-            restClient
-                    .search(query, skip, PAGE_SIZE)
-                    .observeOn(scheduler.diskIO())
-                    .doOnSuccess {
-                        if (it.isNotEmpty()) {
-                            entryDao.mergeAndsaveSearchResult(query, it)
-                        }
-                    }
-                    .map { it.isNotEmpty() }
+    suspend fun removeQuery(query: String)
 
+    suspend fun startDownload(url: String?)
 
-    fun getRecentSearches() =
-            RxPagedListBuilder(entryDao.findRecentSearches(), PAGE_SIZE)
-                    .setFetchScheduler(scheduler.diskIO())
-                    .setNotifyScheduler(scheduler.ui())
-                    .buildFlowable(BackpressureStrategy.LATEST)
+    suspend fun checkDownloadStatus()
 
-    fun getForQuery(query: String): Flowable<List<Entry>> {
-        return entryDao
-                .findSearchResultLive(query)
-                .flatMapSingle { entryDao.loadById(it.ids)}
-                .subscribeOn(scheduler.diskIO())
-    }
+    suspend fun deleteFile(id: Long)
 
-    fun removeQuery(query: String?) {
-        entryDao.removeQuery(query)
-    }
+    fun play(podcast: Entry)
 
-    fun startDownload(url: String?): Completable {
-        return Completable.fromCallable {
-            val downloadId = downloadManager.startDownload(url)
-            entryDao.updateDownloadId(downloadId, url)
-            return@fromCallable url
-        }
-    }
+    fun pause()
 
-    fun checkDownloadStatus() {
-        val ids = entryDao.getDownloadIds().toMutableList()
-        if (ids.isEmpty()) {
-            return
-        }
-        val downloadProgressMap = HashMap<Long, Int>()
-        val fileNames = HashMap<Long, String>()
-        downloadManager.checkDownloadStatus(ids, downloadProgressMap, fileNames)
-        entryDao.updateDownloadStatus(ids, downloadProgressMap, fileNames)
-    }
+    fun resume()
 
-    fun deleteFile(id: Long): Completable {
-        return Completable.fromCallable {
-            downloadManager.delete(id)
-            entryDao.deleteFilePath(id)
-            return@fromCallable id
-        }
-    }
+    suspend fun playStream(url: String)
 
-    fun play(podcast: Entry) {
-        AudioService.play(podcast.file, podcast.audioUrl, podcast.progress, application)
-    }
-
-    fun pause() {
-        AudioService.pause(application)
-    }
-
-    fun resume() {
-        AudioService.resume(application)
-    }
-
-    fun playStream(url: String) {
-        entryDao.playStream(url)
-        AudioService.play(null, url, 0L, application)
-    }
-
-    fun setCurrentEntry(audioUrl: String?, lastProgress: Long) {
-        entryDao.setCurrentEntry(audioUrl, lastProgress)
-    }
-
-    fun updateCurrentEntryStateAndProgress(state: Int, progress: Long) {
-        entryDao.updateCurrentEntryStateAndProgress(state, progress)
-    }
-
-    fun getEntry(id: String?): Maybe<Entry?> = entryDao.getEntry(id)
+    fun getEntry(id: String): Flow<Entry>
 }

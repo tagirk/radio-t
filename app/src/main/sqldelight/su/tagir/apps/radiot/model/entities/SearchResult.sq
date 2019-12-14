@@ -1,0 +1,20 @@
+import java.lang.String;
+import java.util.Date;
+import kotlin.collections.List;
+
+CREATE TABLE searchResult(
+    query TEXT NOT NULL PRIMARY KEY,
+    ids TEXT AS List<String> NOT NULL,
+    timeStamp INTEGER AS Date NOT NULL);
+
+insert:
+INSERT OR REPLACE INTO searchResult(query, ids, timeStamp) VALUES(?, ?, ?);
+
+findByQuery:
+SELECT * FROM searchResult WHERE query = ?;
+
+findRecentSearches:
+SELECT query FROM searchResult ORDER BY timeStamp DESC;
+
+removeQuery:
+DELETE FROM searchResult WHERE query = ?;

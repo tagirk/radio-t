@@ -1,64 +1,36 @@
 package su.tagir.apps.radiot
 
-import android.app.Activity
 import android.app.Application
-import android.app.Service
-import android.content.ContentProvider
 import android.content.SharedPreferences
 import android.os.Build
-import android.preference.PreferenceManager
-import android.support.v7.app.AppCompatDelegate
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.core.CrashlyticsCore
-import com.evernote.android.job.JobConfig
-import com.evernote.android.job.JobManager
 import com.facebook.stetho.Stetho
-import com.squareup.leakcanary.LeakCanary
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
-import dagger.android.HasContentProviderInjector
-import dagger.android.HasServiceInjector
 import io.fabric.sdk.android.Fabric
 import saschpe.android.customtabs.CustomTabsActivityLifecycleCallbacks
-import su.tagir.apps.radiot.di.AppInjector
-import su.tagir.apps.radiot.job.RadiotJobCreator
+import su.tagir.apps.radiot.di.AppComponent
+import su.tagir.apps.radiot.di.AppModule
+import su.tagir.apps.radiot.di.DataModule
+import su.tagir.apps.radiot.di.NavigationModule
 import su.tagir.apps.radiot.ui.notification.createNotificationsChannels
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
 import timber.log.Timber
-import javax.inject.Inject
 
-class App : Application(),
-        HasActivityInjector,
-        HasServiceInjector,
-        HasContentProviderInjector{
+class App : Application() {
 
-    @Inject
-    lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
-
-    @Inject
-    lateinit var dispatchingServiceInjector: DispatchingAndroidInjector<Service>
-
-    @Inject
-    lateinit var dispatchContentProviderInjector: DispatchingAndroidInjector<ContentProvider>
-
-
-    override fun activityInjector() = dispatchingActivityInjector
-    override fun serviceInjector() = dispatchingServiceInjector
-    override fun contentProviderInjector() = dispatchContentProviderInjector
+    lateinit var appComponent: AppComponent
+        private set
 
     override fun onCreate() {
         super.onCreate()
+        appComponent = AppComponent.Impl(appModule = AppModule.Impl(this),
+                dataModule = DataModule.Impl(this),
+                navigationModule = NavigationModule.Impl())
 
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            return
-        }
-        LeakCanary.install(this)
-
-        AppInjector.inject(this)
-
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
-
+//        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
         initTools()
 
@@ -66,25 +38,22 @@ class App : Application(),
             createNotificationsChannels(this)
         }
 
-        JobManager
-                .create(this)
-                .addJobCreator(RadiotJobCreator())
-
         registerActivityLifecycleCallbacks(CustomTabsActivityLifecycleCallbacks())
         setNightMode()
     }
 
     private fun setNightMode() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val prefs = appComponent.preferences
         val modes = resources.getStringArray(R.array.night_mode)
         val mode = prefs.getString(SettingsFragment.KEY_NIGHT_MODE, modes[0])
         when (mode) {
-            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
+            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
             modes[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
     }
+
 
     private fun initTools() {
 
@@ -116,7 +85,6 @@ class App : Application(),
         } else {
             Timber.plant(CrashReportingTree(PreferenceManager.getDefaultSharedPreferences(this)))
         }
-        JobConfig.setLogcatEnabled(BuildConfig.DEBUG)
     }
 
 

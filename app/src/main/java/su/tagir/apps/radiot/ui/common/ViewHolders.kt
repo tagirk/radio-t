@@ -1,26 +1,20 @@
 package su.tagir.apps.radiot.ui.common
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
-import android.support.v4.content.ContextCompat
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v7.app.AlertDialog
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
-import butterknife.*
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import android.widget.*
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.image.ImageConfig
+import su.tagir.apps.radiot.image.ImageLoader
+import su.tagir.apps.radiot.image.Transformation
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.utils.longDateFormat
@@ -28,18 +22,24 @@ import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 
 
-class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) :  DataBoundViewHolder<Entry>(view) {
+class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
-    @BindView(R.id.title)
-    lateinit var title: TextView
+    private val title: TextView = itemView.findViewById(R.id.title)
+    private val date: TextView = itemView.findViewById(R.id.date)
+    private val comments: TextView = itemView.findViewById(R.id.comments)
+    private val avatars: LinearLayout = itemView.findViewById(R.id.avatars)
+    private lateinit var entry: Entry
 
-    @BindView(R.id.date)
-    lateinit var date: TextView
+    private val iconSize = itemView.resources.getDimensionPixelSize(R.dimen.commentator_image_size)
+    private val margin = iconSize/4
+    private val screenMargin = itemView.resources.getDimensionPixelSize(R.dimen.screen_margin)
+    private val layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
+    private val config = ImageConfig(fit = true, error = R.drawable.ic_account_circle_24dp, transformations = listOf(Transformation.Circle))
 
-    private lateinit var podcast: Entry
+    private val maxCount = (itemView.resources.displayMetrics.widthPixels - 2 * screenMargin) / (iconSize - margin) - 1
 
     init {
-        ButterKnife.bind(this, view)
+        layoutParams.marginEnd = -margin
     }
 
     override fun bind(t: Entry?) {
@@ -48,78 +48,57 @@ class PrepViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
         }
         title.text = t.title
         date.text = t.date?.longDateFormat()
-        podcast = t
-    }
+        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
 
-    @OnClick(R.id.root)
-    fun onPlayClick() {
-        callback.onClick(podcast)
-    }
+        avatars.removeAllViews()
+        entry = t
 
+        t.commentators?.let { list ->
+            for (i in list.indices) {
+                if (i > maxCount) {
+                    break
+                }
+                val icon = ImageView(itemView.context)
+                icon.id = View.generateViewId()
+                icon.alpha = 0.7f
+                avatars.addView(icon, layoutParams)
+
+                ImageLoader.display(list[i], icon, config)
+            }
+        }
+    }
 }
 
-class PodcastViewHolder(view: View,
-                        private val type:Int,
-                        private val glide: GlideRequests?,
-                        private val callback: EntriesAdapter.Callback) : DataBoundViewHolder<Entry>(view), MenuItem.OnMenuItemClickListener {
+class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
-    @BindView(R.id.title)
-    lateinit var title: TextView
-
-    @BindView(R.id.image)
-    lateinit var image: ImageView
-
-    @BindView(R.id.blur)
-    lateinit var blur: ImageView
-
-    @BindView(R.id.progress)
-    lateinit var progress: ProgressBar
-
-    @BindView(R.id.cancel)
-    lateinit var cancel: ImageView
-
-    @BindView(R.id.btn_download)
-    lateinit var download: ImageButton
-
-    @BindView(R.id.btn_remove)
-    lateinit var remove: ImageButton
-
-    @BindView(R.id.show_notes)
-    lateinit var showNotes: TextView
-
-    @JvmField
-    @BindDimen(R.dimen.item_image_corner_radius)
-    var cornerRadius: Int = 0
-
-    @JvmField
-    @BindColor(R.color.colorPrimaryText)
-    var primaryTextColor: Int = 0
-
-    @JvmField
-    @BindColor(R.color.colorAccent)
-    var accentColor: Int = 0
+    private val title: TextView = itemView.findViewById(R.id.title)
+    private val image: ImageView = itemView.findViewById(R.id.image)
+    private val blur: ImageView = itemView.findViewById(R.id.blur)
+    private val progress: ProgressBar = itemView.findViewById(R.id.progress)
+    val cancel: ImageView = itemView.findViewById(R.id.cancel)
+    val download: ImageButton = itemView.findViewById(R.id.btn_download)
+    val remove: ImageButton = itemView.findViewById(R.id.btn_remove)
+    private val showNotes: TextView = itemView.findViewById(R.id.show_notes)
+    val comments: TextView = itemView.findViewById(R.id.comments)
 
     private lateinit var podcast: Entry
 
-    init {
-        ButterKnife.bind(this, view)
-    }
-
+    @SuppressLint("SetTextI18n")
     override fun bind(t: Entry?) {
         if (t == null) {
             return
         }
         title.text = t.title
         val date = t.date?.longDateFormat()
-        val notes = if (t.showNotes.isNullOrBlank()) "" else t.showNotes?.replace("\n", "")
+        val notes = if (t.showNotes.isNullOrBlank()) "" else t.showNotes.replace("\n", "")
         val sb = SpannableStringBuilder()
                 .append(date)
 
-        if (!notes.isNullOrBlank()) {
+        if (!notes.isBlank()) {
             sb.append(" - ").append(notes)
         }
 
-        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length
+        sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         showNotes.text = sb
@@ -132,68 +111,23 @@ class PodcastViewHolder(view: View,
         download.visibleInvisible(progress < 0 && t.file == null)
         remove.visibleInvisible(t.file != null)
 
-        glide
-                ?.load(t.image)
-                ?.diskCacheStrategy(DiskCacheStrategy.ALL)
-                ?.transforms(CenterCrop(), RoundedCorners(cornerRadius))
-                ?.placeholder(R.drawable.ic_notification_large)
-                ?.error(R.drawable.ic_notification_large)
-                ?.into(image)
+        t.image?.let { url ->
+            val config = ImageConfig(placeholder = R.drawable.ic_notification_large, error = R.drawable.ic_notification_large)
+            ImageLoader.display(url, image, config)
+        }
 
         blur.visibleGone(t.state == EntryState.PLAYING || t.state == EntryState.PAUSED)
         blur.setImageDrawable(getImageByState(t.state))
         this.podcast = t
 
-        itemView.setOnCreateContextMenuListener { menu, _, _ ->
-            menu?.add(Menu.NONE, ITEM_LISTEN, 0, R.string.listen)?.setOnMenuItemClickListener(this)
-            if (progress < 0 && t.file == null) {
-                menu?.add(Menu.NONE, ITEM_DOWNLOAD, 1, R.string.download)?.setOnMenuItemClickListener(this)
-            } else {
-                menu?.add(Menu.NONE, ITEM_DELETE, 1, R.string.delete)?.setOnMenuItemClickListener(this)
-            }
-            if(type== EntriesAdapter.TYPE_PODCAST) {
-                menu?.add(Menu.NONE, ITEM_WEB, 2, R.string.web)?.setOnMenuItemClickListener(this)
-                menu?.add(Menu.NONE, ITEM_CHAT, 3, R.string.chat_log)?.setOnMenuItemClickListener(this)
-            }
-        }
-    }
-
-    @OnClick(R.id.root)
-    fun onPlayClick() {
-        callback.onClick(podcast)
-    }
-
-    @OnClick(R.id.btn_download)
-    fun onDownloadClick() {
-        callback.download(podcast)
-    }
-
-    @OnClick(R.id.btn_remove, R.id.cancel)
-    fun onRemoveClick() {
-        AlertDialog.Builder(itemView.context)
-                .setMessage("Удалить файл?")
-                .setPositiveButton("Да", { _, _ -> callback.remove(podcast) })
-                .setNegativeButton("Нет", null)
-                .create()
-                .show()
-    }
-
-    override fun onMenuItemClick(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            ITEM_LISTEN -> onPlayClick()
-            ITEM_DOWNLOAD -> onDownloadClick()
-            ITEM_DELETE -> onRemoveClick()
-            ITEM_WEB -> callback.openWebSite(podcast)
-            ITEM_CHAT -> callback.openChatLog(podcast)
-        }
-        return false
+        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
     }
 
     private fun getImageByState(state: Int): Drawable? {
         return when (state) {
             EntryState.PLAYING -> {
                 val animation = ContextCompat.getDrawable(itemView.context, R.drawable.ic_equalizer_white_36dp) as AnimationDrawable?
-                DrawableCompat.setTintList(animation!!, ColorStateList.valueOf(accentColor))
+                DrawableCompat.setTintList(animation!!, ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.colorAccent)))
                 animation.start()
                 animation
             }
@@ -202,51 +136,29 @@ class PodcastViewHolder(view: View,
             else -> null
         }
     }
-
-    companion object {
-
-        const val ITEM_LISTEN = 0
-        const val ITEM_DOWNLOAD = 1
-        const val ITEM_DELETE = 2
-        const val ITEM_WEB = 3
-        const val ITEM_CHAT = 4
-    }
 }
 
-class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) :  DataBoundViewHolder<Entry>(view) {
+class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
 
-    @BindView(R.id.title)
-    lateinit var title: TextView
-
-    @BindView(R.id.image)
-    lateinit var image: ImageView
-
-    @BindView(R.id.blur)
-    lateinit var blur: View
-
-    @BindView(R.id.progress)
-    lateinit var progress: ProgressBar
-
-    @BindView(R.id.cancel)
-    lateinit var cancel: ImageView
-
-    @BindView(R.id.btn_download)
-    lateinit var download: ImageButton
-
-    @BindView(R.id.btn_remove)
-    lateinit var remove: ImageButton
-
-    @BindView(R.id.show_notes)
-    lateinit var showNotes: TextView
-
-    @JvmField
-    @BindColor(R.color.colorPrimaryText)
-    var primaryTextColor: Int = 0
+    private val title: TextView = itemView.findViewById(R.id.title)
+    private val image: ImageView = itemView.findViewById(R.id.image)
+    private val blur: ImageView = itemView.findViewById(R.id.blur)
+    private val progress: ProgressBar = itemView.findViewById(R.id.progress)
+    private val cancel: ImageView = itemView.findViewById(R.id.cancel)
+    private val download: ImageButton = itemView.findViewById(R.id.btn_download)
+    private val remove: ImageButton = itemView.findViewById(R.id.btn_remove)
+    private val showNotes: TextView = itemView.findViewById(R.id.show_notes)
+    val comments: TextView = itemView.findViewById(R.id.comments)
 
     private lateinit var entry: Entry
 
     init {
-        ButterKnife.bind(this, view)
+        progress.visibleGone(false)
+        download.visibleGone(false)
+        remove.visibleGone(false)
+        blur.visibleGone(false)
+        image.visibleGone(false)
+        cancel.visibleGone(false)
     }
 
     override fun bind(t: Entry?) {
@@ -259,23 +171,12 @@ class NewsViewHolder(view: View, private val callback: EntriesAdapter.Callback) 
                 .append(date)
                 .append(" - ")
                 .append(t.showNotes?.replace("\n", ""))
-        sb.setSpan(ForegroundColorSpan(primaryTextColor), 0, date?.length?.plus(3)
+        sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length?.plus(3)
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         showNotes.text = sb
+        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
 
-        progress.visibleGone(false)
-        download.visibleGone(false)
-        remove.visibleGone(false)
-        blur.visibleGone(false)
-        image.visibleGone(false)
-        cancel.visibleGone(false)
         this.entry = t
 
     }
-
-    @OnClick(R.id.root)
-    fun onPlayClick() {
-        callback.onClick(entry)
-    }
-
 }

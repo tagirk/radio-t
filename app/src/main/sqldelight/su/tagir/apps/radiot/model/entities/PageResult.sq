@@ -1,0 +1,17 @@
+import java.lang.String;
+import java.util.Date;
+import kotlin.collections.List;
+
+CREATE TABLE pageResult(
+    query TEXT NOT NULL PRIMARY KEY,
+    ids TEXT AS List<String> NOT NULL,
+    totalCount INTEGER AS Int);
+
+insert:
+INSERT OR REPLACE INTO pageResult(query, ids, totalCount) VALUES(?, ?, ?);
+
+findByQuery:
+SELECT * FROM pageResult WHERE query = ?;
+
+removeQuery:
+DELETE FROM pageResult WHERE query = ?;

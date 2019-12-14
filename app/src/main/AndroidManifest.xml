@@ -4,7 +4,7 @@
     package="su.tagir.apps.radiot">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".App"
@@ -14,7 +14,9 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="false"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        android:usesCleartextTraffic="true"
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:targetApi="m">
 
         <activity
             android:name=".ui.MainActivity"
@@ -25,7 +27,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.chat.ChatActivity" />
+        <activity android:name=".ui.chat.ChatActivity"
+            android:theme="@style/AppTheme"/>
 
         <service
             android:name=".service.AudioService"
@@ -36,13 +39,6 @@
                 <action android:name="su.tagir.apps.radiot.service.IAudioService" />
             </intent-filter>
         </service>
-        <service
-            android:name=".model.PodcastStateService"
-            android:exported="false" />
-
-        <service
-            android:name="com.evernote.android.job.gcm.PlatformGcmService"
-            tools:node="remove"/>
 
         <provider
             android:name=".model.EntryContentProvider"

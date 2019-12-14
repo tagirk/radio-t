@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#161616</color>
-    <color name="colorPrimaryDark">#090915</color>
+    <color name="colorPrimary">#2c3e50</color>
+    <color name="colorPrimaryDark">#263238</color>
     <color name="colorAccent">#FF5252</color>
     <color name="colorDivider">#424242</color>
-    <color name="colorPrimaryText">#ababab</color>
-    <color name="colorSecondaryText">#757575</color>
+    <color name="colorPrimaryText">#e2e2e2</color>
+    <color name="colorSecondaryText">#898989</color>
     <color name="colorIcons">#ababab</color>
-    <color name="colorBackground">#111111</color>
-    <color name="colorPlayerBackground">#161616</color>
+    <color name="colorBackground">#263238</color>
+    <color name="colorPlayerBackground">#2c3e50</color>
     <color name="colorTimeLabels">#aa161616</color>
     <color name="colorActiveArticle">#1EFF5252</color>
     <color name="colorUrl">#2196F3</color>
     <color name="colorBlur">#cc111111</color>
     <color name="colorTabTextColor">#99ababab</color>
+    <color name="colorStreamView">#22999999</color>
 </resources>

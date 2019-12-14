@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="Уведомления"
+    <PreferenceCategory android:title="@string/notifications"
         android:layout="@layout/pref_category">
 
         <SwitchPreference
             android:defaultValue="false"
             android:summary="@string/not_show"
-            android:title="Напоминание о прямом эфире"
+            android:title="@string/live_show_notification"
             android:key="stream_notification"
             android:layout="@layout/pref_switch"/>
 
@@ -26,14 +26,14 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Отчеты"
+    <PreferenceCategory android:title="@string/reports"
         android:layout="@layout/pref_category">
 
         <SwitchPreference
             android:checked="true"
             android:defaultValue="true"
             android:summary="@string/send"
-            android:title="Отчеты о сбоях"
+            android:title="@string/crash_reports"
             android:key="crash_reports"
             android:layout="@layout/pref_switch"/>
 

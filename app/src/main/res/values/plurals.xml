@@ -2,35 +2,20 @@
 <resources>
 
     <plurals name="days">
-        <item quantity="one">день</item>
-        <item quantity="few">дня</item>
-        <item quantity="many">дней</item>
-        <item quantity="zero">дней</item>
-        <item quantity="other">дней</item>
+        <item quantity="one">One day</item>
+        <item quantity="few">%d days</item>
+        <item quantity="many">%d days</item>
+        <item quantity="zero">%d days</item>
+        <item quantity="other">%d days</item>
     </plurals>
 
-    <plurals name="hours">
-        <item quantity="one">час</item>
-        <item quantity="few">часа</item>
-        <item quantity="many">часов</item>
-        <item quantity="zero">часов</item>
-        <item quantity="other">часов</item>
-    </plurals>
 
-    <plurals name="minutes">
-        <item quantity="one">минута</item>
-        <item quantity="few">минуты</item>
-        <item quantity="many">минут</item>
-        <item quantity="zero">минут</item>
-        <item quantity="other">минут</item>
-    </plurals>
-
-    <plurals name="seconds">
-        <item quantity="one">секунда</item>
-        <item quantity="few">секунды</item>
-        <item quantity="many">секунд</item>
-        <item quantity="zero">секунд</item>
-        <item quantity="other">секунд</item>
+    <plurals name="comments">
+        <item quantity="zero">No comments</item>
+        <item quantity="one">%d comment</item>
+        <item quantity="few">%d comments</item>
+        <item quantity="many">%d comments</item>
+        <item quantity="other">%d comments</item>
     </plurals>
 
 </resources>

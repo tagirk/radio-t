@@ -1,0 +1,33 @@
+import java.lang.Boolean;
+import java.util.Date;
+
+CREATE TABLE article(
+    slug TEXT NOT NULL PRIMARY KEY,
+    title TEXT,
+    content TEXT,
+    snippet TEXT,
+    image TEXT,
+    link TEXT,
+    author TEXT,
+    date INTEGER AS Date,
+    addedDate INTEGER AS Date,
+    active INTEGER AS Boolean DEFAULT 0 NOT NULL,
+    geek INTEGER AS Boolean DEFAULT 0 NOT NULL,
+    domain TEXT,
+    comments INTEGER AS Int DEFAULT 0 NOT NULL,
+    likes INTEGER AS Int DEFAULT 0 NOT NULL,
+    deleted INTEGER AS Boolean DEFAULT 0 NOT NULL,
+    archived INTEGER AS Boolean DEFAULT 0 NOT NULL);
+
+insert:
+INSERT OR REPLACE INTO article(slug, title, content, snippet, image, link, author, date, addedDate, active, geek, domain, comments, likes, deleted, archived)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM article;
+
+updateState:
+UPDATE article SET active = ? WHERE active = ?;
+
+findByDeletedAndArchivedStates:
+SELECT * FROM article WHERE deleted = ? AND archived = ? ORDER BY active DESC, addedDate DESC;

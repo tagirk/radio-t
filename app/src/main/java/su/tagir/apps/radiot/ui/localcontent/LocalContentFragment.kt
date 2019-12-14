@@ -1,83 +1,66 @@
 package su.tagir.apps.radiot.ui.localcontent
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.webkit.WebView
-import butterknife.BindView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.di.Injectable
-import su.tagir.apps.radiot.ui.MainViewModel
-import su.tagir.apps.radiot.ui.common.BaseFragment
-import javax.inject.Inject
+import su.tagir.apps.radiot.model.entries.Entry
+import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
 
+class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalContentContract.Presenter>(),
+        LocalContentContract.View{
 
-class LocalContentFragment : BaseFragment(), Injectable {
-
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private lateinit var viewModel: LocalContentViewModel
-    private lateinit var mainViewModel: MainViewModel
-
-    @BindView(R.id.web_view)
     lateinit var webView: WebView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
-
-    override fun createView(inflater: LayoutInflater, container: ViewGroup?): View =
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_content, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.title = arguments?.getString(ARG_TITLE)
+        toolbar.inflateMenu(R.menu.menu_content)
+        toolbar.setNavigationOnClickListener { presenter.exit() }
+        toolbar.setOnMenuItemClickListener {
+            presenter.openInBrowser()
+            false
+        }
+
+        webView = view.findViewById(R.id.web_view)
         webView.setBackgroundColor(ContextCompat.getColor(view.context, R.color.colorBackground))
 
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(LocalContentViewModel::class.java)
-        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
+    override fun createPresenter(): LocalContentContract.Presenter {
 
-        viewModel.getEntry()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer { entry ->
-                            val sb = "<HTML><HEAD><LINK href=\"material.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>" +
-                                    entry?.body +
-                                    "</body></HTML>"
+        val appComponent = (activity!!.application as App).appComponent
 
-                            webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
-                            mainViewModel.setCurrentScreen(entry?.title?:"")
-                        })
-
-        viewModel.setId(arguments?.getString(ARG_ID))
+        return LocalContentPresenter(arguments!!.getString("entry_id")!!,
+                appComponent.entryRepository,
+                appComponent.router)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.menu_content, menu)
+    override fun showContent(entry: Entry) {
+        val sb = "<HTML><HEAD><LINK href=\"material.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>" +
+                entry.body +
+                "</body></HTML>"
+
+        webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
     }
-
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId){
-            R.id.web -> viewModel.openInBrowser()
-        }
-        return false
-    }
-
 
     companion object {
-        const val ARG_ID = "entry_id"
+        private const val ARG_ID = "entry_id"
+        private const val ARG_TITLE = "entry_id"
 
-        fun newInstance(url: String?): LocalContentFragment{
+        fun newInstance(title: String?, url: String?): LocalContentFragment {
             val args = Bundle()
+            args.putString(ARG_TITLE, title)
             args.putString(ARG_ID, url)
             val fragment = LocalContentFragment()
             fragment.arguments = args

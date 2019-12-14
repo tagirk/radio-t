@@ -1,70 +1,55 @@
 package su.tagir.apps.radiot.ui.podcasts.downloaded
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.widget.Toast
-import su.tagir.apps.radiot.GlideApp
-import su.tagir.apps.radiot.di.Injectable
+import android.view.View
+import androidx.appcompat.app.AlertDialog
+import su.tagir.apps.radiot.App
+import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.ui.MainViewModel
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.common.PagedListFragment
-import su.tagir.apps.radiot.ui.player.PlayerViewModel
-import javax.inject.Inject
+import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
 
-class DownloadedPodcastsFragment: PagedListFragment<Entry>(), EntriesAdapter.Callback, Injectable {
+class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsContract.View, DownloadedPodcastsContract.Presenter>(),
+        DownloadedPodcastsContract.View,
+        EntriesAdapter.Callback{
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private lateinit var playerViewModel: PlayerViewModel
-    private lateinit var mainViewModel: MainViewModel
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        playerViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(PlayerViewModel::class.java)
-        mainViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(MainViewModel::class.java)
-        observeViewModel()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        refreshLayout.isEnabled = false
     }
 
-    override fun createViewModel()=ViewModelProviders.of(this, viewModelFactory).get(DownloadedPodcastsViewModel::class.java)
-
-    override fun createAdapter() = EntriesAdapter(EntriesAdapter.TYPE_PODCAST, GlideApp.with(this), this)
-
-
-
-    override fun onClick(entry: Entry) {
-        playerViewModel.onPlayClick(entry)
+    override fun createPresenter(): DownloadedPodcastsContract.Presenter {
+        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        return DownloadedPodcastsPresenter(appComponent.entryRepository, appComponent.router)
     }
 
 
-    override fun openWebSite(entry: Entry) {
-        mainViewModel.openWebSite(entry.url)
+    override fun createAdapter() = EntriesAdapter(this)
+
+    override fun showRemoveError(error: String?) {
+        context?.let { c ->
+            AlertDialog.Builder(c)
+                    .setTitle(R.string.error)
+                    .setMessage(error)
+                    .setPositiveButton("OK", null)
+                    .create()
+                    .show()
+        }
     }
 
-    override fun openChatLog(entry: Entry) {
-        mainViewModel.openWebSite(entry.chatUrl)
+    override fun select(entry: Entry) {
+        presenter.select(entry)
     }
+
+    override fun download(entry: Entry) {}
 
     override fun remove(entry: Entry) {
-        (listViewModel as DownloadedPodcastsViewModel).onRemoveClick(entry)
-
+        presenter.remove(entry)
     }
 
-    override fun download(entry: Entry) {
-
+    override fun openComments(entry: Entry) {
+        presenter.openComments(entry)
     }
 
-    private fun observeViewModel() {
-        (listViewModel as DownloadedPodcastsViewModel)
-                .error()
-                .observe(getViewLifecycleOwner()!!,
-                        Observer {
-                            if (it != null) {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                            }
-                        })
-    }
 }

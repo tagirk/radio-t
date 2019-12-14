@@ -1,16 +1,15 @@
 package su.tagir.apps.radiot.model.entries
 
-import android.arch.persistence.room.Embedded
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
-import android.arch.persistence.room.Relation
 import com.google.gson.annotations.SerializedName
+import su.tagir.apps.radiot.model.entities.MessageQueries
+import su.tagir.apps.radiot.model.entities.UserQueries
 import java.util.*
 
 data class Token(@SerializedName("access_token") val token: String,
                  @SerializedName("token_type") val type: String,
                  @SerializedName("scope") val scope: String? = null,
-                 @SerializedName("expires_in") val createdAt: Long? = null)
+                 @SerializedName("expires_in") val expiresIn: Long? = null,
+                 @SerializedName("refresh_token") val refreshToken: String? = null)
 
 data class GitterMessage(
         @SerializedName("id") val id: String,
@@ -47,31 +46,21 @@ data class Event(
         @SerializedName("fromUser") val fromUser: User)
 
 
-@Entity(tableName = User.TABLE)
 data class User(
-        @PrimaryKey(autoGenerate = false)
         @SerializedName("id") val id: String,
         @SerializedName("username") val username: String? = null,
         @SerializedName("avatarUrl") val avatarUrl: String? = null,
-        @SerializedName("avatarUrlSmall") val avatarUrlSmall: String,
+        @SerializedName("avatarUrlSmall") val avatarUrlSmall: String? = null,
         @SerializedName("displayName") val displayName: String? = null,
         @SerializedName("url") val url: String? = null,
         @SerializedName("avatarUrlMedium") val avatarUrlMedium: String? = null) {
-
-    companion object {
-        const val TABLE = "chat_user"
-        const val ID = "id"
-    }
 }
-
 
 data class Url(val url: String?)
 
 data class Mention(val screenName: String?, val userId: String?, val userIds: List<String>?)
 
-@Entity(tableName = Message.TABLE)
 data class Message(
-        @PrimaryKey(autoGenerate = false)
         val id: String,
         val text: String? = null,
         val html: String? = null,
@@ -81,23 +70,49 @@ data class Message(
         val unread: Boolean = false,
         val readBy: Int? = null,
         val urls: List<Url>? = null,
-        val mentions: List<Mention>? = null) {
+        val mentions: List<Mention>? = null)
 
-    companion object {
-        const val TABLE = "message"
-        const val ID = "id"
-        const val FROM_USER = "fromUserId"
-        const val SENT = "sent"
-    }
+data class MessageFull(val message: Message, val user: User?)
+
+fun Message.insert(messageQueries: MessageQueries) {
+    messageQueries.insert(id, text, html, sent, editedAt, fromUserId, unread, readBy, urls, mentions)
 }
 
-class MessageFull {
+val messageMapper: (id: String,
+                    text: String?,
+                    html: String?,
+                    sent: Date?,
+                    editedAt: Date?,
+                    fromUserId: String?,
+                    unread: Boolean,
+                    readBy: Int?,
+                    urls: List<Url>?,
+                    mentions: List<Mention>?,
+                    userId: String?,
+                    userName: String?,
+                    displayName: String?,
+                    avatarUrl: String?,
+                    url: String?) -> MessageFull
+    get() = { id,
+              text,
+              html,
+              sent,
+              editedAt,
+              fromUserId,
+              unread,
+              readBy,
+              urls,
+              mentions,
+              userId: String?,
+              userName: String?,
+              displayName: String?,
+              avatarUrl: String?,
+              url: String? ->
+        val message = Message(id, text, html, sent, editedAt, fromUserId, unread, readBy, urls, mentions)
+        val user = userId?.let {User(userId, userName, null, avatarUrl, displayName, url, null)}
+        MessageFull(message, user)
+    }
 
-    @Embedded
-    var message: Message? = null
-
-    @Relation(parentColumn = Message.FROM_USER, entityColumn = User.ID)
-    var user: List<User>? = null
-
-
+fun User.insert(userQueries: UserQueries) {
+    userQueries.insert(id, username, avatarUrl, avatarUrlSmall ?: "", displayName, url, avatarUrlMedium)
 }

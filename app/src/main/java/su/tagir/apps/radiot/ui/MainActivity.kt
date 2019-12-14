@@ -1,192 +1,80 @@
 package su.tagir.apps.radiot.ui
 
-import android.animation.ValueAnimator
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.os.IBinder
-import android.os.RemoteException
-import android.support.customtabs.CustomTabsIntent
-import android.support.design.widget.BottomSheetBehavior
-import android.support.design.widget.NavigationView
-import android.support.v4.app.ActivityOptionsCompat
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
-import android.support.v4.view.GravityCompat
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.graphics.drawable.DrawerArrowDrawable
-import android.support.v7.widget.Toolbar
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
-import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
-import butterknife.BindColor
-import butterknife.BindDimen
-import butterknife.BindView
-import butterknife.ButterKnife
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.support.HasSupportFragmentInjector
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import ru.terrakok.cicerone.NavigatorHolder
-import ru.terrakok.cicerone.android.SupportAppNavigator
+import ru.terrakok.cicerone.android.support.SupportAppNavigator
 import ru.terrakok.cicerone.commands.Command
 import ru.terrakok.cicerone.commands.Forward
 import saschpe.android.customtabs.CustomTabsHelper
 import saschpe.android.customtabs.WebViewFallback
+import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.Screens
-import su.tagir.apps.radiot.model.entries.EntryState.PLAYING
-import su.tagir.apps.radiot.model.entries.Progress
-import su.tagir.apps.radiot.service.AudioService
-import su.tagir.apps.radiot.service.IAudioService
-import su.tagir.apps.radiot.service.IAudioServiceCallback
-import su.tagir.apps.radiot.ui.chat.ChatActivity
+import su.tagir.apps.radiot.di.AppComponent
+import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.BackClickHandler
-import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
+import su.tagir.apps.radiot.ui.mvp.BaseMvpActivity
+import su.tagir.apps.radiot.ui.news.ArticlesFragment
 import su.tagir.apps.radiot.ui.news.NewsFragment
-import su.tagir.apps.radiot.ui.news.NewsTabsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.player.PlayerFragment
-import su.tagir.apps.radiot.ui.player.PlayerViewModel
-import su.tagir.apps.radiot.ui.podcasts.PodcastTabsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsFragment
-import su.tagir.apps.radiot.ui.search.SearchFragment
+import su.tagir.apps.radiot.ui.podcasts.PodcastsTabsFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragment
-import su.tagir.apps.radiot.ui.settings.CreditsFragment
 import su.tagir.apps.radiot.ui.settings.SettingsFragment
+import su.tagir.apps.radiot.ui.settings.SettingsFragmentRoot
 import su.tagir.apps.radiot.utils.visibleGone
-import su.tagir.apps.radiot.utils.visibleInvisible
 import timber.log.Timber
-import java.lang.ref.WeakReference
-import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(),
-        HasSupportFragmentInjector, ServiceConnection, View.OnClickListener {
+class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(), MainContract.View,
+        View.OnClickListener,
+        BottomNavigationView.OnNavigationItemSelectedListener {
 
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    @Inject
-    lateinit var navigatorHolder: NavigatorHolder
-
-    @BindView(R.id.bottom_sheet)
-    lateinit var bottomSheet: ViewGroup
-
-    @BindView(R.id.fragment_container)
-    lateinit var fragmentContainer: FrameLayout
-
-    @BindView(R.id.drawer_layout)
-    lateinit var drawerLayout: DrawerLayout
-
-    @BindView(R.id.nav_view)
-    lateinit var navigationView: NavigationView
-
-    @BindView(R.id.toolbar)
-    lateinit var toolbar: Toolbar
-
-    private lateinit var timeLeft: TextView
-    private lateinit var playStream: ImageButton
-    private lateinit var pauseStream: ImageButton
-    private lateinit var homeDrawable: DrawerArrowDrawable
-
-    @JvmField
-    @BindColor(R.color.colorPrimary)
-    var primaryColor: Int = 0
-
-    @JvmField
-    @BindDimen(R.dimen.player_peek_height)
-    var peekHeight: Int = 0
-
-    @BindView(R.id.dim)
-    lateinit var dim: View
-
+    private lateinit var navigatorHolder: NavigatorHolder
+    private lateinit var bottomSheet: ViewGroup
+    private lateinit var fragmentContainer: FrameLayout
+    private lateinit var navigationView: BottomNavigationView
+    private lateinit var dim: View
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-
-    private lateinit var playerViewModel: PlayerViewModel
-    private lateinit var mainViewModel: MainViewModel
-
-    private val serviceCallback = AudioServiceCallback(this)
-
-    private var audioService: IAudioService? = null
 
     private val handler = Handler()
 
     private val currentFragment
         get() = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
-    private var isHomeAsUp = false
-        set(value) {
-            if (field != value) {
-                field = value
-                val anim = if (value) ValueAnimator.ofFloat(0f, 1f) else ValueAnimator.ofFloat(1f, 0f)
-                anim.addUpdateListener { valueAnimator ->
-                    val slideOffset = valueAnimator.animatedValue as Float
-                    homeDrawable.progress = slideOffset
-                }
-                anim.interpolator = DecelerateInterpolator()
-
-                anim.duration = 300
-                anim.start()
-            }
-            drawerLayout.setDrawerLockMode(if (value) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        ButterKnife.bind(this)
-        setSupportActionBar(toolbar)
 
-        homeDrawable = DrawerArrowDrawable(toolbar.context)
-        toolbar.navigationIcon = homeDrawable
-        toolbar.setNavigationOnClickListener {
-            when {
-                drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
-                isHomeAsUp -> onBackPressed()
-                else -> drawerLayout.openDrawer(GravityCompat.START)
-            }
-        }
+        navigatorHolder = (application as App).appComponent.navigatorHolder
 
-        val navItems = navigationView.findViewById<LinearLayout>(R.id.nav_items)
+        bottomSheet = findViewById(R.id.bottom_sheet)
+        fragmentContainer = findViewById(R.id.fragment_container)
+        navigationView = findViewById(R.id.navigation_view)
+        dim = findViewById(R.id.dim)
 
-        for (i in 0 until navItems.childCount) {
-            navItems.getChildAt(i).setOnClickListener(this)
-        }
+        navigationView.setOnNavigationItemSelectedListener(this)
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        bottomSheetBehavior.setBottomSheetCallback(BottomSheetCallback())
-
-        timeLeft = findViewById(R.id.time_left)
-        playStream = findViewById(R.id.play)
-        playStream.setOnClickListener { playerViewModel.onPlayStreamClick() }
-        pauseStream = findViewById(R.id.pause)
-        pauseStream.setOnClickListener { playerViewModel.onPauseClick() }
-
-        playerViewModel = getViewModel(PlayerViewModel::class.java)
-        mainViewModel = getViewModel(MainViewModel::class.java)
-
-        observe()
+        bottomSheetBehavior.addBottomSheetCallback(BottomSheetCallback())
 
         initMainScreen()
         initBottomSheet()
@@ -195,41 +83,26 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater?.inflate(R.menu.menu_main, menu)
-        menu?.findItem(R.id.search)?.isVisible = currentFragment is PodcastTabsFragment
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            R.id.search -> mainViewModel.navigateToSearch()
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState?.putInt("state", bottomSheetBehavior.state)
+        outState.putInt("state", bottomSheetBehavior.state)
     }
 
     override fun onStart() {
         super.onStart()
-        bindService()
-        mainViewModel.start()
+        dim.visibleGone(bottomSheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED)
+        navigationView.visibleGone(bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED)
+        when(currentFragment){
+            is PodcastsTabsFragment -> navigationView.selectedItemId = R.id.podcasts
+            is ArticlesFragment -> navigationView.selectedItemId = R.id.news
+            is PiratesTabsFragment -> navigationView.selectedItemId = R.id.pirates
+            is SettingsFragmentRoot -> navigationView.selectedItemId = R.id.settings
+        }
     }
+
 
     override fun onStop() {
         handler.removeCallbacksAndMessages(null)
-        try {
-            audioService?.unregisterCallback(serviceCallback)
-            audioService?.onActivityStopped()
-        } catch (e: RemoteException) {
-            Timber.e(e)
-        }
-        unbindService(this)
-        mainViewModel.stop()
         super.onStop()
     }
 
@@ -246,165 +119,81 @@ class MainActivity : AppCompatActivity(),
     override fun onBackPressed() {
         when {
             bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED -> bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
             currentFragment is BackClickHandler -> (currentFragment as BackClickHandler).onBackClick()
             else -> super.onBackPressed()
         }
     }
 
-    override fun supportFragmentInjector() = dispatchingAndroidInjector
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.podcasts -> {
+                if (currentFragment !is PodcastsFragment) {
+                    presenter.navigateToPodcasts()
+                }
+            }
+            R.id.news -> {
+                if (currentFragment !is NewsFragment) {
+                    presenter.navigateToNews()
+                }
+            }
+            R.id.settings ->
+                if(currentFragment !is SettingsFragment) {
+                    presenter.navigateToSettings()
+                }
+            R.id.chat -> presenter.navigateToChat()
+            R.id.pirates -> {
+                if (currentFragment !is PiratesFragment) {
+                    presenter.navigateToPirates()
+                }
+            }
+        }
+        return true
+    }
 
     override fun onClick(v: View?) {
-        drawerLayout.closeDrawer(GravityCompat.START)
         when (v?.id) {
             R.id.nav_podcats -> {
                 if (currentFragment !is PodcastsFragment) {
-                    mainViewModel.navigateToPodcasts()
+                    presenter.navigateToPodcasts()
                 }
             }
             R.id.nav_news -> {
                 if (currentFragment !is NewsFragment) {
-                    mainViewModel.navigateToNews()
+                    presenter.navigateToNews()
                 }
             }
-            R.id.nav_settings -> mainViewModel.navigateToSettings()
-            R.id.nav_chat -> mainViewModel.navigateToChat()
+            R.id.nav_settings -> presenter.navigateToSettings()
+            R.id.nav_chat -> presenter.navigateToChat()
             R.id.nav_pirates -> {
                 if (currentFragment !is PiratesFragment) {
-                    mainViewModel.navigateToPirates()
+                    presenter.navigateToPirates()
                 }
             }
             R.id.nav_about -> {
                 if (currentFragment !is AboutFragment) {
-                    mainViewModel.navigateToAbout()
+                    presenter.navigateToAbout()
                 }
             }
         }
     }
 
-    override fun onServiceDisconnected(name: ComponentName?) {
-        try {
-            audioService?.unregisterCallback(serviceCallback)
-        } catch (e: RemoteException) {
-            Timber.e(e)
-        }
-        audioService = null
+    override fun showCurrentPodcast(entry: Entry) {
+        bottomSheet.visibleGone(true)
+        setBottomMargin(resources.getDimensionPixelSize(R.dimen.player_peek_height))
     }
 
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        audioService = IAudioService.Stub.asInterface(service)
-        try {
-            audioService?.registerCallback(serviceCallback)
-            audioService?.onActivityStarted()
-        } catch (e: RemoteException) {
-            Timber.e(e)
-        }
+    override fun createPresenter(): MainContract.Presenter {
+        val appComponent: AppComponent = (application as App).appComponent
+        val entryRepository = appComponent.entryRepository
+        val router = appComponent.router
+        return MainPresenter(entryRepository, router)
     }
 
-    private fun observe() {
-        playerViewModel
-                .getCurrentPodcast()
-                .observe(this,
-                        Observer { entry ->
-                            bottomSheet.visibleGone(entry != null)
-                            setBottomMargin(if (entry != null) peekHeight else 0)
-                            showHideBtnStream(entry?.url == STREAM_URL && entry.state == PLAYING)
-                            when (entry?.state) {
-                                PLAYING -> {
-                                    if (audioService == null) {
-                                        bindService()
-                                    }
-                                    playerViewModel.startUpdateProgress()
-                                }
-                                else -> playerViewModel.stopUpdateProgress()
-                            }
-                        })
-
-        playerViewModel
-                .seekEvent()
-                .observe(this,
-                        Observer {
-                            if (it != null) {
-                                try {
-                                    audioService?.seekTo(it)
-                                } catch (e: RemoteException) {
-                                    Timber.e(e)
-                                }
-                            }
-                        })
-
-        playerViewModel
-                .requestProgressEvent()
-                .observe(this,
-                        Observer {
-                            val progress = Progress()
-                            try {
-                                audioService?.getProgress(progress)
-                                playerViewModel.setProgress(progress)
-                            } catch (e: RemoteException) {
-                                Timber.e(e)
-                            }
-                        })
-
-        playerViewModel
-                .expandEvent()
-                .observe(this, Observer {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                })
-
-        mainViewModel
-                .getCurrentScreen()
-                .observe(this, Observer {
-                    dismissKeyboard(fragmentContainer.windowToken)
-                    when (it) {
-                        Screens.SETTINGS_SCREEN -> {
-                            isHomeAsUp = true
-                            toolbar.setTitle(R.string.settings)
-                        }
-                        Screens.PODCASTS_SCREEN -> {
-                            isHomeAsUp = false
-                            toolbar.setTitle(R.string.podcasts)
-                        }
-                        Screens.NEWS_SCREEN -> {
-                            isHomeAsUp = false
-                            toolbar.setTitle(R.string.news)
-                        }
-                        Screens.PIRATES_SCREEN -> {
-                            isHomeAsUp = false
-                            toolbar.setTitle(R.string.pirates)
-                        }
-                        Screens.SEARCH_SCREEN -> {
-                            isHomeAsUp = true
-                            toolbar.title = null
-                        }
-                        Screens.ABOUT_SCREEN ->{
-                            isHomeAsUp = true
-                            toolbar.setTitle(R.string.about)
-                        }
-                        Screens.CREDITS_SCREEN ->{
-                            isHomeAsUp = true
-                            toolbar.setTitle(R.string.credits)
-                        }
-                        else -> {
-                            isHomeAsUp = true
-                            toolbar.title = it
-
-                        }
-                    }
-                    invalidateOptionsMenu()
-                })
-
-        mainViewModel.getTimer()
-                .observe(this, Observer {
-                    timeLeft.text = it
-                })
-
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        Timber.d("onRequestPermissionsResult: $requestCode")
     }
 
-    private fun showHideBtnStream(playing: Boolean) {
-        playStream.visibleInvisible(!playing)
-        pauseStream.visibleInvisible(playing)
-    }
 
     private fun initBottomSheet() {
         var playerFr = supportFragmentManager.findFragmentById(R.id.bottom_sheet)
@@ -422,50 +211,30 @@ class MainActivity : AppCompatActivity(),
         if (currentFragment == null) {
             supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_container, PodcastTabsFragment())
+                    .replace(R.id.fragment_container, PodcastsTabsFragment())
                     .commitNowAllowingStateLoss()
         }
     }
 
-    private fun <T : ViewModel> getViewModel(clazz: Class<T>): T = ViewModelProviders.of(this, viewModelFactory).get(clazz)
-
-    private fun dismissKeyboard(windowToken: IBinder?) {
-        val imm = getSystemService(
-                Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(windowToken, 0)
-
-    }
-
     private val navigator = object : SupportAppNavigator(this, R.id.fragment_container) {
 
-        override fun createActivityIntent(context: Context?, screenKey: String?, data: Any?): Intent? = when (screenKey) {
-            Screens.CHAT_ACTIVITY -> Intent(this@MainActivity, ChatActivity::class.java)
-            else -> null
-        }
-
-        override fun createFragment(screenKey: String?, data: Any?): Fragment? = when (screenKey) {
-            Screens.PODCASTS_SCREEN -> PodcastTabsFragment()
-            Screens.NEWS_SCREEN -> NewsTabsFragment()
-            Screens.SEARCH_SCREEN -> SearchFragment()
-            Screens.CONTENT_SCREEN -> LocalContentFragment.newInstance(data as String)
-            Screens.SETTINGS_SCREEN -> SettingsFragment()
-            Screens.PIRATES_SCREEN -> PiratesTabsFragment()
-            Screens.CREDITS_SCREEN -> CreditsFragment()
-            Screens.ABOUT_SCREEN -> AboutFragment()
-            else -> null
-        }
 
         override fun applyCommand(command: Command?) {
-            if (command is Forward && command.screenKey == Screens.WEB_SCREEN) {
-                openWebPage(command.transitionData as String)
-            } else if (command is Forward && command.screenKey == Screens.RESOLVE_ACTIVITY) {
-                openWithResolveActivity(command.transitionData as String)
+            if (command is Forward && command.screen is Screens.WebScreen) {
+                val screen = command.screen as Screens.WebScreen
+                openWebPage(screen.url)
+            } else if (command is Forward && command.screen is Screens.CommentsScreen) {
+                val screen = command.screen as Screens.CommentsScreen
+                openWebPage("${screen.entry.url}/#comments")
+            }else if (command is Forward && command.screen is Screens.ResolveActivityScreen) {
+                val screen = command.screen as Screens.ResolveActivityScreen
+                openWithResolveActivity(screen.url)
             } else {
                 super.applyCommand(command)
             }
         }
 
-        override fun setupFragmentTransactionAnimation(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
+        override fun setupFragmentTransaction(command: Command?, currentFragment: Fragment?, nextFragment: Fragment?, fragmentTransaction: FragmentTransaction?) {
             fragmentTransaction?.setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
         }
 
@@ -486,7 +255,7 @@ class MainActivity : AppCompatActivity(),
         private fun openWebPage(url: String) {
             val customTabsIntent = CustomTabsIntent.Builder()
                     .addDefaultShareMenuItem()
-                    .setToolbarColor(primaryColor)
+                    .setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.colorPrimary))
                     .setShowTitle(true)
                     .setCloseButtonIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_arrow_back_24dp))
                     .build()
@@ -503,38 +272,21 @@ class MainActivity : AppCompatActivity(),
         fragmentContainer.setPadding(0, 0, 0, margin)
     }
 
-
-    private fun bindService() {
-        val intent = Intent(application, AudioService::class.java)
-        intent.action = IAudioService::class.java.name
-        bindService(intent, this, Context.BIND_AUTO_CREATE)
-    }
-
-
     inner class BottomSheetCallback : BottomSheetBehavior.BottomSheetCallback() {
 
         override fun onStateChanged(bottomSheet: View, newState: Int) {
+            dim.visibleGone(newState != BottomSheetBehavior.STATE_COLLAPSED)
+            navigationView.visibleGone(newState != BottomSheetBehavior.STATE_EXPANDED)
         }
 
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            playerViewModel.onSliding(slideOffset)
+            (supportFragmentManager
+                    .findFragmentById(R.id.bottom_sheet) as? PlayerFragment)?.onSlide(slideOffset)
+
             dim.alpha = slideOffset
+            navigationView.alpha = 1 - slideOffset
         }
     }
 
-    class AudioServiceCallback(mainActivity: MainActivity) : IAudioServiceCallback.Stub() {
-
-        private val weakRef = WeakReference(mainActivity)
-
-        override fun onStateChanged(loading: Boolean, state: Int) {
-            if (weakRef.get()?.playerViewModel?.isLoading()?.value != loading) {
-                weakRef.get()?.playerViewModel?.setLoading(loading)
-            }
-        }
-
-        override fun onError(error: String?) {
-            weakRef.get()?.playerViewModel?.setError(error)
-        }
-    }
 }
 
