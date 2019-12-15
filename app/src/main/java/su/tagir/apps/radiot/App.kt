@@ -45,11 +45,11 @@ class App : Application() {
     private fun setNightMode() {
         val prefs = appComponent.preferences
         val modes = resources.getStringArray(R.array.night_mode)
-        val mode = prefs.getString(SettingsFragment.KEY_NIGHT_MODE, modes[0])
+        val mode = prefs.getString(SettingsFragment.KEY_NIGHT_MODE, modes[2])
         when (mode) {
-            modes[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            modes[0] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             modes[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
 
     }

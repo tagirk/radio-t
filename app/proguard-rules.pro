@@ -29,18 +29,14 @@
 -dontwarn org.jetbrains.annotations.**
 #-keep class kotlin.Metadata { *; }
 -dontwarn kotlin.**
+-keepnames class kotlinx.** { *; }
 
 -keepattributes *Annotation*
 -keepattributes SourceFile,LineNumberTable
 
-#===============Glide================
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep public class * extends com.bumptech.glide.module.AppGlideModule { *; }
--keep class com.bumptech.glide.GeneratedAppGlideModuleImpl { *; }
--keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
-  **[] $VALUES;
-  public *;
-}
+-keep class su.tagir.apps.radiot.model.entries.RemarkUser
+-keep class su.tagir.apps.radiot.model.entries.Comment
+-keep class su.tagir.apps.radiot.model.entries.CommentList
 
 #-----------Retrofit--------------
 -dontnote retrofit2.Platform
@@ -48,15 +44,11 @@
 -keepattributes Signature
 -keepattributes Exceptions
 
-
 #--------------OkHttp--------------
--dontwarn okhttp3.**
--dontwarn okio.**
-
-
-#---------Dagger---------------
--dontwarn com.google.errorprone.annotations.**
-
+-dontwarn javax.annotation.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+-dontwarn org.codehaus.mojo.animal_sniffer.*
+-dontwarn okhttp3.internal.platform.ConscryptPlatform
 
 #------------------Enums--------------------
 -keepclassmembers class * extends java.lang.Enum {

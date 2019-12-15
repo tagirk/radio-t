@@ -76,7 +76,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         val modes = resources.getStringArray(R.array.night_mode)
 
         val nightMode: ListPreference? = findPreference(KEY_NIGHT_MODE)
-        nightMode?.summary = prefs.getString(KEY_NIGHT_MODE, modes[0])
+        nightMode?.summary = prefs.getString(KEY_NIGHT_MODE, modes[2])
         nightMode?.setOnPreferenceChangeListener { _, newValue ->
             prefs.modify { putString(KEY_NIGHT_MODE, newValue as String) }
             true
@@ -105,13 +105,13 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             }
             KEY_NIGHT_MODE -> {
                 val modes = resources.getStringArray(R.array.night_mode)
-                val mode = prefs.getString(key, modes[0])
+                val mode = prefs.getString(key, modes[2])
                 val nightMode: ListPreference? = findPreference(key)
                 nightMode?.summary = mode
                 when (mode) {
-                    modes[2] -> setDefaultNightMode(MODE_NIGHT_FOLLOW_SYSTEM)
+                    modes[0] -> setDefaultNightMode(MODE_NIGHT_NO)
                     modes[1] -> setDefaultNightMode(MODE_NIGHT_YES)
-                    else -> setDefaultNightMode(MODE_NIGHT_NO)
+                    else -> setDefaultNightMode(MODE_NIGHT_FOLLOW_SYSTEM)
                 }
                 activity?.recreate()
             }

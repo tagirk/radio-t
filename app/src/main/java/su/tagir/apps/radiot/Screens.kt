@@ -14,7 +14,6 @@ import su.tagir.apps.radiot.ui.news.NewsTabsFragment
 import su.tagir.apps.radiot.ui.pirates.PiratesTabsFragment
 import su.tagir.apps.radiot.ui.podcasts.PodcastsTabsFragment
 import su.tagir.apps.radiot.ui.search.SearchFragment
-import su.tagir.apps.radiot.ui.settings.AboutFragment
 import su.tagir.apps.radiot.ui.settings.AboutFragmentRoot
 import su.tagir.apps.radiot.ui.settings.CreditsFragment
 import su.tagir.apps.radiot.ui.settings.SettingsFragmentRoot
@@ -22,18 +21,8 @@ import su.tagir.apps.radiot.ui.settings.SettingsFragmentRoot
 
 object Screens {
 
-    const val PODCASTS_SCREEN = "podcasts_screen"
-    const val NEWS_SCREEN = "news_screen"
-    const val SEARCH_SCREEN  = "search_screen"
-    const val CONTENT_SCREEN = "content_screen"
     const val WEB_SCREEN = "web_screen"
     const val RESOLVE_ACTIVITY = "resolve_activity"
-    const val SETTINGS_SCREEN = "settings_screen"
-    const val ABOUT_SCREEN = "about_screen"
-
-    const val PIRATES_SCREEN = "pirates_screen"
-    const val CREDITS_SCREEN = "credits_screen"
-    const val COMMENTS_SCREEN = "comments_screen"
 
     object PdcastsScreen: SupportAppScreen(){
         override fun getFragment(): Fragment {

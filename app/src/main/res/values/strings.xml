@@ -44,4 +44,5 @@
     <string name="online">Stream</string>
     <string name="all">All</string>
     <string name="downloaded">Downloaded</string>
+    <string name="enter_message">Введите сообщение</string>
 </resources>

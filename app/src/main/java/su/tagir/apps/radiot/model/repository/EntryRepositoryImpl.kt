@@ -22,16 +22,14 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.HashMap
 
+const val PAGE_SIZE = 50
+
 class EntryRepositoryImpl(private val restClient: RestClient,
                           private val remarkClient: RemarkClient,
                           private val database: RadiotDb,
                           private val downloadManager: DownloadManager,
                           private val application: Application,
                           private val dispatcher: CoroutineDispatcher = Dispatchers.Default) : EntryRepository {
-
-    companion object {
-        const val PAGE_SIZE = 50
-    }
 
     private val entryQueries = database.entryQueries
     private val timeLabelQueries = database.timeLabelQueries
