@@ -24,21 +24,17 @@ class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun doOnAttach(view: DownloadedPodcastsContract.View) {
-        observePodcasts()
+        loadData(false)
     }
 
-    private fun observePodcasts() {
-       launch {
-           entryRepository
-                   .getDownloadedEntries(listOf("podcast"))
-                   .collect { data ->
-                       state = state.copy(data = data) }
-       }
-
-    }
 
     override fun loadData(pullToRefresh: Boolean) {
-
+        launch {
+            entryRepository
+                    .getDownloadedEntries(listOf("podcast"))
+                    .collect { data ->
+                        state = state.copy(data = data) }
+        }
     }
 
     override fun select(entry: Entry) {

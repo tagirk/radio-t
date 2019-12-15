@@ -1,5 +1,7 @@
 package su.tagir.apps.radiot.ui.pirates.downloaded
 
+import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
@@ -12,6 +14,13 @@ class DownloadedPiratesFragment :
         BaseMvpListFragment<Entry, DownloadedPiratesContract.View, DownloadedPiratesContract.Presenter>(),
         DownloadedPiratesContract.View,
         EntriesAdapter.Callback {
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        refreshLayout.isEnabled = false
+    }
+
 
     override fun createAdapter() = EntriesAdapter(this)
 

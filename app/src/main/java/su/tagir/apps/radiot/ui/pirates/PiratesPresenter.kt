@@ -48,7 +48,7 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
         launch {
             while (true) {
                 entryRepository.checkDownloadStatus()
-                delay(5000L)
+                delay(3000L)
             }
         }
     }

@@ -20,11 +20,15 @@ class DownloadedPiratesPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun doOnAttach(view: DownloadedPiratesContract.View) {
-        observePodcasts()
+        loadData(false)
     }
 
     override fun loadData(pullToRefresh: Boolean) {
-
+        launch {
+            entryRepository
+                    .getDownloadedEntries(listOf("pirates"))
+                    .collect{data ->  state = state.copy(data = data)}
+        }
     }
 
     override fun select(entry: Entry) {
@@ -38,11 +42,4 @@ class DownloadedPiratesPresenter(private val entryRepository: EntryRepository,
         }
     }
 
-    private fun observePodcasts() {
-       launch {
-           entryRepository
-                   .getDownloadedEntries(listOf("pirates"))
-                   .collect{data ->  state = state.copy(data = data)}
-       }
-    }
 }
