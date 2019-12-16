@@ -179,7 +179,7 @@ class MainActivity : BaseMvpActivity<MainContract.View, MainContract.Presenter>(
 
     override fun showCurrentPodcast(entry: Entry) {
         bottomSheet.visibleGone(true)
-        setBottomMargin(resources.getDimensionPixelSize(R.dimen.player_peek_height))
+        setBottomMargin(resources.getDimensionPixelSize(R.dimen.bottom_padding))
     }
 
     override fun createPresenter(): MainContract.Presenter {

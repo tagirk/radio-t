@@ -6,6 +6,7 @@
     <dimen name="player_image_size">40dp</dimen>
     <dimen name="load_progress_padding">8dp</dimen>
     <dimen name="player_peek_height">112dp</dimen>
+    <dimen name="bottom_padding">56dp</dimen>
 
     <dimen name="button_inset_vertical_material">6dp</dimen>
     <dimen name="button_inset_horizontal_material">@dimen/control_inset_material</dimen>
