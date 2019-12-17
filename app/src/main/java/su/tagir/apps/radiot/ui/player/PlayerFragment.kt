@@ -197,7 +197,7 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         when (p0?.id) {
             R.id.btn_pause, R.id.btn_pause_big -> presenter.pause()
             R.id.btn_play, R.id.btn_play_big -> presenter.resume()
-            R.id.chat -> presenter.showChat()
+            R.id.btn_chat -> presenter.showChat()
             R.id.btn_web -> presenter.openWebPage()
             R.id.btn_forward -> seekTo(seekBar.progress + 30)
             R.id.btn_replay -> seekTo(max(0, seekBar.progress - 30))

@@ -14,6 +14,7 @@ import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
 import su.tagir.apps.radiot.ui.mvp.BasePresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import timber.log.Timber
 
 class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
@@ -49,9 +50,11 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun showChat() {
+        Timber.d("showChat")
         currentPodcast?.let { entry ->
 
             if (entry.url != STREAM_URL) {
+                Timber.d("showChat: ${entry.chatUrl}")
                 router.navigateTo(Screens.WebScreen(entry.chatUrl))
             } else {
                 router.navigateTo(Screens.ChatScreen)

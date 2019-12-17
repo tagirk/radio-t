@@ -19,7 +19,6 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.*
 import com.google.android.exoplayer2.util.Util
-//import leakcanary.AppWatcher
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
@@ -91,7 +90,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
                 MSG_UNREGISTER_CLIENT -> {
                     audioService.client = null
                 }
-                MSG_SEEK_TO ->{
+                MSG_SEEK_TO -> {
                     audioService.resumePlay()
                     audioService.player?.seekTo(msg.arg1.toLong() * 1000)
                 }
@@ -100,7 +99,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
                     val progress = audioService.player?.currentPosition?.div(1000) ?: 0L
                     audioService.client?.send(Message.obtain(null, MSG_PROGRESS, duration.toInt(), progress.toInt()))
                 }
-                MSG_ACTIVITY_STARTED ->{
+                MSG_ACTIVITY_STARTED -> {
                     audioService.stopForeground(true)
                     audioService.isForeground = false
                     audioService.updateState()
@@ -270,8 +269,7 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         if (isPlayerReady) {
             player?.playWhenReady = true
         } else {
-            val entry = getCurrentEntry()
-            if (entry != null) {
+            getCurrentEntry()?.let { entry ->
                 playAudioStream(entry.file, entry.audioUrl, entry.progress)
             }
         }
@@ -297,7 +295,6 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
             }
         }
 
-//        PodcastStateService.saveCurrent(url!!, player?.currentPosition ?: 0, this)
         val cv = ContentValues()
         cv.put("audioUrl", url)
         cv.put("lastProgress", player?.currentPosition ?: 0)
@@ -343,9 +340,8 @@ class AudioService : Service(), AudioManager.OnAudioFocusChangeListener {
         cv.put("state", state)
         cv.put("progress", progress)
         contentResolver.update(Uri.parse(EntryContentProvider.UPDATE_ENTRY_URI), cv, null, null)
-        Timber.d("state: $state")
         client?.let {
-            val message = Message.obtain(null, MSG_STATE_CHANGED, if(loading) 1 else 0, -1)
+            val message = Message.obtain(null, MSG_STATE_CHANGED, if (loading) 1 else 0, -1)
             client?.send(message)
         }
 
