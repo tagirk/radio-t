@@ -6,13 +6,13 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
 
 class SearchPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
-                      dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Entry, SearchContract.View>(dispatcher), SearchContract.Presenter {
+                      dispatcher: CoroutineDispatcher = MainDispatcher()) : MvpBaseListPresenter<Entry, SearchContract.View>(dispatcher), SearchContract.Presenter {
 
 
     private var searchJob: Job? = null
@@ -20,7 +20,7 @@ class SearchPresenter(private val entryRepository: EntryRepository,
 
     private val downloadErrorHandler by lazy {
         CoroutineExceptionHandler { _, exception ->
-            view?.showDownloadError(exception.message)
+            ifViewAttached({v -> v.showDownloadError(exception.message)})
         }
     }
 
@@ -37,7 +37,9 @@ class SearchPresenter(private val entryRepository: EntryRepository,
 
         launch {
             entryRepository.getRecentSearches()
-                    .collect { this@SearchPresenter.view?.showRecentQueries(it) }
+                    .collect {list ->
+                        ifViewAttached({ v -> v.showRecentQueries(list) })
+                    }
         }
 
         launch {

@@ -9,7 +9,7 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.utils.visibleGone
 
 class EntriesAdapter(private val actionHandler: Callback) :
-        DataBoundListAdapter<Entry>() {
+        BindingListAdapter<Entry>() {
 
     override val differ: AsyncListDiffer<Entry> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Entry>() {
         override fun areItemsTheSame(oldItem: Entry, newItem: Entry): Boolean = oldItem.url == newItem.url
@@ -17,7 +17,7 @@ class EntriesAdapter(private val actionHandler: Callback) :
         override fun areContentsTheSame(oldItem: Entry, newItem: Entry) = oldItem == newItem
     })
 
-    override fun bind(viewHolder: DataBoundViewHolder<Entry>, position: Int) {
+    override fun bind(viewHolder: BindingViewHolder<Entry>, position: Int) {
         when (viewHolder) {
             is PodcastViewHolder -> viewHolder.bind(items[position])
             is PrepViewHolder -> viewHolder.bind(items[position])
@@ -25,7 +25,7 @@ class EntriesAdapter(private val actionHandler: Callback) :
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<Entry> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<Entry> {
         val inflater = LayoutInflater.from(parent.context)
         when (viewType) {
             TYPE_NEWS -> {
@@ -35,7 +35,7 @@ class EntriesAdapter(private val actionHandler: Callback) :
                     val entry = items[holder.adapterPosition]
                     actionHandler.select(entry)
                 }
-                holder.comments.setOnClickListener {
+                holder.binding.comments.setOnClickListener {
                     val entry = items[holder.adapterPosition]
                     actionHandler.openComments(entry)
                 }
@@ -53,24 +53,24 @@ class EntriesAdapter(private val actionHandler: Callback) :
             else -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
                 val holder = PodcastViewHolder(view)
-                holder.comments.visibleGone(viewType == TYPE_PODCAST)
+                holder.binding.comments.visibleGone(viewType == TYPE_PODCAST)
                 holder.itemView.setOnClickListener {
                     val entry = items[holder.adapterPosition]
                     actionHandler.select(entry)
                 }
-                holder.remove.setOnClickListener {
+                holder.binding.btnRemove.setOnClickListener {
                     val entry = items[holder.adapterPosition]
                     actionHandler.remove(entry)
                 }
-                holder.cancel.setOnClickListener {
+                holder.binding.cancel.setOnClickListener {
                     val entry = items[holder.adapterPosition]
                     actionHandler.remove(entry)
                 }
-                holder.download.setOnClickListener {
+                holder.binding.btnDownload.setOnClickListener {
                     val entry = items[holder.adapterPosition]
                     actionHandler.download(entry)
                 }
-                holder.comments.setOnClickListener {
+                holder.binding.comments.setOnClickListener {
                     val entry = items[holder.adapterPosition]
                     actionHandler.openComments(entry)
                 }

@@ -5,9 +5,9 @@ import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
+import su.tagir.apps.radiot.ui.mvp.MvpListFragment
 
-class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.Presenter>(),
+class NewsFragment : MvpListFragment<Entry, NewsContract.View, NewsContract.Presenter>(),
         NewsContract.View{
 
 
@@ -29,8 +29,8 @@ class NewsFragment : BaseMvpListFragment<Entry, NewsContract.View, NewsContract.
 
 
     override fun createPresenter(): NewsContract.Presenter {
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
-        val categories = arguments!!.getStringArray("categories")!!.toList()
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
+        val categories = requireArguments().getStringArray("categories")!!.toList()
         return NewsPresenter(categories, appComponent.entryRepository, router = appComponent.router)
     }
 

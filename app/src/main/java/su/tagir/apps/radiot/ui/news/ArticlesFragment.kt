@@ -17,17 +17,17 @@ import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Article
-import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
-import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
-import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
+import su.tagir.apps.radiot.ui.common.BindingListAdapter
+import su.tagir.apps.radiot.ui.common.BindingViewHolder
+import su.tagir.apps.radiot.ui.mvp.MvpListFragment
 import su.tagir.apps.radiot.utils.shortDateFormat
 
-class ArticlesFragment : BaseMvpListFragment<Article, ArticlesContract.View, ArticlesContract.Presenter>(),
+class ArticlesFragment : MvpListFragment<Article, ArticlesContract.View, ArticlesContract.Presenter>(),
         ArticlesContract.View,
         ArticlesAdapter.Callback {
 
     override fun createPresenter(): ArticlesContract.Presenter {
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
         return ArticlesPresenter(appComponent.newsRepository, appComponent.router)
     }
 
@@ -38,7 +38,7 @@ class ArticlesFragment : BaseMvpListFragment<Article, ArticlesContract.View, Art
     }
 }
 
-class ArticlesAdapter(private val callback: Callback) : DataBoundListAdapter<Article>() {
+class ArticlesAdapter(private val callback: Callback) : BindingListAdapter<Article>() {
 
 
     override val differ: AsyncListDiffer<Article> = AsyncListDiffer<Article>(this, object : DiffUtil.ItemCallback<Article>(){
@@ -59,7 +59,7 @@ class ArticlesAdapter(private val callback: Callback) : DataBoundListAdapter<Art
         return holder
     }
 
-    override fun bind(viewHolder: DataBoundViewHolder<Article>, position: Int) {
+    override fun bind(viewHolder: BindingViewHolder<Article>, position: Int) {
         viewHolder.bind(items[position])
     }
 
@@ -69,7 +69,7 @@ class ArticlesAdapter(private val callback: Callback) : DataBoundListAdapter<Art
 
 }
 
-class ArticleViewHolder(view: View) : DataBoundViewHolder<Article>(view) {
+class ArticleViewHolder(view: View) : BindingViewHolder<Article>(view) {
 
     private val title: TextView = view.findViewById(R.id.title)
 

@@ -11,13 +11,13 @@ abstract class BaseMvpActivity<V: MvpView, P: MvpPresenter<V>>: AppCompatActivit
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         presenter = createPresenter()
-    }
-
-    override fun onStart() {
-        super.onStart()
         presenter.attachView(this as V)
     }
 
+    override fun onDestroy() {
+        presenter.detachView()
+        super.onDestroy()
+    }
     override fun onStop() {
         presenter.detachView()
         super.onStop()

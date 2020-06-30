@@ -4,12 +4,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import timber.log.Timber
 
-abstract class BaseListPresenter<M, V: MvpListView<M>>(dispatcher: CoroutineDispatcher): BasePresenter<V>(dispatcher), MvpListPresenter<M, V> {
+abstract class MvpBaseListPresenter<M, V: MvpListView<M>>(dispatcher: CoroutineDispatcher): MvpBasePresenter<V>(dispatcher), MvpListPresenter<M, V> {
 
     protected var state = ViewState<List<M>>(status = Status.SUCCESS, data = emptyList())
     set(value) {
         field = value
-        view?.updateState(value)
+        ifViewAttached({v -> v.updateState(value)})
     }
 
     override var exceptionHandler: CoroutineExceptionHandler = CoroutineExceptionHandler{ _, throwable ->

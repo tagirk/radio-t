@@ -8,8 +8,6 @@ import com.google.crypto.tink.config.TinkConfig
 import com.google.crypto.tink.daead.DeterministicAeadFactory
 import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.ironz.binaryprefs.BinaryPreferencesBuilder
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
@@ -20,15 +18,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 import su.tagir.apps.radiot.BuildConfig
 import su.tagir.apps.radiot.encryption.TinkKeyEncryption
 import su.tagir.apps.radiot.encryption.TinkValueEncryption
-import su.tagir.apps.radiot.model.api.*
-import su.tagir.apps.radiot.model.api.auth.AuthHolder
-import su.tagir.apps.radiot.model.api.auth.GitterAuthHolder
+import su.tagir.apps.radiot.model.api.NewsRestClient
+import su.tagir.apps.radiot.model.api.RemarkClient
+import su.tagir.apps.radiot.model.api.RestClient
 import su.tagir.apps.radiot.model.db.RadiotDb
 import su.tagir.apps.radiot.model.db.createQueryWrapper
 import su.tagir.apps.radiot.model.db.sqlOpenHelper
 import su.tagir.apps.radiot.model.repository.*
 import java.security.GeneralSecurityException
-import java.util.concurrent.TimeUnit
 
 interface DataModule {
 
@@ -36,8 +33,6 @@ interface DataModule {
     val database: RadiotDb
 
     val preferences: SharedPreferences
-
-    val chatRepository: ChatRepository
 
     val entryRepository: EntryRepository
 
@@ -103,8 +98,6 @@ interface DataModule {
             createQueryWrapper(driver)
         }
 
-        override val chatRepository: ChatRepository by lazy { ChatRepositoryImpl(gitterAuthClient, gitterStreamClient, gitterRestClient, database, gitterAuthHolder, gson) }
-
         override val entryRepository: EntryRepository by lazy { EntryRepositoryImpl(radiotRestClient, remarkRestClient, database, downloadManager, application) }
 
         override val newsRepository: NewsRepository by lazy { NewsRepositoryImpl(newsRestClient, database) }
@@ -112,10 +105,6 @@ interface DataModule {
         override val commentsRepository: CommentsRepository by lazy { CommentsRepositoryImpl(remarkRestClient) }
 
         override val downloadManager: DownloadManager by lazy { DownloadManagerImpl(application) }
-
-        private val gson: Gson by lazy { GsonBuilder().create() }
-
-        private val gitterAuthHolder: AuthHolder = GitterAuthHolder(preferences)
 
         private val radiotRestClient: RestClient by lazy {
             val builder = Retrofit.Builder()
@@ -174,56 +163,6 @@ interface DataModule {
             builder.client(httpClient.build())
                     .build()
                     .create(NewsRestClient::class.java)
-        }
-
-        private val gitterAuthClient: GitterAuthClient by lazy {
-            val builder = Retrofit.Builder()
-                    .baseUrl("https://gitter.im/")
-                    .addConverterFactory(GsonConverterFactory.create())
-
-            val httpClient = OkHttpClient.Builder()
-
-            if (BuildConfig.DEBUG) {
-                val loggingInterceptor = HttpLoggingInterceptor()
-                loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-
-                httpClient
-                        .addInterceptor(loggingInterceptor)
-
-            }
-            builder.client(httpClient.build())
-                    .build()
-                    .create(GitterAuthClient::class.java)
-        }
-
-        private val gitterRestClient: GitterClient by lazy {
-            val builder = Retrofit.Builder()
-                    .baseUrl("https://api.gitter.im/")
-                    .addConverterFactory(GsonConverterFactory.create())
-
-            val httpClient = OkHttpClient.Builder()
-                    .addInterceptor(ApiHeadersInterceptor(gitterAuthHolder))
-//                    .authenticator(ApiAuthenticator(gitterAuthHolder))
-
-            if (BuildConfig.DEBUG) {
-                val loggingInterceptor = HttpLoggingInterceptor()
-                loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-
-                httpClient
-                        .addInterceptor(loggingInterceptor)
-
-            }
-            builder.client(httpClient.build())
-                    .build()
-                    .create(GitterClient::class.java)
-        }
-
-        private val gitterStreamClient: OkHttpClient by lazy {
-            OkHttpClient.Builder()
-                    .addNetworkInterceptor(ApiHeadersInterceptor(gitterAuthHolder))
-                    .authenticator(ApiAuthenticator(gitterAuthHolder))
-                    .readTimeout(10, TimeUnit.MINUTES)
-                    .build()
         }
     }
 }

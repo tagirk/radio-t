@@ -2,21 +2,20 @@ package su.tagir.apps.radiot.ui.pirates
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.REQUEST_WRITE_PERMISSION
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
-
+import su.tagir.apps.radiot.ui.mvp.MvpListFragment
 
 class PiratesFragment :
-        BaseMvpListFragment<Entry, PiratesContract.View, PiratesContract.Presenter>(),
+        MvpListFragment<Entry, PiratesContract.View, PiratesContract.Presenter>(),
         PiratesContract.View,
         EntriesAdapter.Callback {
 
@@ -29,8 +28,16 @@ class PiratesFragment :
             }
         }
 
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){ isGranted ->
+        if(isGranted){
+            startDownload()
+        }else{
+            showNeedPermission()
+        }
+    }
+
     override fun createPresenter(): PiratesContract.Presenter {
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
         return PiratesPresenter(appComponent.entryRepository)
     }
 
@@ -56,16 +63,6 @@ class PiratesFragment :
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if(requestCode != REQUEST_WRITE_PERMISSION){
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-            return
-        }
-        if(grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED){
-            showNeedPermission()
-        }
-    }
-
     override fun select(entry: Entry) {
         presenter.select(entry)
     }
@@ -83,23 +80,30 @@ class PiratesFragment :
     }
 
     private fun startDownload() {
-        if (context == null) {
-            return
-        }
         if (entryForDownload == null) {
             return
         }
         when {
-            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                download()
+            }
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED -> {
                 entryForDownload?.let {
                     presenter.download(entryForDownload!!)
                     entryForDownload = null
                 }
             }
 
-            ActivityCompat.shouldShowRequestPermissionRationale(activity!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
 
             else -> requestWritePermission()
+        }
+    }
+
+    private fun download(){
+        entryForDownload?.let {
+            presenter.download(entryForDownload!!)
+            entryForDownload = null
         }
     }
 
@@ -108,7 +112,7 @@ class PiratesFragment :
     }
 
     private fun showPermissionRationale() {
-        AlertDialog.Builder(context!!)
+        AlertDialog.Builder(requireContext())
                 .setMessage(R.string.write_permission_rationale)
                 .setPositiveButton("OK"){_, _ -> requestWritePermission()}
                 .setNegativeButton(R.string.cancel, null)
@@ -117,6 +121,6 @@ class PiratesFragment :
     }
 
     private fun requestWritePermission(){
-        requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_WRITE_PERMISSION)
+        requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 }

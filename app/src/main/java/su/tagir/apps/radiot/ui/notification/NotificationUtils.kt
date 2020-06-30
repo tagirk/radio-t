@@ -68,7 +68,7 @@ fun createStreamNotification(context: Context): Notification {
             .setContentTitle("Напоминание о прямом эфире")
             .setContentText("Не пропустите сегодня в 23:00 мск.")
             .setAutoCancel(true)
-            .setCategory(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) Notification.CATEGORY_REMINDER else Notification.CATEGORY_EVENT)
+            .setCategory(Notification.CATEGORY_REMINDER)
             .build()
 
 }

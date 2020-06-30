@@ -1,13 +1,8 @@
 package su.tagir.apps.radiot
 
-import android.content.Context
-import android.content.Intent
 import androidx.fragment.app.Fragment
 import ru.terrakok.cicerone.android.support.SupportAppScreen
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.ui.chat.AuthFragment
-import su.tagir.apps.radiot.ui.chat.ChatActivity
-import su.tagir.apps.radiot.ui.chat.ChatFragment
 import su.tagir.apps.radiot.ui.comments.CommentsFragment
 import su.tagir.apps.radiot.ui.localcontent.LocalContentFragment
 import su.tagir.apps.radiot.ui.news.NewsTabsFragment
@@ -75,24 +70,6 @@ object Screens {
     data class CommentsScreen(val entry: Entry): SupportAppScreen(){
         override fun getFragment(): Fragment {
             return CommentsFragment.newInstance(entry)
-        }
-    }
-
-    object ChatScreen: SupportAppScreen(){
-        override fun getActivityIntent(context: Context?): Intent {
-            return Intent(context, ChatActivity::class.java)
-        }
-    }
-
-    object ChatAuthScreen: SupportAppScreen(){
-        override fun getFragment(): Fragment {
-            return AuthFragment()
-        }
-    }
-
-    object ChatScreenFragment: SupportAppScreen(){
-        override fun getFragment(): Fragment {
-            return ChatFragment()
         }
     }
 

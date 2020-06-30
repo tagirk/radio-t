@@ -52,7 +52,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
         prefs = appComponent.preferences
     }
 

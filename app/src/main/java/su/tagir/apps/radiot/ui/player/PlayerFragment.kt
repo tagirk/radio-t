@@ -5,16 +5,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.*
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.*
+import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import by.kirich1409.viewbindingdelegate.viewBinding
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
+import su.tagir.apps.radiot.databinding.FragmentPlayerBinding
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
@@ -22,7 +22,7 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.EntryState
 import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.service.*
-import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
+import su.tagir.apps.radiot.ui.mvp.MvpFragment
 import su.tagir.apps.radiot.utils.convertSeconds
 import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
@@ -30,30 +30,14 @@ import timber.log.Timber
 import java.lang.ref.WeakReference
 import kotlin.math.max
 
-class PlayerFragment : BaseMvpFragment<PlayerContract.View,
-        PlayerContract.Presenter>(),
+class PlayerFragment : MvpFragment<PlayerContract.View,
+        PlayerContract.Presenter>(R.layout.fragment_player),
         PlayerContract.View,
         ServiceConnection,
         View.OnClickListener,
         TimeLabelsAdapter.Callback {
 
-    private lateinit var btnPlay: View
-    private lateinit var btnPause: View
-    private lateinit var btnPlayBig: View
-    private lateinit var btnPauseBig: View
-    private lateinit var image: ImageView
-    private lateinit var title: TextView
-    private lateinit var progress: ProgressBar
-    private lateinit var progressHorizontal: ProgressBar
-    private lateinit var seekBar: SeekBar
-    private lateinit var progressTime: TextView
-    private lateinit var leftTime: TextView
-    private lateinit var timeLabels: RecyclerView
-    private lateinit var btnForward: ImageButton
-    private lateinit var btnReplay: ImageButton
-    private lateinit var btnChat: ImageButton
-    private lateinit var btnWeb: ImageButton
-    private lateinit var logo: ImageView
+    private val binding: FragmentPlayerBinding by viewBinding()
 
     private lateinit var timeLabelsAdapter: TimeLabelsAdapter
 
@@ -88,57 +72,38 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_player, container, false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         messenger = Messenger(IncomingHandler(this))
-        return v
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        btnPlay = view.findViewById(R.id.btn_play)
-        btnPause = view.findViewById(R.id.btn_pause)
-        btnPlayBig = view.findViewById(R.id.btn_play_big)
-        btnPauseBig = view.findViewById(R.id.btn_pause_big)
-        image = view.findViewById(R.id.image)
-        title = view.findViewById(R.id.title)
-        progress = view.findViewById(R.id.progress)
-        progressHorizontal = view.findViewById(R.id.progress_horizontal)
-        seekBar = view.findViewById(R.id.seek_bar)
-        progressTime = view.findViewById(R.id.progress_time)
-        leftTime = view.findViewById(R.id.left_time)
-        timeLabels = view.findViewById(R.id.time_labels)
-        btnForward = view.findViewById(R.id.btn_forward)
-        btnReplay = view.findViewById(R.id.btn_replay)
-        btnChat = view.findViewById(R.id.btn_chat)
-        btnWeb = view.findViewById(R.id.btn_web)
-        logo = view.findViewById(R.id.logo)
+        binding.btnPause.setOnClickListener(this)
+        binding.btnPauseBig.setOnClickListener(this)
+        binding.btnPlay.setOnClickListener(this)
+        binding.btnPlayBig.setOnClickListener(this)
+        binding.btnChat.setOnClickListener(this)
+        binding.btnWeb.setOnClickListener(this)
+        binding.title.setOnClickListener(this)
+        binding.image.setOnClickListener(this)
+        binding.btnForward.setOnClickListener(this)
+        binding.btnReplay.setOnClickListener(this)
 
-        btnPause.setOnClickListener(this)
-        btnPauseBig.setOnClickListener(this)
-        btnPlay.setOnClickListener(this)
-        btnPlayBig.setOnClickListener(this)
-        btnChat.setOnClickListener(this)
-        btnWeb.setOnClickListener(this)
-        title.setOnClickListener(this)
-        image.setOnClickListener(this)
-        btnForward.setOnClickListener(this)
-        btnReplay.setOnClickListener(this)
-
-        ImageLoader.display(R.drawable.ic_radiot, logo)
+        ImageLoader.display(R.drawable.ic_radiot, binding.logo)
 
         timeLabelsAdapter = TimeLabelsAdapter(emptyList(), this)
-        timeLabels.adapter = timeLabelsAdapter
-        timeLabels.layoutManager = LinearLayoutManager(view.context, RecyclerView.VERTICAL, true)
+        binding.timeLabels.adapter = timeLabelsAdapter
+        binding.timeLabels.layoutManager = LinearLayoutManager(view.context, RecyclerView.VERTICAL, true)
 
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (!fromUser) {
                     return
                 }
-                progressTime.text = progress.toLong().convertSeconds()
-                leftTime.text = (seekBar.max - progress).toLong().convertSeconds()
+                binding.progressTime.text = progress.toLong().convertSeconds()
+                binding.leftTime.text = (seekBar.max - progress).toLong().convertSeconds()
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -152,15 +117,10 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
         })
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        bindService(context)
-    }
 
     override fun onResume() {
         super.onResume()
-        bindService(context!!)
+        bindService(requireContext())
     }
 
     override fun onPause() {
@@ -199,8 +159,8 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
             R.id.btn_play, R.id.btn_play_big -> presenter.resume()
             R.id.btn_chat -> presenter.showChat()
             R.id.btn_web -> presenter.openWebPage()
-            R.id.btn_forward -> seekTo(seekBar.progress + 30)
-            R.id.btn_replay -> seekTo(max(0, seekBar.progress - 30))
+            R.id.btn_forward -> seekTo(binding.seekBar.progress + 30)
+            R.id.btn_replay -> seekTo(max(0, binding.seekBar.progress - 30))
         }
     }
 
@@ -209,26 +169,26 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun createPresenter(): PlayerContract.Presenter {
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
         return PlayerPresenter(appComponent.entryRepository, appComponent.router)
     }
 
     override fun showCurrentPodcast(entry: Entry) {
 //        Timber.d("entry: $entry")
-        btnPause.visibleInvisible(entry.state == EntryState.PLAYING)
-        btnPlay.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
-        btnPauseBig.visibleInvisible(entry.state == EntryState.PLAYING)
-        btnPlayBig.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
+        binding.btnPause.visibleInvisible(entry.state == EntryState.PLAYING)
+        binding.btnPlay.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
+        binding.btnPauseBig.visibleInvisible(entry.state == EntryState.PLAYING)
+        binding.btnPlayBig.visibleInvisible(entry.state == EntryState.PAUSED || entry.state == EntryState.IDLE)
 
         val config = ImageConfig(placeholder = R.drawable.ic_notification_large, error = R.drawable.ic_notification_large)
-        ImageLoader.display(entry.image ?: "empty", image, config)
+        ImageLoader.display(entry.image ?: "empty", binding.image, config)
 
-        title.text = entry.title
-        seekBar.isEnabled = entry.url != STREAM_URL
-        btnForward.visibleInvisible(entry.url != STREAM_URL)
-        btnReplay.visibleInvisible(entry.url != STREAM_URL)
-        leftTime.visibleInvisible(entry.url != STREAM_URL)
-        progressTime.visibleInvisible(entry.url != STREAM_URL)
+        binding.title.text = entry.title
+        binding.seekBar.isEnabled = entry.url != STREAM_URL
+        binding.btnForward.visibleInvisible(entry.url != STREAM_URL)
+        binding.btnReplay.visibleInvisible(entry.url != STREAM_URL)
+        binding.leftTime.visibleInvisible(entry.url != STREAM_URL)
+        binding.progressTime.visibleInvisible(entry.url != STREAM_URL)
     }
 
     override fun showTimeLabels(timeLabels: List<TimeLabel>) {
@@ -254,17 +214,17 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
     }
 
     override fun showLoading(loading: Boolean) {
-        btnForward.isEnabled = !loading
-        btnReplay.isEnabled = !loading
-        progress.visibleGone(loading)
-        progressHorizontal.visibleInvisible(loading)
-        seekBar.visibleInvisible(!loading)
-        leftTime.visibleInvisible(!loading)
-        progressTime.visibleInvisible(!loading)
+        binding.btnForward.isEnabled = !loading
+        binding.btnReplay.isEnabled = !loading
+        binding.progress.visibleGone(loading)
+        binding.progressHorizontal.visibleInvisible(loading)
+        binding.seekBar.visibleInvisible(!loading)
+        binding.leftTime.visibleInvisible(!loading)
+        binding.progressTime.visibleInvisible(!loading)
     }
 
     override fun showError(error: String) {
-        AlertDialog.Builder(context!!)
+        AlertDialog.Builder(requireContext())
                 .setTitle(R.string.error)
                 .setMessage(error)
                 .setPositiveButton("OK", null)
@@ -280,29 +240,29 @@ class PlayerFragment : BaseMvpFragment<PlayerContract.View,
 
     override fun onSlide(offset: Float) {
         val alpha = 1 - 5 * offset
-        btnPause.alpha = alpha
-        btnPlay.alpha = alpha
-        btnPlay.isEnabled = btnPlay.alpha > 0
-        btnPause.isEnabled = btnPause.alpha > 0
-        progress.alpha = alpha
-        btnChat.alpha = -alpha
-        btnWeb.alpha = -alpha
-        btnChat.visibleInvisible(btnChat.alpha > 0)
-        btnWeb.visibleInvisible(btnWeb.alpha > 0)
+        binding.btnPause.alpha = alpha
+        binding.btnPlay.alpha = alpha
+        binding.btnPlay.isEnabled = binding.btnPlay.alpha > 0
+        binding.btnPause.isEnabled = binding.btnPause.alpha > 0
+        binding.progress.alpha = alpha
+        binding.btnChat.alpha = -alpha
+        binding.btnWeb.alpha = -alpha
+        binding.btnChat.visibleInvisible(binding.btnChat.alpha > 0)
+        binding.btnWeb.visibleInvisible(binding.btnWeb.alpha > 0)
     }
 
     private fun showProgress(duration: Int, progress: Int) {
         if (seeking) {
             return
         }
-        if (seekBar.max != duration) {
-            seekBar.max = duration
+        if (binding.seekBar.max != duration) {
+            binding.seekBar.max = duration
         }
-        seekBar.progress = progress
-        progressTime.text = progress.convertSeconds()
+        binding.seekBar.progress = progress
+        binding.progressTime.text = progress.convertSeconds()
 
         val leftTime = duration - progress
-        this.leftTime.text = (if (leftTime >= 0) leftTime else 0).convertSeconds()
+        binding.leftTime.text = (if (leftTime >= 0) leftTime else 0).convertSeconds()
     }
 
 }

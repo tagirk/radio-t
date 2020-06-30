@@ -7,40 +7,35 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import androidx.viewpager.widget.ViewPager
-import com.google.android.material.tabs.TabLayout
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.databinding.FragmentTabsPodcastsBinding
 import su.tagir.apps.radiot.utils.visibleGone
 
 class NewsTabsFragment : Fragment() {
 
-    private lateinit var viewPager: ViewPager
-
-    private lateinit var tabs: TabLayout
-
+    private lateinit var binding: FragmentTabsPodcastsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_tabs_podcasts, container, false)
+        binding = FragmentTabsPodcastsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<View>(R.id.search).visibleGone(false)
+        binding.search.visibleGone(false)
 
-        viewPager = view.findViewById(R.id.view_pager)
-        viewPager.offscreenPageLimit = 2
-        tabs = view.findViewById(R.id.tabs)
+        binding.viewPager.offscreenPageLimit = 2
         initFragments()
     }
 
     private fun initFragments() {
         val fragmentAdapter = FragmentAdapter(childFragmentManager)
-        viewPager.adapter = fragmentAdapter
-        tabs.setupWithViewPager(viewPager)
-        tabs.getTabAt(0)?.setText(R.string.themes)
-        tabs.getTabAt(1)?.setText(R.string.themes_from_authors)
-        tabs.getTabAt(2)?.setText(R.string.news)
+        binding.viewPager.adapter = fragmentAdapter
+        binding.tabs.setupWithViewPager(binding.viewPager)
+        binding.tabs.getTabAt(0)?.setText(R.string.themes)
+        binding.tabs.getTabAt(1)?.setText(R.string.themes_from_authors)
+        binding.tabs.getTabAt(2)?.setText(R.string.news)
     }
 
     private class FragmentAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {

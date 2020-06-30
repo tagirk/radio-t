@@ -8,15 +8,15 @@ import kotlinx.coroutines.launch
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.STREAM_URL
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BasePresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBasePresenter
 import su.tagir.apps.radiot.utils.startTimer
 import java.util.*
 import kotlin.math.floor
 
 class PodcastTabsPresenter(private val entryRepository: EntryRepository,
                            dispatcher: CoroutineDispatcher = MainDispatcher(),
-                           private val application: Application) : BasePresenter<PodcastsTabsContract.View>(dispatcher), PodcastsTabsContract.Presenter {
+                           private val application: Application) : MvpBasePresenter<PodcastsTabsContract.View>(dispatcher), PodcastsTabsContract.Presenter {
 
     private val nextShow: Calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Moscow"))
 
@@ -42,7 +42,7 @@ class PodcastTabsPresenter(private val entryRepository: EntryRepository,
             entryRepository.getCurrent()
                     .collect { entry ->
                         val isStream = STREAM_URL == entry?.audioUrl
-                        view?.showOrHideStream(!isStream)
+                        ifViewAttached({v -> v.showOrHideStream(!isStream)})
                         if (!isStream) {
                             startTimer()
                         } else {
@@ -57,7 +57,7 @@ class PodcastTabsPresenter(private val entryRepository: EntryRepository,
         timerJob = launch {
             startTimer(repeatMillis = 1000L) {
                 val time = convertTime(nextShow.timeInMillis)
-                view?.showStreamTime(time)
+                ifViewAttached({v -> v.showStreamTime(time)})
             }
         }
     }

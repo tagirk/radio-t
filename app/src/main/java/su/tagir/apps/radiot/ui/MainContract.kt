@@ -14,7 +14,6 @@ interface MainContract {
         fun navigateToPodcasts()
         fun navigateToNews()
         fun navigateToSettings()
-        fun navigateToChat()
         fun navigateToPirates()
         fun navigateToAbout()
         fun navigateToCredits()

@@ -29,13 +29,13 @@ import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.Node
-import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
-import su.tagir.apps.radiot.ui.common.DataBoundViewHolder
-import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
+import su.tagir.apps.radiot.ui.common.BindingListAdapter
+import su.tagir.apps.radiot.ui.common.BindingViewHolder
+import su.tagir.apps.radiot.ui.mvp.MvpListFragment
 import su.tagir.apps.radiot.utils.BetterLinkMovementMethod
 import su.tagir.apps.radiot.utils.visibleGone
 
-class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(),
+class CommentsFragment : MvpListFragment<Node, CommentsContract.View, CommentsContract.Presenter>(),
         CommentsContract.View,
         Toolbar.OnMenuItemClickListener{
 
@@ -59,13 +59,13 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
     }
 
     override fun createPresenter(): CommentsContract.Presenter {
-        val postUrl = arguments!!.getString("url")!!
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val postUrl = requireArguments().getString("url")!!
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
         return CommentsPresenter(postUrl, appComponent.commentsRepository, appComponent.router)
     }
 
 
-    override fun createAdapter(): DataBoundListAdapter<Node> =
+    override fun createAdapter(): BindingListAdapter<Node> =
             CommentsAdapter(
                     object : CommentsAdapter.Callback {
                         override fun expand(position: Int, node: Node) {
@@ -97,7 +97,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
     }
 
     class CommentsAdapter(private val callback: Callback,
-                          private val linkMethod: LinkMovementMethod) : DataBoundListAdapter<Node>() {
+                          private val linkMethod: LinkMovementMethod) : BindingListAdapter<Node>() {
 
         override val differ: AsyncListDiffer<Node> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Node>() {
 
@@ -109,7 +109,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
 
         })
 
-        override fun bind(viewHolder: DataBoundViewHolder<Node>, position: Int) {
+        override fun bind(viewHolder: BindingViewHolder<Node>, position: Int) {
             viewHolder.bind(items[position])
             (viewHolder as CommentViewHolder).expand.setOnClickListener {
                 val node = items[viewHolder.adapterPosition]
@@ -121,7 +121,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<Node> {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<Node> {
             val inflater = LayoutInflater.from(parent.context)
             val v = inflater.inflate(R.layout.item_comment, parent, false)
             return CommentViewHolder(v, linkMethod)
@@ -133,7 +133,7 @@ class CommentsFragment : BaseMvpListFragment<Node, CommentsContract.View, Commen
         }
     }
 
-    class CommentViewHolder(view: View, linkMethod: LinkMovementMethod) : DataBoundViewHolder<Node>(view) {
+    class CommentViewHolder(view: View, linkMethod: LinkMovementMethod) : BindingViewHolder<Node>(view) {
 
         private val avatar: ImageView = itemView.findViewById(R.id.avatar)
 

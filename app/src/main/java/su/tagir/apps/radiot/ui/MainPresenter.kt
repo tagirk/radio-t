@@ -6,12 +6,12 @@ import kotlinx.coroutines.launch
 import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BasePresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBasePresenter
 
 class MainPresenter(private val entryRepository: EntryRepository,
                     private val router: Router,
-                    dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<MainContract.View>(dispatcher), MainContract.Presenter {
+                    dispatcher: CoroutineDispatcher = MainDispatcher()) : MvpBasePresenter<MainContract.View>(dispatcher), MainContract.Presenter {
 
 
     override fun doOnAttach(view: MainContract.View) {
@@ -22,8 +22,8 @@ class MainPresenter(private val entryRepository: EntryRepository,
         launch {
             entryRepository.getCurrent()
                     .collect { entry ->
-                        entry?.let {
-                            view?.showCurrentPodcast(it)
+                        entry?.let {p ->
+                            ifViewAttached({v -> v.showCurrentPodcast(p)})
                         }
                     }
         }
@@ -39,10 +39,6 @@ class MainPresenter(private val entryRepository: EntryRepository,
 
     override fun navigateToSettings() {
         router.newRootScreen(Screens.SettingsScreen)
-    }
-
-    override fun navigateToChat() {
-        router.navigateTo(Screens.ChatScreen)
     }
 
     override fun navigateToPirates() {

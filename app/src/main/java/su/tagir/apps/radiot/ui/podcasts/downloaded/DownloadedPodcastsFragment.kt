@@ -8,19 +8,19 @@ import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
+import su.tagir.apps.radiot.ui.mvp.MvpListFragment
 
-class DownloadedPodcastsFragment: BaseMvpListFragment<Entry, DownloadedPodcastsContract.View, DownloadedPodcastsContract.Presenter>(),
+class DownloadedPodcastsFragment: MvpListFragment<Entry, DownloadedPodcastsContract.View, DownloadedPodcastsContract.Presenter>(),
         DownloadedPodcastsContract.View,
         EntriesAdapter.Callback{
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        refreshLayout.isEnabled = false
+        binding.refreshLayout.isEnabled = false
     }
 
     override fun createPresenter(): DownloadedPodcastsContract.Presenter {
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
         return DownloadedPodcastsPresenter(appComponent.entryRepository, appComponent.router)
     }
 

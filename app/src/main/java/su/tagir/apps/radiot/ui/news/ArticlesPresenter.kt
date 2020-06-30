@@ -9,13 +9,13 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.repository.NewsRepository
-import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
 
 class ArticlesPresenter(private val newsRepository: NewsRepository,
                         private val router: Router,
-                        dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Article, ArticlesContract.View>(dispatcher), ArticlesContract.Presenter {
+                        dispatcher: CoroutineDispatcher = MainDispatcher()) : MvpBaseListPresenter<Article, ArticlesContract.View>(dispatcher), ArticlesContract.Presenter {
 
     private var loadJob: Job? = null
 

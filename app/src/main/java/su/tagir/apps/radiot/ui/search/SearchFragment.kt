@@ -2,43 +2,41 @@ package su.tagir.apps.radiot.ui.search
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
+import by.kirich1409.viewbindingdelegate.viewBinding
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
-import su.tagir.apps.radiot.REQUEST_WRITE_PERMISSION
+import su.tagir.apps.radiot.databinding.FragmentSearchBinding
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.ui.common.DataBoundListAdapter
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
-import su.tagir.apps.radiot.ui.mvp.BaseMvpListFragment
+import su.tagir.apps.radiot.ui.mvp.MvpFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
 
 class SearchFragment :
-        BaseMvpListFragment<Entry, SearchContract.View, SearchContract.Presenter>(),
+        MvpFragment<SearchContract.View, SearchContract.Presenter>(R.layout.fragment_search),
         SearchContract.View,
         RecentQueriesAdapter.Callback,
         ItemTouchHelper.Callback,
         EntriesAdapter.Callback {
 
-    private lateinit var recentQueries: RecyclerView
-
-    private lateinit var layoutEntries: View
+    private val searchBinding: FragmentSearchBinding by viewBinding()
 
     private lateinit var recentQueriesAdapter: RecentQueriesAdapter
+    private lateinit var adapter: SearchAdapter
+
     private val handler = Handler()
 
     private var searchView: SearchView? = null
@@ -51,26 +49,31 @@ class SearchFragment :
             }
         }
 
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){isGranted ->
+        if(isGranted){
+            startDownload()
+        }else{
+            showNeedPermission()
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recentQueries = view.findViewById(R.id.recent_queries)
-        layoutEntries = view.findViewById(R.id.layout_entries)
-
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { presenter.exit() }
         toolbar.inflateMenu(R.menu.menu_search)
         initSearchView(toolbar.menu)
 
+        adapter = SearchAdapter(this)
+        searchBinding.layoutEntries.list.adapter = adapter
+
         recentQueriesAdapter = RecentQueriesAdapter(this)
-        recentQueries.adapter = recentQueriesAdapter
+        searchBinding.recentQueries.adapter = recentQueriesAdapter
         val itemTouchHelperCallback = ItemTouchHelper(this)
-        androidx.recyclerview.widget.ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recentQueries)
+        androidx.recyclerview.widget.ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(searchBinding.recentQueries)
 
-        refreshLayout.isEnabled = false
+        searchBinding.layoutEntries.refreshLayout.isEnabled = false
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_search, container, false)
 
     override fun onResume() {
         super.onResume()
@@ -92,10 +95,6 @@ class SearchFragment :
         }
     }
 
-    override fun createAdapter(): DataBoundListAdapter<Entry> {
-        return SearchAdapter( this)
-    }
-
     override fun onQueryClick(query: String?) {
         searchView?.setQuery(query, false)
     }
@@ -110,7 +109,7 @@ class SearchFragment :
     }
 
     override fun createPresenter(): SearchContract.Presenter {
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
         return SearchPresenter(appComponent.entryRepository, appComponent.router)
     }
 
@@ -127,16 +126,6 @@ class SearchFragment :
 
     override fun showRecentQueries(queries: List<String>) {
         recentQueriesAdapter.replace(queries)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if(requestCode != REQUEST_WRITE_PERMISSION){
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-            return
-        }
-        if(grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED){
-            showNeedPermission()
-        }
     }
 
     override fun select(entry: Entry) {
@@ -172,8 +161,8 @@ class SearchFragment :
                 handler.removeCallbacksAndMessages(null)
                 handler.postDelayed({
                     presenter.search(newText ?: "")
-                    layoutEntries.visibleGone(!newText.isNullOrBlank())
-                    recentQueries.visibleGone(newText.isNullOrBlank())
+                    searchBinding.layoutEntries.getRoot().visibleGone(!newText.isNullOrBlank())
+                    searchBinding.recentQueries.visibleGone(newText.isNullOrBlank())
                 }, 1000)
 
                 return false
@@ -190,16 +179,26 @@ class SearchFragment :
             return
         }
         when {
-            ContextCompat.checkSelfPermission(context!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ->{
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                download()
+            }
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ->{
                 entryForDownload?.let {
                     presenter.download(entryForDownload!!)
                     entryForDownload = null
                 }
             }
 
-            ActivityCompat.shouldShowRequestPermissionRationale(activity!!, Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
+            shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> showPermissionRationale()
 
             else -> requestWritePermission()
+        }
+    }
+
+    private fun download(){
+        entryForDownload?.let {
+            presenter.download(entryForDownload!!)
+            entryForDownload = null
         }
     }
 
@@ -208,7 +207,7 @@ class SearchFragment :
     }
 
     private fun showPermissionRationale() {
-        AlertDialog.Builder(context!!)
+        AlertDialog.Builder(requireContext())
                 .setMessage(R.string.write_permission_rationale)
                 .setPositiveButton("OK"){_, _ -> requestWritePermission()}
                 .setNegativeButton(R.string.cancel, null)
@@ -217,6 +216,18 @@ class SearchFragment :
     }
 
     private fun requestWritePermission(){
-        requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_WRITE_PERMISSION)
+        requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    }
+
+    private fun showHideViews(viewState: ViewState<List<Entry>>) {
+        val isEmpty = (viewState.data?.size ?: 0) == 0
+
+        searchBinding.layoutEntries.progress.visibleGone(viewState.loading && isEmpty)
+        searchBinding.layoutEntries.textEmpty.visibleGone(viewState.completed && isEmpty)
+        searchBinding.layoutEntries.textError.visibleGone(viewState.error && isEmpty)
+        searchBinding.layoutEntries.btnRetry.visibleGone(viewState.error && isEmpty)
+        searchBinding.layoutEntries.refreshLayout.visibleGone(viewState.completed || !isEmpty)
+        searchBinding.layoutEntries.loadMoreProgress.visibleGone(viewState.loadingMore)
+        searchBinding.layoutEntries.refreshLayout.isRefreshing = viewState.refreshing
     }
 }

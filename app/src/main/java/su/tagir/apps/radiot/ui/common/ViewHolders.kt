@@ -8,10 +8,13 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.view.View
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.databinding.ItemPodcastBinding
+import su.tagir.apps.radiot.databinding.ItemPrepBinding
 import su.tagir.apps.radiot.image.ImageConfig
 import su.tagir.apps.radiot.image.ImageLoader
 import su.tagir.apps.radiot.image.Transformation
@@ -22,12 +25,10 @@ import su.tagir.apps.radiot.utils.visibleGone
 import su.tagir.apps.radiot.utils.visibleInvisible
 
 
-class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
+class PrepViewHolder(view: View) : BindingViewHolder<Entry>(view) {
 
-    private val title: TextView = itemView.findViewById(R.id.title)
-    private val date: TextView = itemView.findViewById(R.id.date)
-    private val comments: TextView = itemView.findViewById(R.id.comments)
-    private val avatars: LinearLayout = itemView.findViewById(R.id.avatars)
+    private val binding = ItemPrepBinding.bind(view)
+
     private lateinit var entry: Entry
 
     private val iconSize = itemView.resources.getDimensionPixelSize(R.dimen.commentator_image_size)
@@ -46,11 +47,11 @@ class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
         if (t == null) {
             return
         }
-        title.text = t.title
-        date.text = t.date?.longDateFormat()
-        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
+        binding.title.text = t.title
+        binding.date.text = t.date?.longDateFormat()
+        binding.comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
 
-        avatars.removeAllViews()
+        binding.avatars.removeAllViews()
         entry = t
 
         t.commentators?.let { list ->
@@ -61,7 +62,7 @@ class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
                 val icon = ImageView(itemView.context)
                 icon.id = View.generateViewId()
                 icon.alpha = 0.7f
-                avatars.addView(icon, layoutParams)
+                binding.avatars.addView(icon, layoutParams)
 
                 ImageLoader.display(list[i], icon, config)
             }
@@ -69,17 +70,9 @@ class PrepViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
     }
 }
 
-class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
+class PodcastViewHolder(view: View) : BindingViewHolder<Entry>(view) {
 
-    private val title: TextView = itemView.findViewById(R.id.title)
-    private val image: ImageView = itemView.findViewById(R.id.image)
-    private val blur: ImageView = itemView.findViewById(R.id.blur)
-    private val progress: ProgressBar = itemView.findViewById(R.id.progress)
-    val cancel: ImageView = itemView.findViewById(R.id.cancel)
-    val download: ImageButton = itemView.findViewById(R.id.btn_download)
-    val remove: ImageButton = itemView.findViewById(R.id.btn_remove)
-    private val showNotes: TextView = itemView.findViewById(R.id.show_notes)
-    val comments: TextView = itemView.findViewById(R.id.comments)
+    val binding = ItemPodcastBinding.bind(view)
 
     private lateinit var podcast: Entry
 
@@ -88,7 +81,7 @@ class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
         if (t == null) {
             return
         }
-        title.text = t.title
+        binding.title.text = t.title
         val date = t.date?.longDateFormat()
         val notes = if (t.showNotes.isNullOrBlank()) "" else t.showNotes.replace("\n", "")
         val sb = SpannableStringBuilder()
@@ -101,26 +94,26 @@ class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
         sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
-        showNotes.text = sb
+        binding.showNotes.text = sb
 
         val progress = t.downloadProgress
-        this.progress.progress = progress
-        this.progress.visibleInvisible(progress >= 0 && t.file == null)
-        cancel.visibleInvisible(progress >= 0 && t.file == null)
+        binding.progress.progress = progress
+        binding.progress.visibleInvisible(progress >= 0 && t.file == null)
+        binding.cancel.visibleInvisible(progress >= 0 && t.file == null)
 
-        download.visibleInvisible(progress < 0 && t.file == null)
-        remove.visibleInvisible(t.file != null)
+        binding.btnDownload.visibleInvisible(progress < 0 && t.file == null)
+        binding.btnRemove.visibleInvisible(t.file != null)
 
         t.image?.let { url ->
             val config = ImageConfig(placeholder = R.drawable.ic_notification_large, error = R.drawable.ic_notification_large)
-            ImageLoader.display(url, image, config)
+            ImageLoader.display(url, binding.image, config)
         }
 
-        blur.visibleGone(t.state == EntryState.PLAYING || t.state == EntryState.PAUSED)
-        blur.setImageDrawable(getImageByState(t.state))
+        binding.blur.visibleGone(t.state == EntryState.PLAYING || t.state == EntryState.PAUSED)
+        binding.blur.setImageDrawable(getImageByState(t.state))
         this.podcast = t
 
-        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
+        binding.comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
     }
 
     private fun getImageByState(state: Int): Drawable? {
@@ -138,34 +131,25 @@ class PodcastViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
     }
 }
 
-class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
+class NewsViewHolder(view: View) : BindingViewHolder<Entry>(view) {
 
-    private val title: TextView = itemView.findViewById(R.id.title)
-    private val image: ImageView = itemView.findViewById(R.id.image)
-    private val blur: ImageView = itemView.findViewById(R.id.blur)
-    private val progress: ProgressBar = itemView.findViewById(R.id.progress)
-    private val cancel: ImageView = itemView.findViewById(R.id.cancel)
-    private val download: ImageButton = itemView.findViewById(R.id.btn_download)
-    private val remove: ImageButton = itemView.findViewById(R.id.btn_remove)
-    private val showNotes: TextView = itemView.findViewById(R.id.show_notes)
-    val comments: TextView = itemView.findViewById(R.id.comments)
-
+    val binding = ItemPodcastBinding.bind(view)
     private lateinit var entry: Entry
 
     init {
-        progress.visibleGone(false)
-        download.visibleGone(false)
-        remove.visibleGone(false)
-        blur.visibleGone(false)
-        image.visibleGone(false)
-        cancel.visibleGone(false)
+        binding.progress.visibleGone(false)
+        binding.btnDownload.visibleGone(false)
+        binding.btnRemove.visibleGone(false)
+        binding.blur.visibleGone(false)
+        binding.image.visibleGone(false)
+        binding.cancel.visibleGone(false)
     }
 
     override fun bind(t: Entry?) {
         if (t == null) {
             return
         }
-        title.text = t.title
+        binding.title.text = t.title
         val date = t.date?.longDateFormat()
         val sb = SpannableStringBuilder()
                 .append(date)
@@ -173,8 +157,8 @@ class NewsViewHolder(view: View) : DataBoundViewHolder<Entry>(view) {
                 .append(t.showNotes?.replace("\n", ""))
         sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length?.plus(3)
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        showNotes.text = sb
-        comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
+        binding.showNotes.text = sb
+        binding.comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
 
         this.entry = t
 

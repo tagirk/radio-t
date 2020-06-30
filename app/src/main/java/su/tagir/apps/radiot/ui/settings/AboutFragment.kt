@@ -19,7 +19,7 @@ class AboutFragmentRoot: Fragment(){
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
-        val appComponent: AppComponent = (activity!!.application as App).appComponent
+        val appComponent: AppComponent = (requireActivity().application as App).appComponent
 
         val v = inflater.inflate(R.layout.fragment_toolbar, container, false)
         val toolbar = v.findViewById<Toolbar>(R.id.toolbar)
@@ -52,7 +52,7 @@ class AboutFragment : PreferenceFragmentCompat() {
         var appVersion = ""
 
         try {
-            val pInfo = activity!!.packageManager.getPackageInfo("su.tagir.apps.radiot", 0)
+            val pInfo = requireActivity().packageManager.getPackageInfo("su.tagir.apps.radiot", 0)
             appVersion = pInfo.versionName
         } catch (e: PackageManager.NameNotFoundException) {
             Timber.e(e)
@@ -61,7 +61,7 @@ class AboutFragment : PreferenceFragmentCompat() {
         version?.title = "Версия приложения $appVersion"
 
         findPreference<Preference>(KEY_CREDITS)?.setOnPreferenceClickListener {
-            val appComponent: AppComponent = (activity!!.application as App).appComponent
+            val appComponent: AppComponent = (requireActivity().application as App).appComponent
             appComponent.router.navigateTo(Screens.CreditsScreen)
             return@setOnPreferenceClickListener true
         }

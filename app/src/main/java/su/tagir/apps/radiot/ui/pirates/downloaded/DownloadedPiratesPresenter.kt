@@ -6,16 +6,16 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBaseListPresenter
 
 class DownloadedPiratesPresenter(private val entryRepository: EntryRepository,
                                 dispatcher: CoroutineDispatcher = MainDispatcher()) :
-        BaseListPresenter<Entry, DownloadedPiratesContract.View>(dispatcher), DownloadedPiratesContract.Presenter {
+        MvpBaseListPresenter<Entry, DownloadedPiratesContract.View>(dispatcher), DownloadedPiratesContract.Presenter {
 
     private val deleterErrorHandler by lazy {
         CoroutineExceptionHandler { _, exception ->
-            view?.showRemoveError(exception.message)
+            ifViewAttached({v -> v.showRemoveError(exception.message)})
         }
     }
 

@@ -12,19 +12,19 @@ import su.tagir.apps.radiot.model.entries.Article
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.entries.TimeLabel
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BasePresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBasePresenter
 import timber.log.Timber
 
 class PlayerPresenter(private val entryRepository: EntryRepository,
                       private val router: Router,
-                      dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
+                      dispatcher: CoroutineDispatcher = MainDispatcher()) : MvpBasePresenter<PlayerContract.View>(dispatcher), PlayerContract.Presenter {
 
     private var currentPodcast: Entry? = null
         set(value) {
             field = value
             value?.let { entry ->
-                view?.showCurrentPodcast(entry)
+                ifViewAttached({v -> v.showCurrentPodcast(entry)})
             }
         }
 
@@ -57,7 +57,7 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
                 Timber.d("showChat: ${entry.chatUrl}")
                 router.navigateTo(Screens.WebScreen(entry.chatUrl))
             } else {
-                router.navigateTo(Screens.ChatScreen)
+//                router.navigateTo(Screens.ChatScreen)
             }
         }
     }
@@ -70,7 +70,7 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
 
     override fun seekTo(timeLabel: TimeLabel) {
         timeLabel.time?.let { time ->
-            view?.seekTo(time.toInt() / 1000)
+            ifViewAttached({v -> v.seekTo(time.toInt() / 1000)})
         }
     }
 
@@ -83,7 +83,8 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
                     .onEach { entry -> currentPodcast = entry }
                     .flatMapLatest { entry -> entryRepository.getTimeLabels(entry) }
                     .collect { labels ->
-                        view?.showTimeLabels(labels) }
+                        ifViewAttached({v -> v.showTimeLabels(labels) })
+                    }
         }
     }
 
@@ -94,7 +95,8 @@ class PlayerPresenter(private val entryRepository: EntryRepository,
                     emit(1)
                     delay(1000L)
                 }
-            }.collect { view?.requestProgress() }
+            }.collect { ifViewAttached({v -> v.requestProgress() })
+            }
         }
     }
 }

@@ -1,47 +1,39 @@
 package su.tagir.apps.radiot.ui.localcontent
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.webkit.WebView
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import by.kirich1409.viewbindingdelegate.viewBinding
 import su.tagir.apps.radiot.App
 import su.tagir.apps.radiot.R
+import su.tagir.apps.radiot.databinding.FragmentContentBinding
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.ui.mvp.BaseMvpFragment
+import su.tagir.apps.radiot.ui.mvp.MvpFragment
 
-class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalContentContract.Presenter>(),
+class LocalContentFragment : MvpFragment<LocalContentContract.View, LocalContentContract.Presenter>(R.layout.fragment_content),
         LocalContentContract.View{
 
-    lateinit var webView: WebView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_content, container, false)
+    private val binding: FragmentContentBinding by viewBinding()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.title = arguments?.getString(ARG_TITLE)
-        toolbar.inflateMenu(R.menu.menu_content)
-        toolbar.setNavigationOnClickListener { presenter.exit() }
-        toolbar.setOnMenuItemClickListener {
+        binding.toolbar.title = arguments?.getString(ARG_TITLE)
+        binding.toolbar.inflateMenu(R.menu.menu_content)
+        binding.toolbar.setNavigationOnClickListener { presenter.exit() }
+        binding.toolbar.setOnMenuItemClickListener {
             presenter.openInBrowser()
             false
         }
 
-        webView = view.findViewById(R.id.web_view)
-        webView.setBackgroundColor(ContextCompat.getColor(view.context, R.color.colorBackground))
+        binding.webView.setBackgroundColor(ContextCompat.getColor(view.context, R.color.colorBackground))
 
     }
 
     override fun createPresenter(): LocalContentContract.Presenter {
 
-        val appComponent = (activity!!.application as App).appComponent
+        val appComponent = (requireActivity().application as App).appComponent
 
-        return LocalContentPresenter(arguments!!.getString("entry_id")!!,
+        return LocalContentPresenter(requireArguments().getString("entry_id")!!,
                 appComponent.entryRepository,
                 appComponent.router)
     }
@@ -51,7 +43,7 @@ class LocalContentFragment : BaseMvpFragment<LocalContentContract.View, LocalCon
                 entry.body +
                 "</body></HTML>"
 
-        webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
+        binding.webView.loadDataWithBaseURL("file:///android_asset/", sb, "text/html", "utf-8", null)
     }
 
     companion object {

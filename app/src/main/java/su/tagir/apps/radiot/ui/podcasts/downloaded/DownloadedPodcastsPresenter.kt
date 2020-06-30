@@ -8,18 +8,18 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBaseListPresenter
 
 class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
                                   private val router: Router,
                                   dispatcher: CoroutineDispatcher = MainDispatcher()):
-        BaseListPresenter<Entry, DownloadedPodcastsContract.View>(dispatcher),
+        MvpBaseListPresenter<Entry, DownloadedPodcastsContract.View>(dispatcher),
         DownloadedPodcastsContract.Presenter {
 
     private val deleterErrorHandler by lazy {
         CoroutineExceptionHandler { _, exception ->
-            view?.showRemoveError(exception.message)
+            ifViewAttached({v -> v.showRemoveError(exception.message)})
         }
     }
 

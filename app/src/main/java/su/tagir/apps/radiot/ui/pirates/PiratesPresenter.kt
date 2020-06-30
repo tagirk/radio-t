@@ -4,18 +4,18 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
 
 class PiratesPresenter(private val entryRepository: EntryRepository,
-                       dispatcher: CoroutineDispatcher = MainDispatcher()) : BaseListPresenter<Entry, PiratesContract.View>(dispatcher), PiratesContract.Presenter {
+                       dispatcher: CoroutineDispatcher = MainDispatcher()) : MvpBaseListPresenter<Entry, PiratesContract.View>(dispatcher), PiratesContract.Presenter {
 
     private var loadJob: Job? = null
 
     private val downloadErrorHandler by lazy {
         CoroutineExceptionHandler { _, exception ->
-            view?.showDownloadError(exception.message)
+            ifViewAttached({v -> v.showDownloadError(exception.message)})
         }
     }
 

@@ -9,7 +9,7 @@ import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.*
 
 
-class SearchAdapter(private val callback: EntriesAdapter.Callback) : DataBoundListAdapter<Entry>() {
+class SearchAdapter(private val callback: EntriesAdapter.Callback) : BindingListAdapter<Entry>() {
 
     override val differ: AsyncListDiffer<Entry> = AsyncListDiffer(this, object : DiffUtil.ItemCallback<Entry>(){
         override fun areItemsTheSame(oldItem: Entry, newItem: Entry): Boolean = oldItem.url == newItem.url
@@ -17,14 +17,14 @@ class SearchAdapter(private val callback: EntriesAdapter.Callback) : DataBoundLi
         override fun areContentsTheSame(oldItem: Entry, newItem: Entry) = oldItem == newItem
     })
 
-    override fun bind(viewHolder: DataBoundViewHolder<Entry>, position: Int) {
+    override fun bind(viewHolder: BindingViewHolder<Entry>, position: Int) {
         viewHolder.bind(items[position])
     }
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataBoundViewHolder<Entry> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingViewHolder<Entry> {
         val inflater = LayoutInflater.from(parent.context)
-        val viewHolder: DataBoundViewHolder<Entry>
+        val viewHolder: BindingViewHolder<Entry>
         viewHolder = when (viewType) {
             EntriesAdapter.TYPE_NEWS -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
@@ -45,18 +45,18 @@ class SearchAdapter(private val callback: EntriesAdapter.Callback) : DataBoundLi
                 callback.select(entry)
             }
             if(viewHolder is PodcastViewHolder){
-                viewHolder.remove.setOnClickListener {
+                viewHolder.binding.btnRemove.setOnClickListener {
                     val entry = items[viewHolder.adapterPosition]
                     callback.remove(entry) }
-                viewHolder.cancel.setOnClickListener {
+                viewHolder.binding.cancel.setOnClickListener {
                     val entry = items[viewHolder.adapterPosition]
                     callback.remove(entry)
                 }
-                viewHolder.download.setOnClickListener {
+                viewHolder.binding.btnDownload.setOnClickListener {
                     val entry = items[viewHolder.adapterPosition]
                     callback.download(entry)
                 }
-                viewHolder.comments.setOnClickListener {
+                viewHolder.binding.comments.setOnClickListener {
                     val entry = items[viewHolder.adapterPosition]
                     callback.openComments(entry)
                 }

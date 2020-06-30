@@ -4,17 +4,17 @@ import androidx.annotation.MainThread
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
 
-abstract class DataBoundListAdapter<T> : RecyclerView.Adapter<DataBoundViewHolder<T>>() {
+abstract class BindingListAdapter<T> : RecyclerView.Adapter<BindingViewHolder<T>>() {
 
     abstract val differ: AsyncListDiffer<T>
 
     override fun getItemCount() = differ.currentList.size
 
-    override fun onBindViewHolder(holder: DataBoundViewHolder<T>, position: Int) {
+    override fun onBindViewHolder(holder: BindingViewHolder<T>, position: Int) {
         bind(holder, position)
     }
 
-    protected abstract fun bind(viewHolder: DataBoundViewHolder<T>, position: Int)
+    protected abstract fun bind(viewHolder: BindingViewHolder<T>, position: Int)
 
 
     @MainThread

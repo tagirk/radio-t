@@ -7,14 +7,14 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BasePresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBasePresenter
 
 class LocalContentPresenter(
         private val entryId: String,
         private val entryRepository: EntryRepository,
         private val router: Router,
-        dispatcher: CoroutineDispatcher = MainDispatcher()) : BasePresenter<LocalContentContract.View>(dispatcher), LocalContentContract.Presenter {
+        dispatcher: CoroutineDispatcher = MainDispatcher()) : MvpBasePresenter<LocalContentContract.View>(dispatcher), LocalContentContract.Presenter {
 
     private var entry: Entry? = null
 
@@ -28,7 +28,7 @@ class LocalContentPresenter(
            entryRepository.getEntry(id)
                    .collect{entry ->
                        this@LocalContentPresenter.entry = entry
-                       view?.showContent(entry)
+                       ifViewAttached({v -> v.showContent(entry)})
                    }
         }
     }

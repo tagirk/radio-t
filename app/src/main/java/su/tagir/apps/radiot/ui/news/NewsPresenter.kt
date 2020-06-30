@@ -9,8 +9,8 @@ import ru.terrakok.cicerone.Router
 import su.tagir.apps.radiot.Screens
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.model.repository.EntryRepository
-import su.tagir.apps.radiot.ui.mvp.BaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.MainDispatcher
+import su.tagir.apps.radiot.ui.mvp.MvpBaseListPresenter
 import su.tagir.apps.radiot.ui.mvp.Status
 import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
@@ -18,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
 class NewsPresenter(private val categories: List<String>,
                     private val entryRepository: EntryRepository,
                     dispatcher: CoroutineDispatcher = MainDispatcher(),
-                    private val router: Router) : BaseListPresenter<Entry, NewsContract.View>(dispatcher), NewsContract.Presenter {
+                    private val router: Router) : MvpBaseListPresenter<Entry, NewsContract.View>(dispatcher), NewsContract.Presenter {
 
     private var loadJob: Job? = null
 
