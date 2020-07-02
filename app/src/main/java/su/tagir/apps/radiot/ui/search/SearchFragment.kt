@@ -21,6 +21,7 @@ import su.tagir.apps.radiot.databinding.FragmentSearchBinding
 import su.tagir.apps.radiot.di.AppComponent
 import su.tagir.apps.radiot.model.entries.Entry
 import su.tagir.apps.radiot.ui.common.EntriesAdapter
+import su.tagir.apps.radiot.ui.common.autoCleared
 import su.tagir.apps.radiot.ui.mvp.MvpFragment
 import su.tagir.apps.radiot.ui.mvp.ViewState
 import su.tagir.apps.radiot.utils.visibleGone
@@ -34,8 +35,8 @@ class SearchFragment :
 
     private val searchBinding: FragmentSearchBinding by viewBinding()
 
-    private lateinit var recentQueriesAdapter: RecentQueriesAdapter
-    private lateinit var adapter: SearchAdapter
+    private var recentQueriesAdapter by autoCleared<RecentQueriesAdapter>()
+    private var adapter by autoCleared<SearchAdapter>()
 
     private val handler = Handler()
 

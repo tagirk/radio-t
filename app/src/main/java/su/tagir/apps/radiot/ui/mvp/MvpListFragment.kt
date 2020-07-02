@@ -8,19 +8,22 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.databinding.FragmentEntryListBinding
 import su.tagir.apps.radiot.ui.common.BindingListAdapter
+import su.tagir.apps.radiot.ui.common.autoCleared
 import su.tagir.apps.radiot.utils.visibleGone
 
 abstract class MvpListFragment<M, V: MvpListView<M>, P: MvpListPresenter<M, V>> : MvpFragment<V, P>(R.layout.fragment_entry_list), MvpListView<M>{
 
      val binding: FragmentEntryListBinding by viewBinding()
 
-    protected lateinit var adapter: BindingListAdapter<M>
+    protected var adapter by autoCleared<BindingListAdapter<M>>()
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.btnRetry.setOnClickListener { presenter.loadData(false) }
 
         initList()
+        presenter.loadData(false)
     }
 
     private fun initList() {

@@ -7,9 +7,12 @@ import android.graphics.drawable.Drawable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.text.style.LeadingMarginSpan
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import su.tagir.apps.radiot.R
@@ -35,7 +38,7 @@ class PrepViewHolder(view: View) : BindingViewHolder<Entry>(view) {
     private val margin = iconSize/4
     private val screenMargin = itemView.resources.getDimensionPixelSize(R.dimen.screen_margin)
     private val layoutParams = LinearLayout.LayoutParams(iconSize, iconSize)
-    private val config = ImageConfig(fit = true, error = R.drawable.ic_account_circle_24dp, transformations = listOf(Transformation.Circle))
+    private val config = ImageConfig(fit = true, error = R.drawable.ic_account_circle_24dp, placeholder = R.drawable.ic_account_circle_24dp, transformations = listOf(Transformation.Circle))
 
     private val maxCount = (itemView.resources.displayMetrics.widthPixels - 2 * screenMargin) / (iconSize - margin) - 1
 
@@ -49,7 +52,7 @@ class PrepViewHolder(view: View) : BindingViewHolder<Entry>(view) {
         }
         binding.title.text = t.title
         binding.date.text = t.date?.longDateFormat()
-        binding.comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
+        binding.comments.text = "${t.commentsCount}"
 
         binding.avatars.removeAllViews()
         entry = t
@@ -70,11 +73,30 @@ class PrepViewHolder(view: View) : BindingViewHolder<Entry>(view) {
     }
 }
 
-class PodcastViewHolder(view: View) : BindingViewHolder<Entry>(view) {
+class PodcastViewHolder(view: View, private val isPirates: Boolean = false) : BindingViewHolder<Entry>(view) {
 
     val binding = ItemPodcastBinding.bind(view)
 
     private lateinit var podcast: Entry
+
+    init {
+        if(isPirates){
+            val margin = itemView.resources.getDimensionPixelSize(R.dimen.screen_margin)
+            val btnSize = itemView.resources.getDimensionPixelSize(R.dimen.download_btn_size)
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(binding.root)
+            constraintSet.clear(binding.btnDownload.id)
+            constraintSet.clear(binding.comments.id)
+            constraintSet.connect(binding.btnDownload.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            constraintSet.connect(binding.btnDownload.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+            constraintSet.connect(binding.btnDownload.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, margin)
+            constraintSet.constrainHeight(binding.btnDownload.id, btnSize)
+            constraintSet.constrainWidth(binding.btnDownload.id, btnSize)
+            constraintSet.applyTo(binding.root)
+            binding.comments.visibleGone(false)
+            binding.showNotes.minLines = 1
+        }
+    }
 
     @SuppressLint("SetTextI18n")
     override fun bind(t: Entry?) {
@@ -83,14 +105,16 @@ class PodcastViewHolder(view: View) : BindingViewHolder<Entry>(view) {
         }
         binding.title.text = t.title
         val date = t.date?.longDateFormat()
-        val notes = if (t.showNotes.isNullOrBlank()) "" else t.showNotes.replace("\n", "")
+        val notes = if (t.showNotes.isNullOrBlank()) "" else t.showNotes.replace("\n", " ")
         val sb = SpannableStringBuilder()
                 .append(date)
 
         if (!notes.isBlank()) {
-            sb.append(" - ").append(notes)
+            sb.append(" -").append(notes)
         }
-
+        val resources = binding.root.resources
+        val firstLineMargin = resources.getDimensionPixelSize(R.dimen.item_image_size) + (binding.title.layoutParams as ConstraintLayout.LayoutParams).marginStart
+        sb.setSpan(LeadingMarginSpan.Standard(firstLineMargin, 0), 0, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
@@ -113,7 +137,9 @@ class PodcastViewHolder(view: View) : BindingViewHolder<Entry>(view) {
         binding.blur.setImageDrawable(getImageByState(t.state))
         this.podcast = t
 
-        binding.comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
+        binding.comments.text = "${t.commentsCount}"
+
+
     }
 
     private fun getImageByState(state: Int): Drawable? {
@@ -133,16 +159,12 @@ class PodcastViewHolder(view: View) : BindingViewHolder<Entry>(view) {
 
 class NewsViewHolder(view: View) : BindingViewHolder<Entry>(view) {
 
-    val binding = ItemPodcastBinding.bind(view)
+    val binding = ItemPrepBinding.bind(view)
     private lateinit var entry: Entry
 
     init {
-        binding.progress.visibleGone(false)
-        binding.btnDownload.visibleGone(false)
-        binding.btnRemove.visibleGone(false)
-        binding.blur.visibleGone(false)
-        binding.image.visibleGone(false)
-        binding.cancel.visibleGone(false)
+        binding.avatars.visibleGone(false)
+        binding.date.setTextColor(ContextCompat.getColor(itemView.context, R.color.colorSecondaryText))
     }
 
     override fun bind(t: Entry?) {
@@ -155,10 +177,10 @@ class NewsViewHolder(view: View) : BindingViewHolder<Entry>(view) {
                 .append(date)
                 .append(" - ")
                 .append(t.showNotes?.replace("\n", ""))
-        sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length?.plus(3)
+        sb.setSpan(ForegroundColorSpan(ContextCompat.getColor(itemView.context, R.color.colorPrimaryText)), 0, date?.length
                 ?: 0, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        binding.showNotes.text = sb
-        binding.comments.text = itemView.resources.getQuantityString(R.plurals.comments, t.commentsCount, t.commentsCount)
+        binding.date.text = sb
+        binding.comments.text = "${t.commentsCount}"
 
         this.entry = t
 

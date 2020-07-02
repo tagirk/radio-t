@@ -19,10 +19,6 @@ class DownloadedPiratesPresenter(private val entryRepository: EntryRepository,
         }
     }
 
-    override fun doOnAttach(view: DownloadedPiratesContract.View) {
-        loadData(false)
-    }
-
     override fun loadData(pullToRefresh: Boolean) {
         launch {
             entryRepository

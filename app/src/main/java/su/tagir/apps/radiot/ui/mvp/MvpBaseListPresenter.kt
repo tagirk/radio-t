@@ -17,11 +17,6 @@ abstract class MvpBaseListPresenter<M, V: MvpListView<M>>(dispatcher: CoroutineD
         state = state.copy(status = Status.ERROR, errorMessage = throwable.message)
     }
 
-    override fun doOnAttach(view: V) {
-        super.doOnAttach(view)
-        loadData(false)
-    }
-
     override fun loadMore(lastIndex: Int) {
 
     }

@@ -20,8 +20,8 @@ class PiratesPresenter(private val entryRepository: EntryRepository,
     }
 
     override fun doOnAttach(view: PiratesContract.View) {
+        super.doOnAttach(view)
         observePodcasts()
-        loadData(false)
         startStatusTimer()
     }
 

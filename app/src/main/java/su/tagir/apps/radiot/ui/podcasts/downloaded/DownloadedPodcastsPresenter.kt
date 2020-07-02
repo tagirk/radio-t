@@ -23,11 +23,6 @@ class DownloadedPodcastsPresenter(private val entryRepository: EntryRepository,
         }
     }
 
-    override fun doOnAttach(view: DownloadedPodcastsContract.View) {
-        loadData(false)
-    }
-
-
     override fun loadData(pullToRefresh: Boolean) {
         launch {
             entryRepository

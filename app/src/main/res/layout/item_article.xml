@@ -14,6 +14,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:maxLines="2"
+        android:textSize="16sp"
         android:layout_marginTop="8dp"
         android:ellipsize="marquee"
         android:textStyle="bold"
@@ -28,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginEnd="16dp"
-        android:textSize="11sp"
+        android:textSize="14sp"
         android:gravity="bottom"
         android:textColor="@color/colorAccent"
         app:layout_constraintTop_toTopOf="@+id/title"
@@ -42,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:maxLines="3"
-        android:textSize="13sp"
+        android:textSize="14sp"
         android:ellipsize="end"
         app:layout_constraintVertical_chainStyle="packed"
         android:textColor="@color/colorSecondaryText"
@@ -55,11 +56,10 @@
     <View
         android:id="@+id/divider"
         android:layout_width="0dp"
-        android:layout_height="1dp"
+        android:layout_height="0.5dp"
         android:background="@color/colorDivider"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="16dp"/>
+        app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

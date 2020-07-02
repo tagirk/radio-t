@@ -29,7 +29,6 @@ class NewsPresenter(private val categories: List<String>,
     override fun doOnAttach(view: NewsContract.View) {
         super.doOnAttach(view)
         observeNews()
-        loadData(false)
     }
 
     override fun observeNews() {

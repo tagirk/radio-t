@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import su.tagir.apps.radiot.R
 import su.tagir.apps.radiot.model.entries.Entry
-import su.tagir.apps.radiot.utils.visibleGone
 
 class EntriesAdapter(private val actionHandler: Callback) :
         BindingListAdapter<Entry>() {
@@ -29,7 +28,7 @@ class EntriesAdapter(private val actionHandler: Callback) :
         val inflater = LayoutInflater.from(parent.context)
         when (viewType) {
             TYPE_NEWS -> {
-                val view = inflater.inflate(R.layout.item_podcast, parent, false)
+                val view = inflater.inflate(R.layout.item_prep, parent, false)
                 val holder = NewsViewHolder(view)
                 holder.itemView.setOnClickListener {
                     val entry = items[holder.adapterPosition]
@@ -52,8 +51,8 @@ class EntriesAdapter(private val actionHandler: Callback) :
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_podcast, parent, false)
-                val holder = PodcastViewHolder(view)
-                holder.binding.comments.visibleGone(viewType == TYPE_PODCAST)
+                val holder = PodcastViewHolder(view, isPirates = viewType == TYPE_PIRATES)
+
                 holder.itemView.setOnClickListener {
                     val entry = items[holder.adapterPosition]
                     actionHandler.select(entry)
